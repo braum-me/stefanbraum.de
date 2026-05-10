@@ -1,0 +1,230 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { getT, getLocalePrefix } from "~/i18n";
+
+const locale = "en" as const;
+const t = getT(locale);
+const prefix = getLocalePrefix(locale);
+const homeHref = prefix === "" ? "/" : `${prefix}/`;
+const stand = new Date().toLocaleDateString("en-US", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+---
+
+<BaseLayout
+  title={t.legal.datenschutz.title}
+  description={t.legal.datenschutz.description}
+  locale={locale}
+>
+  <main id="top" class="px-6 md:px-12 pt-32 md:pt-40 pb-20">
+    <div class="max-w-3xl mx-auto mb-10">
+      <a href={homeHref} class="back-link interactive">
+        <span aria-hidden="true">&larr;</span>
+        <span>{t.legal.backToOverview}</span>
+      </a>
+    </div>
+
+    <article class="max-w-3xl mx-auto legal-body">
+      <header class="mb-12">
+        <div class="eyebrow mb-6">{t.legal.eyebrow}</div>
+        <h1 class="legal-h1">{t.legal.datenschutz.h1}</h1>
+        <p class="legal-stand">{t.legal.datenschutz.stand}: {stand}</p>
+      </header>
+
+      <section>
+        <h2>At a glance</h2>
+        <p>
+          stefanbraum.de is a slim, dark-themed CV site. <strong>No cookies</strong> are set, <strong>no advertising trackers</strong> are loaded, and <strong>no profile data</strong> is shared with third parties. For anonymous reach measurement, where enabled, <a href="https://umami.is" target="_blank" rel="noopener noreferrer">Umami</a> is used in a self-hosted, cookieless variant. Fonts are loaded locally from the site's own server, not from Google Fonts or comparable services.
+        </p>
+      </section>
+
+      <section>
+        <h2>1. Data Controller</h2>
+        <p>
+          Controller within the meaning of Art. 4 No. 7 GDPR:
+        </p>
+        <p>
+          Stefan Braum<br/>
+          Schlüchterner Straße 31<br/>
+          36391 Sinntal<br/>
+          Germany<br/>
+          Email: <a href="mailto:&#099;&#111;&#110;&#116;&#097;&#099;&#116;&#064;&#115;&#116;&#101;&#102;&#097;&#110;&#098;&#114;&#097;&#117;&#109;&#046;&#100;&#101;">&#099;&#111;&#110;&#116;&#097;&#099;&#116;&#064;&#115;&#116;&#101;&#102;&#097;&#110;&#098;&#114;&#097;&#117;&#109;&#046;&#100;&#101;</a>
+        </p>
+        <p>
+          Full provider information: see <a href={`${prefix}/impressum`}>Imprint</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Server Logs</h2>
+        <p>
+          When the site is accessed, the browser transmits technically required data to the web server. This data is stored only briefly in access logs and automatically deleted after 14 days at the latest:
+        </p>
+        <ul>
+          <li>IP address (anonymised)</li>
+          <li>Date and time of access</li>
+          <li>Requested URL</li>
+          <li>Referring page (referrer)</li>
+          <li>Browser type and version (user agent)</li>
+          <li>HTTP status code and amount of data transferred</li>
+        </ul>
+        <p>
+          Legal basis: Art. 6 (1) (f) GDPR (legitimate interest in operating the site reliably and securely).
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Reach Measurement with Umami</h2>
+        <p>
+          Where enabled on this domain, <strong>Umami Analytics</strong> is used for anonymous measurement of site usage (page views, time on page, aggregated country / device). Umami runs <strong>self-hosted</strong>, <strong>sets no cookies</strong>, generates no user IDs, and does not create recognisable profiles. The collected data does not leave the site's own infrastructure.
+        </p>
+        <p>
+          For this reason, according to prevailing opinion <strong>no consent (cookie banner) is required</strong> (Art. 6 (1) (f) GDPR, legitimate interest - no personal evaluation). Standard browser settings or content blockers can be used to opt out.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Fonts</h2>
+        <p>
+          Fonts (Inter Variable, Geist Variable, JetBrains Mono Variable) are loaded <strong>locally from the site's own server directory</strong>. There is <strong>no connection to external font services</strong> such as Google Fonts or Adobe Fonts - the browser does not contact those providers.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Embedded Content and External Links</h2>
+        <p>
+          The site contains no embeds from YouTube, Twitter/X, Facebook, Instagram, LinkedIn, or comparable services. External links (e.g. to LinkedIn, GitHub, braum.me) open in a new tab. When clicked, the privacy policies of the respective operator apply.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. Open Graph and Preview Images</h2>
+        <p>
+          When links to this site are shared in messengers or social media, server-generated preview images are delivered (Open Graph / Twitter Cards). These are provided directly from the site's own server; no request to third-party providers takes place.
+        </p>
+      </section>
+
+      <section>
+        <h2>7. Rights under GDPR</h2>
+        <p>
+          You have the following rights vis-a-vis the controller regarding personal data concerning you, at any time:
+        </p>
+        <ul>
+          <li>Right of access (Art. 15 GDPR)</li>
+          <li>Right to rectification (Art. 16 GDPR)</li>
+          <li>Right to erasure (Art. 17 GDPR)</li>
+          <li>Right to restriction of processing (Art. 18 GDPR)</li>
+          <li>Right to data portability (Art. 20 GDPR)</li>
+          <li>Right to object (Art. 21 GDPR)</li>
+          <li>Right to lodge a complaint with a supervisory authority (Art. 77 GDPR) - competent: <a href="https://datenschutz.hessen.de" target="_blank" rel="noopener noreferrer">The Hessian Commissioner for Data Protection and Freedom of Information</a></li>
+        </ul>
+        <p>
+          To exercise these rights, an informal email to the address listed in section 1 is sufficient.
+        </p>
+      </section>
+
+      <section>
+        <h2>8. Changes to This Policy</h2>
+        <p>
+          This privacy policy will be adapted as soon as the technical setup of the site changes (e.g. when adding a newsletter or further analytics tools). The current version is available here and dated at the top of the document.
+        </p>
+      </section>
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(242, 239, 228, 0.55);
+    text-decoration: none;
+    transition: color 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .back-link:hover {
+    color: var(--mint);
+    transform: translateX(-4px);
+  }
+
+  .legal-h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(2.25rem, 6vw, 4.5rem);
+    line-height: 1.05;
+    color: var(--cream);
+    letter-spacing: -0.025em;
+  }
+  .legal-stand {
+    margin-top: 1rem;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    color: rgba(242, 239, 228, 0.5);
+  }
+
+  .legal-body section {
+    margin-bottom: 2.4rem;
+  }
+  .legal-body h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    font-weight: 500;
+    color: var(--cream);
+    letter-spacing: -0.012em;
+    margin-bottom: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  .legal-body p {
+    font-family: var(--font-body);
+    color: rgba(242, 239, 228, 0.78);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+  .legal-body strong {
+    color: var(--cream);
+    font-weight: 500;
+  }
+  .legal-body a {
+    color: var(--mint);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0, 200, 150, 0.4);
+    padding-bottom: 1px;
+    transition: color 0.25s ease, border-color 0.25s ease;
+  }
+  .legal-body a:hover {
+    color: var(--cream);
+    border-bottom-color: var(--cream);
+  }
+  .legal-body ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+  }
+  .legal-body ul li {
+    position: relative;
+    padding-left: 1.25rem;
+    color: rgba(242, 239, 228, 0.78);
+    font-family: var(--font-body);
+    line-height: 1.65;
+    margin-bottom: 0.55rem;
+  }
+  .legal-body ul li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--mint);
+    opacity: 0.7;
+  }
+</style>

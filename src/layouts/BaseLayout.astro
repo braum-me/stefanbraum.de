@@ -1,0 +1,354 @@
+---
+import { env } from "~/lib/env.ts";
+import AmbientShader from "~/components/AmbientShader.astro";
+import EntryBoot from "~/components/EntryBoot.astro";
+import { getT, localizePath, type Locale } from "~/i18n";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+  ogFocus?: "consulting";
+  locale?: Locale;
+}
+
+const {
+  locale = "de",
+  ogFocus,
+} = Astro.props;
+const t = getT(locale);
+
+const title = Astro.props.title ?? t.meta.title;
+const description = Astro.props.description ?? t.meta.description;
+const noindex = Astro.props.noindex ?? true;
+
+const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
+
+const ogSubtitle = locale === "en"
+  ? "Digital Transformation from the Line, Not from the Slide."
+  : "Digitale Transformation aus der Linie, nicht aus dem Slide.";
+const ogParams = new URLSearchParams({
+  title: "Stefan Braum",
+  subtitle: ogSubtitle,
+});
+if (ogFocus) ogParams.set("focus", ogFocus);
+const ogImageUrl = new URL(`/api/og.png?${ogParams.toString()}`, siteUrl).toString();
+
+// hreflang alternates pointing to the equivalent path in each locale
+const hreflangAlternates = (
+  [
+    { hreflang: "de", locale: "de" as Locale },
+    { hreflang: "en", locale: "en" as Locale },
+    { hreflang: "x-default", locale: "de" as Locale },
+  ]
+).map((entry) => ({
+  hreflang: entry.hreflang,
+  href: new URL(localizePath(Astro.url.pathname, entry.locale), siteUrl).toString(),
+}));
+
+const umamiScript = env("UMAMI_SCRIPT_URL");
+const umamiWebsiteId = env("UMAMI_WEBSITE_ID");
+const umamiEnabled = Boolean(umamiScript && umamiWebsiteId);
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Stefan Braum",
+  url: siteUrl,
+  description,
+  inLanguage: locale === "en" ? "en-US" : "de-DE",
+  jobTitle: locale === "en"
+    ? "Team Lead IT Applications & Deputy Global Head of IT/SAP"
+    : "Teamleiter IT Applications & stellv. Global Head of IT/SAP",
+  worksFor: {
+    "@type": "Organization",
+    name: "ODW-Elektrik",
+  },
+  sameAs: [
+    "https://braum.me",
+    "https://braum.consulting",
+    "https://aboutexport.com",
+    "https://linkedin.com/in/stefanbraum",
+  ],
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Sinntal",
+    addressRegion: "Hessen",
+    addressCountry: "DE",
+  },
+  knowsAbout: [
+    "Digital Transformation",
+    "IT Leadership",
+    "Enterprise Architecture",
+    "SAP",
+    "Azure Hybrid Cloud",
+    "Microsoft 365",
+    "IT-Security",
+    "Applied AI in Enterprise",
+  ],
+};
+---
+
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#030F0B" />
+
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    {hreflangAlternates.map((alt) => (
+      <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+    ))}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="stefanbraum.de" />
+    <meta property="og:locale" content={t.ogLocale} />
+    <meta property="og:locale:alternate" content={locale === "en" ? "de_DE" : "en_US"} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(personJsonLd)}
+    />
+
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Stefan Braum - Schreiben"
+      href="/rss.xml"
+    />
+
+    {
+      umamiEnabled && (
+        <script
+          is:inline
+          defer
+          src={umamiScript}
+          data-website-id={umamiWebsiteId}
+          data-do-not-track="true"
+        />
+      )
+    }
+
+    <script is:inline>
+      // EntryBoot skip-check vor dem ersten Paint, verhindert FOUC-Flash
+      try {
+        if (sessionStorage.getItem("stb-boot") === "1") {
+          document.documentElement.classList.add("boot-skipped");
+        }
+      } catch (e) {
+        /* private mode etc */
+      }
+    </script>
+  </head>
+  <body>
+    <EntryBoot />
+    <a href="#top" class="skip-link">{t.meta.skipLink}</a>
+
+    <!-- Background layers -->
+    <AmbientShader />
+    <div class="ambient-dots" id="ambient-dots" aria-hidden="true"></div>
+    <div class="spotlight" id="spotlight" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
+    <!-- Custom cursor -->
+    <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+    <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+
+    <!-- Scroll progress -->
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+    <slot />
+
+    <script>
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const isTouch = window.matchMedia("(hover: none)").matches;
+
+      // Ambient dots seeding
+      const dots = document.getElementById("ambient-dots");
+      if (dots && !prefersReduced) {
+        const count = 55;
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < count; i++) {
+          const d = document.createElement("span");
+          d.className = "ambient-dot";
+          const size = Math.random() * 2.4 + 1.4;
+          const tx = Math.random() * 100;
+          const ty = Math.random() * 100;
+          const dur = 10 + Math.random() * 20;
+          const delay = -Math.random() * dur;
+          const opacity = 0.3 + Math.random() * 0.5;
+          const hue = Math.random() < 0.35 ? "mint" : "cream";
+          d.dataset.hue = hue;
+          d.style.setProperty("--size", `${size}px`);
+          d.style.setProperty("--tx", `${tx}%`);
+          d.style.setProperty("--ty", `${ty}%`);
+          d.style.setProperty("--dur", `${dur}s`);
+          d.style.setProperty("--delay", `${delay}s`);
+          d.style.setProperty("--op", `${opacity}`);
+          frag.appendChild(d);
+        }
+        dots.appendChild(frag);
+      }
+
+      // Cursor + spotlight
+      if (!prefersReduced && !isTouch) {
+        const spotlight = document.getElementById("spotlight");
+        const dotsLayer = document.getElementById("ambient-dots");
+        const cursorDot = document.getElementById("cursor-dot");
+        const cursorRing = document.getElementById("cursor-ring");
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let ringX = mouseX;
+        let ringY = mouseY;
+
+        document.documentElement.style.setProperty("--mx", "50%");
+        document.documentElement.style.setProperty("--my", "50%");
+
+        window.addEventListener(
+          "mousemove",
+          (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            const mxPct = (mouseX / window.innerWidth) * 100;
+            const myPct = (mouseY / window.innerHeight) * 100;
+            document.documentElement.style.setProperty("--mx", `${mxPct}%`);
+            document.documentElement.style.setProperty("--my", `${myPct}%`);
+            if (spotlight) {
+              spotlight.style.setProperty("--mx", `${mxPct}%`);
+              spotlight.style.setProperty("--my", `${myPct}%`);
+            }
+            if (cursorDot) {
+              cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
+            }
+            if (dotsLayer) {
+              const px = (mxPct / 100 - 0.5) * 60;
+              const py = (myPct / 100 - 0.5) * 60;
+              dotsLayer.style.setProperty("--px", `${px}px`);
+              dotsLayer.style.setProperty("--py", `${py}px`);
+            }
+          },
+          { passive: true },
+        );
+
+        const animateRing = () => {
+          ringX += (mouseX - ringX) * 0.18;
+          ringY += (mouseY - ringY) * 0.18;
+          if (cursorRing) {
+            cursorRing.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+          }
+          requestAnimationFrame(animateRing);
+        };
+        animateRing();
+
+        const selector = "a, button, .interactive, .card-glass, .skill-tag";
+        document.querySelectorAll<HTMLElement>(selector).forEach((el) => {
+          el.addEventListener("mouseenter", () => cursorRing?.classList.add("hover"));
+          el.addEventListener("mouseleave", () => cursorRing?.classList.remove("hover"));
+        });
+      }
+
+      // 3D tilt
+      if (!prefersReduced && !isTouch) {
+        document.querySelectorAll<HTMLElement>(".tilt").forEach((card) => {
+          card.addEventListener("mousemove", (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = (e.clientY - rect.top) / rect.height;
+            const ry = (x - 0.5) * 8;
+            const rx = (y - 0.5) * -8;
+            card.classList.add("active");
+            card.style.setProperty("--rx", `${rx}deg`);
+            card.style.setProperty("--ry", `${ry}deg`);
+          });
+          card.addEventListener("mouseleave", () => {
+            card.classList.remove("active");
+            card.style.setProperty("--rx", "0deg");
+            card.style.setProperty("--ry", "0deg");
+          });
+        });
+      }
+
+      // Scroll progress
+      const sp = document.getElementById("scroll-progress");
+      const updateScroll = () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+        if (sp) {
+          sp.style.width = `${progress * 100}%`;
+        }
+      };
+      window.addEventListener("scroll", updateScroll, { passive: true });
+      updateScroll();
+
+      // Mark document ready so reveal CSS kicks in (no-JS users still see content)
+      document.documentElement.classList.add("js-ready");
+
+      // Intersection reveal
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("in");
+              io.unobserve(entry.target);
+            }
+          });
+        },
+        { rootMargin: "0px 0px -5% 0px", threshold: 0 },
+      );
+      const allReveal = document.querySelectorAll(".reveal-elem, .reveal-stagger");
+      allReveal.forEach((el) => io.observe(el));
+
+      // Safety fallback: reveal everything after 2.5s even if IO never fires
+      setTimeout(() => {
+        allReveal.forEach((el) => el.classList.add("in"));
+      }, 2500);
+
+      // Magnetic links
+      if (!prefersReduced && !isTouch) {
+        document
+          .querySelectorAll<HTMLElement>('a[href^="mailto"], a.link-underline')
+          .forEach((link) => {
+            link.style.transition = "transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)";
+            link.style.display = "inline-block";
+            link.addEventListener("mousemove", (e) => {
+              const rect = link.getBoundingClientRect();
+              const x = e.clientX - rect.left - rect.width / 2;
+              const y = e.clientY - rect.top - rect.height / 2;
+              link.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+            });
+            link.addEventListener("mouseleave", () => {
+              link.style.transform = "";
+            });
+          });
+      }
+    </script>
+    <script>
+      import "~/scripts/animations.client.ts";
+    </script>
+  </body>
+</html>

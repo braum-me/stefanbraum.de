@@ -1,0 +1,199 @@
+---
+import { caseCategories } from "~/data/caseCategories.ts";
+import { getT, type Locale } from "~/i18n";
+
+interface Props {
+  locale?: Locale;
+}
+const { locale = "de" } = Astro.props;
+const t = getT(locale);
+
+// Defensive: ensure pillar IDs match caseCategories
+const validIds = new Set(caseCategories.map((c) => c.id));
+const filtered = t.kernschwerpunkte.pillars.filter((p) => validIds.has(p.id as (typeof caseCategories)[number]["id"]));
+---
+
+<section id="kernschwerpunkte" class="relative px-6 md:px-12 py-24 md:py-32">
+  <div class="max-w-7xl mx-auto">
+    <div class="section-intro">
+      <div class="reveal-elem">
+        <div class="eyebrow mb-8" data-anim="fade-up">{t.kernschwerpunkte.eyebrow}</div>
+        <h2 class="heading-giant text-cream max-w-2xl" data-anim="section-title">{t.kernschwerpunkte.headline}</h2>
+      </div>
+      <div class="reveal-elem">
+        <p class="font-body text-lg md:text-xl text-cream/80 leading-[1.55] max-w-[58ch]" data-anim="fade-up">
+          {t.kernschwerpunkte.subline}
+        </p>
+      </div>
+    </div>
+
+    <div class="ks-grid mt-14 md:mt-20" role="tablist" aria-label={t.kernschwerpunkte.aria} data-anim-group="tiles">
+      {filtered.map((p) => (
+        <button
+          type="button"
+          class="ks-card interactive"
+          role="tab"
+          data-pillar={p.id}
+          data-anim="tile"
+          aria-controls="portfolio"
+          aria-selected="false"
+        >
+          <div class="ks-num">{p.number}</div>
+          <h3 class="ks-title">{p.title}</h3>
+          <p class="ks-body">{p.body}</p>
+          <div class="ks-foot">
+            <span class="ks-cta">{t.kernschwerpunkte.cta}</span>
+            <span class="ks-arrow" aria-hidden="true">&rarr;</span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .ks-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  @media (min-width: 768px) {
+    .ks-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+  }
+  @media (min-width: 1100px) {
+    .ks-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+    }
+  }
+
+  .ks-card {
+    position: relative;
+    text-align: left;
+    padding: 32px 30px 28px;
+    border: 1px solid rgba(242, 239, 228, 0.1);
+    border-radius: 6px;
+    background: linear-gradient(160deg, rgba(13, 61, 46, 0.4), rgba(5, 30, 22, 0.7));
+    color: var(--cream);
+    cursor: pointer;
+    transition:
+      border-color 0.3s ease,
+      background 0.3s ease,
+      transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 240px;
+  }
+  .ks-card:hover {
+    border-color: rgba(0, 200, 150, 0.45);
+    background: linear-gradient(160deg, rgba(26, 93, 70, 0.55), rgba(13, 61, 46, 0.85));
+  }
+  .ks-card[aria-selected="true"] {
+    border-color: var(--mint);
+    background: linear-gradient(160deg, rgba(26, 93, 70, 0.65), rgba(13, 61, 46, 0.9));
+    box-shadow:
+      0 0 0 1px rgba(0, 200, 150, 0.3),
+      0 24px 48px -24px rgba(0, 200, 150, 0.25);
+  }
+
+  .ks-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--mint);
+    letter-spacing: 0.18em;
+    line-height: 1;
+  }
+
+  .ks-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+    color: var(--cream);
+    letter-spacing: -0.012em;
+    line-height: 1.2;
+  }
+
+  .ks-body {
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: rgba(242, 239, 228, 0.7);
+    flex: 1;
+  }
+
+  .ks-foot {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(242, 239, 228, 0.08);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(242, 239, 228, 0.55);
+    transition: color 0.25s ease;
+  }
+  .ks-card:hover .ks-foot,
+  .ks-card[aria-selected="true"] .ks-foot {
+    color: var(--mint);
+  }
+  .ks-arrow {
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .ks-card:hover .ks-arrow {
+    transform: translateX(4px);
+  }
+  .ks-card[aria-selected="true"] .ks-arrow {
+    transform: translateX(0);
+  }
+</style>
+
+<script>
+  const tiles = Array.from(document.querySelectorAll<HTMLButtonElement>(".ks-card"));
+
+  const sync = (pillar: string | null) => {
+    tiles.forEach((t) => {
+      t.setAttribute("aria-selected", String(t.dataset.pillar === pillar && pillar !== null));
+    });
+  };
+
+  tiles.forEach((t) => {
+    t.addEventListener("click", () => {
+      const pillar = t.dataset.pillar;
+      if (!pillar) return;
+      const isActive = t.getAttribute("aria-selected") === "true";
+      const next = isActive ? null : pillar;
+      // Update document state (single source of truth)
+      document.documentElement.dataset.activePillar = next ?? "";
+      // Notify portfolio + sync own UI
+      document.dispatchEvent(
+        new CustomEvent("pillar:change", { detail: { pillar: next, source: "kernschwerpunkte" } }),
+      );
+      sync(next);
+      // Smooth scroll to portfolio
+      const portfolio = document.getElementById("portfolio");
+      if (portfolio) {
+        const top = portfolio.getBoundingClientRect().top + window.scrollY - 24;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+    });
+  });
+
+  // React to changes from elsewhere (e.g. portfolio pill click, or hash-load)
+  document.addEventListener("pillar:change", (e) => {
+    const detail = (e as CustomEvent).detail as { pillar: string | null; source: string };
+    sync(detail.pillar);
+  });
+
+  // Initial state from document.documentElement.dataset.activePillar (set by Cases.astro on load)
+  const initial = document.documentElement.dataset.activePillar;
+  if (initial) sync(initial);
+</script>
+
+<div class="divider"></div>

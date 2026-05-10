@@ -1,0 +1,236 @@
+---
+import { getT, getLocalePrefix, type Locale } from "~/i18n";
+
+interface Props {
+  locale?: Locale;
+}
+const { locale = "de" } = Astro.props;
+const t = getT(locale);
+const prefix = getLocalePrefix(locale);
+
+const year = new Date().getFullYear();
+
+const properties = [
+  { name: "braum.me", href: "https://braum.me" },
+  { name: "braum.consulting", href: "https://braum.consulting" },
+  { name: "aboutexport.com", href: "https://aboutexport.com" },
+];
+
+const homePath = prefix === "" ? "/" : `${prefix}/`;
+const isHome = Astro.url.pathname === homePath || Astro.url.pathname === prefix;
+const markHref = isHome ? "#top" : homePath;
+const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
+---
+
+<footer class="site-footer relative px-6 md:px-12 pt-20 md:pt-24 pb-12 md:pb-14">
+  <div class="max-w-7xl mx-auto">
+    <!-- Top: brand block + 2 columns -->
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href={markHref} class="footer-mark interactive" aria-label={markLabel}>
+          <span class="footer-mark-letters">SB</span>
+          <span class="footer-mark-dot" aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-head">{t.footer.contact}</div>
+        <ul class="footer-col-list">
+          <li><a href="https://braum.me/mail" class="footer-link interactive">{t.footer.contactMail}</a></li>
+          <li><a href="https://linkedin.com/in/stefanbraum" class="footer-link interactive">{t.footer.contactLinkedIn}</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <div class="footer-col-head">{t.footer.properties}</div>
+        <ul class="footer-col-list">
+          {properties.map((p) => (
+            <li><a href={p.href} class="footer-link interactive">{p.name}</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-left">
+        <span class="footer-meta">&copy; {year} Stefan Braum</span>
+      </div>
+      <div class="footer-bottom-mid">
+        <a href={`${prefix}/impressum`} class="footer-meta-link interactive">{t.footer.impressum}</a>
+        <span class="footer-meta-sep" aria-hidden="true">&middot;</span>
+        <a href={`${prefix}/datenschutz`} class="footer-meta-link interactive">{t.footer.datenschutz}</a>
+      </div>
+      <div class="footer-bottom-right">
+        <span class="footer-stack">{t.footer.stack}</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid rgba(242, 239, 228, 0.08);
+  }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .footer-top {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+  }
+  @media (max-width: 540px) {
+    .footer-top {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+  }
+
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: flex-start;
+  }
+  @media (max-width: 900px) {
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .footer-mark {
+    display: inline-flex;
+    align-items: flex-end;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 0.85;
+    letter-spacing: -0.05em;
+    color: var(--cream);
+    gap: 0.04em;
+    user-select: none;
+    text-decoration: none;
+    transition: color 0.25s ease;
+  }
+  .footer-mark:hover {
+    color: var(--mint);
+  }
+  .footer-mark-letters {
+    display: inline-block;
+  }
+  .footer-mark-dot {
+    display: inline-block;
+    width: 0.14em;
+    height: 0.14em;
+    background: var(--mint);
+    border-radius: 50%;
+    margin-bottom: 0.1em;
+    box-shadow: 0 0 18px rgba(0, 200, 150, 0.45);
+  }
+  @media (max-width: 768px) {
+    .footer-mark {
+      font-size: 40px;
+    }
+  }
+
+  .footer-tag {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: rgba(242, 239, 228, 0.55);
+    max-width: 32ch;
+    margin: 0;
+  }
+
+  .footer-col-head {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(242, 239, 228, 0.4);
+    margin-bottom: 16px;
+  }
+
+  .footer-col-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-link {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--cream);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 1px;
+    transition: color 0.25s ease, border-color 0.25s ease;
+    display: inline-block;
+  }
+  .footer-link:hover {
+    color: var(--mint);
+    border-bottom-color: rgba(0, 200, 150, 0.5);
+  }
+
+  .footer-bottom {
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(242, 239, 228, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px 32px;
+  }
+  @media (max-width: 768px) {
+    .footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+  }
+
+  .footer-bottom-left,
+  .footer-bottom-mid,
+  .footer-bottom-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .footer-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: rgba(242, 239, 228, 0.45);
+  }
+  .footer-meta-link {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: rgba(242, 239, 228, 0.55);
+    text-decoration: none;
+    transition: color 0.25s ease;
+  }
+  .footer-meta-link:hover {
+    color: var(--cream);
+  }
+  .footer-meta-sep {
+    color: rgba(242, 239, 228, 0.2);
+  }
+  .footer-stack {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    color: rgba(242, 239, 228, 0.3);
+  }
+</style>

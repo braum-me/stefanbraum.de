@@ -1,0 +1,261 @@
+---
+/* Page-Entry Boot-Screen (forest theme).
+   Erscheint einmal pro Session (once-key in sessionStorage).
+   CSS-only failsafe - hide-Animation läuft auch ohne JS. */
+
+interface Props {
+  id?: string;
+  title?: string;
+  /** sessionStorage key. Wenn gesetzt, feuert Boot nur einmal pro Session. */
+  once?: string;
+}
+
+const { id = "S.B.", title = "Personal Identity Hub", once = "stb-boot" } = Astro.props;
+
+const lines = [
+  { tag: "BOOT", text: "resolving identity" },
+  { tag: "BOOT", text: "indexing programs" },
+  { tag: "BOOT", text: "warming forest atmosphere" },
+  { tag: "OK", text: "hub online", ok: true },
+];
+---
+
+<div
+  class="entry-boot"
+  data-once={once}
+  role="status"
+  aria-live="polite"
+  aria-label="Loading"
+>
+  <div class="entry-boot-frame">
+    <div class="entry-boot-corner tl" aria-hidden="true"></div>
+    <div class="entry-boot-corner tr" aria-hidden="true"></div>
+    <div class="entry-boot-corner bl" aria-hidden="true"></div>
+    <div class="entry-boot-corner br" aria-hidden="true"></div>
+
+    <div class="entry-boot-eyebrow">// initializing personal identity hub</div>
+    <div class="entry-boot-id">
+      {id} <span class="entry-boot-sep">·</span> {title.toUpperCase()}
+    </div>
+
+    <ul class="entry-boot-lines">
+      {
+        lines.map((l, i) => (
+          <li class="entry-boot-line" style={`--i:${i}`}>
+            <span class:list={["entry-boot-tag", l.ok && "ok"]}>[{l.tag}]</span>
+            <span class="entry-boot-text">{l.text}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="entry-boot-bar" aria-hidden="true">
+      <div class="entry-boot-bar-fill"></div>
+    </div>
+
+    <div class="entry-boot-foot">
+      <span class="entry-boot-foot-key">runtime</span>
+      <span class="entry-boot-foot-val">astro 5 · sinntal · de</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* sessionStorage-Markierung für nächste Visits (skip-check läuft inline im head).
+     DOM-Cleanup nach Animation. */
+  const overlay = document.querySelector<HTMLElement>(".entry-boot");
+  if (overlay && !document.documentElement.classList.contains("boot-skipped")) {
+    const onceKey = overlay.dataset.once;
+    if (onceKey) {
+      try {
+        sessionStorage.setItem(onceKey, "1");
+      } catch {
+        // private mode etc.
+      }
+    }
+    setTimeout(() => overlay.remove(), 3000);
+  } else if (overlay) {
+    overlay.remove();
+  }
+</script>
+
+<style>
+  /* Skip on second visit: html.boot-skipped flag wird im head gesetzt, BEVOR
+     CSS rendert. Verhindert FOUC-Flash. */
+  :global(html.boot-skipped) .entry-boot {
+    display: none;
+  }
+
+  .entry-boot {
+    --boot-duration: 2800ms;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at center, rgba(5, 30, 22, 0.92), rgba(2, 14, 10, 0.99) 70%),
+      rgba(2, 14, 10, 0.99);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: entry-boot-life var(--boot-duration) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: opacity, transform, filter;
+  }
+
+  @keyframes entry-boot-life {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+      visibility: visible;
+    }
+    72% {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.04);
+      filter: blur(8px);
+      visibility: hidden;
+    }
+  }
+
+  .entry-boot-frame {
+    position: relative;
+    width: min(560px, calc(100vw - 48px));
+    padding: 40px 44px 36px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(0, 200, 150, 0.25);
+    border-radius: 4px;
+    box-shadow:
+      0 0 0 1px rgba(0, 200, 150, 0.1),
+      0 30px 80px -20px rgba(0, 0, 0, 0.7),
+      0 0 64px -10px rgba(0, 200, 150, 0.18);
+  }
+
+  .entry-boot-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+  }
+  .entry-boot-corner.tl { top: 6px; left: 6px;  border-top: 1px solid var(--mint); border-left: 1px solid var(--mint); }
+  .entry-boot-corner.tr { top: 6px; right: 6px; border-top: 1px solid var(--mint); border-right: 1px solid var(--mint); }
+  .entry-boot-corner.bl { bottom: 6px; left: 6px;  border-bottom: 1px solid var(--mint); border-left: 1px solid var(--mint); }
+  .entry-boot-corner.br { bottom: 6px; right: 6px; border-bottom: 1px solid var(--mint); border-right: 1px solid var(--mint); }
+
+  .entry-boot-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mint);
+    margin-bottom: 12px;
+  }
+  .entry-boot-id {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.005em;
+    color: var(--cream);
+    margin-bottom: 28px;
+  }
+  .entry-boot-sep {
+    color: var(--mint);
+    margin: 0 4px;
+  }
+
+  .entry-boot-lines {
+    list-style: none;
+    margin: 0 0 28px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: rgba(242, 239, 228, 0.55);
+  }
+  .entry-boot-line {
+    opacity: 0;
+    transform: translateX(-6px);
+    animation:
+      entry-boot-line-in 360ms cubic-bezier(0.16, 1, 0.3, 1) forwards
+      calc(var(--boot-duration, 2200ms) * 0.08 + var(--i, 0) * 180ms);
+  }
+  @keyframes entry-boot-line-in {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .entry-boot-tag {
+    color: var(--mint);
+    margin-right: 8px;
+    font-weight: 500;
+  }
+  .entry-boot-tag.ok {
+    color: var(--cream);
+    background: rgba(0, 200, 150, 0.16);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  .entry-boot-bar {
+    height: 3px;
+    background: rgba(242, 239, 228, 0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .entry-boot-bar-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--forest-glow, #2f8264), var(--mint));
+    box-shadow: 0 0 12px rgba(0, 200, 150, 0.5);
+    animation: entry-boot-bar calc(var(--boot-duration, 2200ms) * 0.7) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes entry-boot-bar {
+    to {
+      width: 100%;
+    }
+  }
+
+  .entry-boot-foot {
+    display: flex;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(242, 239, 228, 0.45);
+  }
+  .entry-boot-foot-key {
+    color: rgba(242, 239, 228, 0.45);
+  }
+  .entry-boot-foot-val {
+    color: var(--mint);
+    text-transform: lowercase;
+    letter-spacing: 0.06em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .entry-boot {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+    }
+    .entry-boot-line,
+    .entry-boot-bar-fill {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .entry-boot-bar-fill {
+      width: 100% !important;
+    }
+  }
+</style>

@@ -1,0 +1,786 @@
+---
+import { cases, caseStatus } from "~/data/cases.ts";
+import { getT, getLocalePrefix, type Locale } from "~/i18n";
+
+interface Props {
+  locale?: Locale;
+}
+const { locale = "de" } = Astro.props;
+const t = getT(locale);
+const prefix = getLocalePrefix(locale);
+
+// Short pill-labels for category column
+const pillLabels: Record<string, string> = t.pillarShort;
+
+const statusLabels: Record<string, string> = {
+  ongoing: t.cases.statusOngoing,
+  concept: t.cases.statusConcept,
+};
+
+const filterPills: { id: string; label: string }[] = [
+  { id: "all", label: t.cases.filterAll },
+  { id: "transformation", label: t.pillar.transformation },
+  { id: "ai", label: t.pillar.ai },
+  { id: "enterprise", label: t.pillar.enterprise },
+  { id: "compliance", label: t.pillar.compliance },
+  { id: "engineering", label: t.pillar.engineering },
+  { id: "leadership", label: t.pillar.leadership },
+];
+
+const PAGE_SIZE = 6;
+const totalCases = cases.length;
+const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases));
+---
+
+<section id="portfolio" class="relative px-6 md:px-12 py-28 md:py-40">
+  <div class="max-w-7xl mx-auto relative">
+    <div class="section-intro">
+      <div class="reveal-elem">
+        <div class="eyebrow mb-8" data-anim="fade-up">{t.cases.eyebrow}</div>
+        <h2 class="heading-giant text-cream max-w-xl" data-anim="section-title">{t.cases.headline}</h2>
+      </div>
+      <div class="reveal-elem">
+        <p class="font-body text-lg md:text-xl text-cream/80 leading-[1.55] max-w-[58ch]" data-anim="fade-up">
+          {sublineText}
+        </p>
+      </div>
+    </div>
+
+    <!-- Filter pills -->
+    <div class="pf-filters reveal-elem" role="tablist" aria-label={t.cases.filterAria}>
+      {filterPills.map((p) => (
+        <button
+          type="button"
+          class="pf-pill interactive"
+          data-pill={p.id}
+          role="tab"
+          aria-selected={p.id === "all" ? "true" : "false"}
+        >
+          {p.label}
+        </button>
+      ))}
+    </div>
+
+    <!-- Empty state for empty pillars -->
+    <div class="pf-empty reveal-elem" id="pf-empty" hidden>
+      <p class="font-body text-cream/55">{t.cases.empty}</p>
+    </div>
+
+    <!-- Vertical project list -->
+    <div class="pf-list reveal-elem" id="pf-list" data-anim-group="tiles" data-page-size={PAGE_SIZE}>
+      {cases.map((c, idx) => (
+        <details class="pf-row" id={`case-${c.id}`} data-cat={c.category} data-idx={idx} data-anim="tile">
+          <summary class="pf-summary">
+            <span class="pf-num">{String(idx + 1).padStart(2, "0")}</span>
+            <span class="pf-period">{c.period}</span>
+            <span class="pf-content">
+              <span class="pf-meta">
+                <span class="pf-pill-tag" data-cat-pill={c.category}>{pillLabels[c.category] ?? c.category}</span>
+                {(() => {
+                  const s = caseStatus(c);
+                  if (!s) return null;
+                  return (
+                    <span class="pf-status-pill" data-status={s}>
+                      {s === "ongoing" && <span class="pf-status-dot" aria-hidden="true"></span>}
+                      {statusLabels[s] ?? s}
+                    </span>
+                  );
+                })()}
+                <span class="pf-kind">{c.kind}</span>
+              </span>
+              <span class="pf-title">{c.title}</span>
+              <span class="pf-context-preview">{c.context}</span>
+            </span>
+            <span class="pf-toggle" aria-hidden="true">
+              <span class="pf-toggle-bar"></span>
+              <span class="pf-toggle-bar pf-toggle-bar-v"></span>
+            </span>
+          </summary>
+          <div class="pf-body">
+            <div class="grid md:grid-cols-[1fr_1fr] gap-10 md:gap-16 items-start">
+              <div>
+                <div class="kicker text-mint mb-3">{t.cases.domain}</div>
+                <p class="font-body text-[15px] md:text-[16px] text-cream/70 leading-[1.65] mb-6">{c.context}</p>
+                <div class="kicker text-mint mb-3">{t.cases.intervention}</div>
+                <p class="font-body text-[15px] md:text-[16px] text-cream/80 leading-[1.65] mb-6">{c.intervention}</p>
+                <div class="flex flex-wrap gap-2">
+                  {c.tags.map((tag) => <span class="chip">{tag}</span>)}
+                </div>
+                {c.blogSlug && (
+                  <a href={`${prefix}/blog/${c.blogSlug}/`} class="pf-blog-link interactive">
+                    <span class="pf-blog-link-icon" aria-hidden="true">&rarr;</span>
+                    <span>{t.cases.readBlog}</span>
+                  </a>
+                )}
+              </div>
+              <div>
+                <div class="kicker text-mint mb-5">{t.cases.signals}</div>
+                <div class="grid grid-cols-1 gap-4">
+                  {c.metrics.map((m) => (
+                    <div class="pf-metric-card">
+                      <div class="pf-metric-value">{m.value}</div>
+                      <div class="pf-metric-label">{m.label}</div>
+                    </div>
+                  ))}
+                </div>
+                <div class="mt-8 pt-6 border-t border-cream/10">
+                  <div class="kicker text-cream/45 mb-2">{t.cases.anchor}</div>
+                  <div class="font-mono text-[12.5px] text-cream/75 tracking-[0.04em]">{c.anchor}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      ))}
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pf-pagination reveal-elem" id="pf-pagination" aria-label={t.cases.pageNavAria} data-page-prefix={t.cases.pageNumberPrefix} hidden>
+      <button type="button" class="pf-page-btn pf-page-prev interactive" data-action="prev" aria-label={t.cases.pagePrevAria}>
+        <span aria-hidden="true">&larr;</span>
+        <span class="pf-page-label">{t.cases.pagePrev}</span>
+      </button>
+      <div class="pf-page-numbers" id="pf-page-numbers" role="group" aria-label={t.cases.pageNavAria}></div>
+      <button type="button" class="pf-page-btn pf-page-next interactive" data-action="next" aria-label={t.cases.pageNextAria}>
+        <span class="pf-page-label">{t.cases.pageNext}</span>
+        <span aria-hidden="true">&rarr;</span>
+      </button>
+    </nav>
+  </div>
+</section>
+
+<style>
+  /* Filter pills */
+  .pf-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 56px 0 28px;
+  }
+  .pf-pill {
+    padding: 9px 18px;
+    border: 1px solid rgba(242, 239, 228, 0.15);
+    border-radius: 999px;
+    background: rgba(5, 30, 22, 0.4);
+    color: rgba(242, 239, 228, 0.65);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      border-color 0.25s ease,
+      background 0.25s ease,
+      color 0.25s ease;
+    line-height: 1;
+  }
+  .pf-pill:hover {
+    border-color: rgba(0, 200, 150, 0.45);
+    color: var(--cream);
+  }
+  .pf-pill[aria-selected="true"] {
+    background: rgba(0, 200, 150, 0.12);
+    border-color: var(--mint);
+    color: var(--mint);
+  }
+
+  /* Empty state */
+  .pf-empty {
+    padding: 64px 24px;
+    text-align: center;
+    border-top: 1px solid rgba(242, 239, 228, 0.08);
+    border-bottom: 1px solid rgba(242, 239, 228, 0.08);
+  }
+
+  /* Vertical list */
+  .pf-list { display: flex; flex-direction: column; }
+  .pf-row {
+    border-top: 1px solid rgba(242, 239, 228, 0.08);
+    transition: background 0.3s ease;
+  }
+  .pf-row[hidden] { display: none; }
+  .pf-row:last-child:not([hidden]) { border-bottom: 1px solid rgba(242, 239, 228, 0.08); }
+  .pf-row[open] { background: rgba(5, 30, 22, 0.25); }
+
+  .pf-summary {
+    display: grid;
+    grid-template-columns: 48px 100px 1fr 24px;
+    gap: 24px;
+    align-items: start;
+    padding: 28px 0;
+    cursor: pointer;
+    list-style: none;
+    transition: padding 0.3s ease;
+  }
+  .pf-summary::-webkit-details-marker { display: none; }
+  .pf-row:hover .pf-summary { padding-left: 8px; padding-right: 8px; }
+
+  .pf-num {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 24px;
+    color: var(--mint);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    padding-top: 4px;
+  }
+  .pf-period {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(242, 239, 228, 0.4);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    padding-top: 7px;
+  }
+  .pf-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .pf-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pf-pill-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border: 1px solid rgba(0, 200, 150, 0.35);
+    border-radius: 3px;
+    background: rgba(0, 200, 150, 0.08);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--mint);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  /* Blog cross-link: Case → ausfuehrlicher Blog-Post (wenn blogSlug gesetzt) */
+  .pf-blog-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 8px 14px;
+    border: 1px solid rgba(0, 200, 150, 0.3);
+    border-radius: 999px;
+    background: rgba(0, 200, 150, 0.08);
+    color: var(--mint);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .pf-blog-link:hover {
+    background: rgba(0, 200, 150, 0.18);
+    border-color: var(--mint);
+    transform: translateX(2px);
+  }
+  .pf-blog-link-icon {
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .pf-blog-link:hover .pf-blog-link-icon {
+    transform: translateX(2px);
+  }
+
+  /* Status pill: ongoing (mint, pulse) | concept (cream, dezent) */
+  .pf-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px 3px 8px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+  .pf-status-pill[data-status="ongoing"] {
+    border: 1px solid rgba(0, 200, 150, 0.35);
+    background: rgba(0, 200, 150, 0.08);
+    color: var(--mint);
+  }
+  .pf-status-pill[data-status="concept"] {
+    border: 1px solid rgba(242, 239, 228, 0.18);
+    background: rgba(242, 239, 228, 0.04);
+    color: rgba(242, 239, 228, 0.7);
+  }
+  .pf-status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 6px rgba(0, 200, 150, 0.7);
+    animation: pf-status-pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pf-status-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.8); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pf-status-dot { animation: none; }
+  }
+  .pf-kind {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: rgba(242, 239, 228, 0.4);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .pf-title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(17px, 2vw, 21px);
+    color: var(--cream);
+    letter-spacing: -0.015em;
+    line-height: 1.28;
+  }
+  .pf-context-preview {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: rgba(242, 239, 228, 0.6);
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .pf-toggle {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    margin-top: 8px;
+  }
+  .pf-toggle-bar {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 16px;
+    height: 1px;
+    background: rgba(242, 239, 228, 0.6);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.25s ease;
+  }
+  .pf-toggle-bar-v { transform: rotate(90deg); }
+  .pf-row:hover .pf-toggle-bar { background: var(--mint); }
+  .pf-row[open] .pf-toggle-bar-v { transform: rotate(0deg); opacity: 0; }
+
+  @media (max-width: 768px) {
+    .pf-summary {
+      grid-template-columns: 32px 1fr 18px;
+      grid-template-rows: auto auto;
+      gap: 8px 14px;
+      padding: 22px 0;
+    }
+    .pf-num { grid-row: 1; grid-column: 1; }
+    .pf-period { grid-row: 2; grid-column: 2 / 4; padding-top: 0; font-size: 10px; }
+    .pf-content { grid-row: 1; grid-column: 2 / 3; }
+    .pf-toggle { grid-row: 1; grid-column: 3; margin-top: 4px; }
+    .pf-context-preview { -webkit-line-clamp: 3; }
+  }
+
+  /* Body */
+  .pf-body {
+    padding: 8px 0 48px 72px;
+    max-width: 1100px;
+    animation: pf-open 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  @media (max-width: 768px) {
+    .pf-body { padding-left: 46px; padding-right: 8px; }
+  }
+  @keyframes pf-open {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .pf-metric-card {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 18px;
+    background: rgba(5, 30, 22, 0.4);
+    border: 1px solid rgba(0, 200, 150, 0.18);
+    border-radius: 6px;
+    transition: border-color 0.25s ease, background 0.25s ease;
+  }
+  .pf-metric-card:hover {
+    border-color: rgba(0, 200, 150, 0.5);
+    background: rgba(13, 61, 46, 0.45);
+  }
+  .pf-metric-value {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(24px, 3vw, 32px);
+    color: var(--mint);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .pf-metric-label {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: rgba(242, 239, 228, 0.75);
+    line-height: 1.3;
+  }
+
+  /* Pagination */
+  .pf-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(242, 239, 228, 0.08);
+    flex-wrap: wrap;
+  }
+  .pf-pagination[hidden] {
+    display: none;
+  }
+  .pf-page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 18px;
+    border: 1px solid rgba(242, 239, 228, 0.15);
+    border-radius: 999px;
+    background: rgba(5, 30, 22, 0.4);
+    color: rgba(242, 239, 228, 0.65);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color 0.25s ease, color 0.25s ease, background 0.25s ease, opacity 0.25s ease;
+    line-height: 1;
+  }
+  .pf-page-btn:hover:not([disabled]) {
+    border-color: rgba(0, 200, 150, 0.45);
+    color: var(--cream);
+  }
+  .pf-page-btn[disabled] {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .pf-page-numbers {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .pf-page-num {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid rgba(242, 239, 228, 0.12);
+    border-radius: 4px;
+    background: transparent;
+    color: rgba(242, 239, 228, 0.6);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+    font-variant-numeric: tabular-nums;
+  }
+  .pf-page-num:hover {
+    border-color: rgba(0, 200, 150, 0.4);
+    color: var(--cream);
+  }
+  .pf-page-num[aria-current="page"] {
+    background: rgba(0, 200, 150, 0.12);
+    border-color: var(--mint);
+    color: var(--mint);
+  }
+  .pf-page-ellipsis {
+    color: rgba(242, 239, 228, 0.35);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 0 4px;
+  }
+
+  @media (max-width: 640px) {
+    .pf-pagination {
+      justify-content: center;
+    }
+    .pf-page-label {
+      display: none;
+    }
+    .pf-page-btn {
+      padding: 9px 14px;
+    }
+  }
+</style>
+
+<script>
+  const pills = Array.from(document.querySelectorAll<HTMLButtonElement>(".pf-pill"));
+  const rows = Array.from(document.querySelectorAll<HTMLDetailsElement>(".pf-row"));
+  const empty = document.getElementById("pf-empty") as HTMLDivElement | null;
+  const list = document.getElementById("pf-list") as HTMLDivElement | null;
+  const pagination = document.getElementById("pf-pagination") as HTMLElement | null;
+  const pageNumbers = document.getElementById("pf-page-numbers") as HTMLElement | null;
+  const prevBtn = pagination?.querySelector<HTMLButtonElement>('[data-action="prev"]') ?? null;
+  const nextBtn = pagination?.querySelector<HTMLButtonElement>('[data-action="next"]') ?? null;
+  const PAGE_SIZE = Number(list?.dataset.pageSize ?? 6);
+
+  let currentPillar: string | null = null;
+  let currentPage = 1;
+
+  const filteredRows = (): HTMLDetailsElement[] =>
+    rows.filter((r) => currentPillar === null || r.dataset.cat === currentPillar);
+
+  const renderPagination = () => {
+    if (!pagination || !pageNumbers || !prevBtn || !nextBtn) return;
+    const filtered = filteredRows();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+
+    if (filtered.length <= PAGE_SIZE) {
+      pagination.setAttribute("hidden", "");
+      return;
+    }
+    pagination.removeAttribute("hidden");
+
+    pageNumbers.innerHTML = "";
+    const pagePrefix = pagination.dataset.pagePrefix ?? "Page";
+    const addNum = (n: number) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pf-page-num interactive";
+      btn.textContent = String(n);
+      btn.setAttribute("aria-label", `${pagePrefix} ${n}`);
+      if (n === currentPage) btn.setAttribute("aria-current", "page");
+      btn.addEventListener("click", () => {
+        if (n !== currentPage) {
+          currentPage = n;
+          applyPage();
+          scrollToList();
+        }
+      });
+      pageNumbers.appendChild(btn);
+    };
+    const addEllipsis = () => {
+      const span = document.createElement("span");
+      span.className = "pf-page-ellipsis";
+      span.textContent = "...";
+      span.setAttribute("aria-hidden", "true");
+      pageNumbers.appendChild(span);
+    };
+
+    // Compact pagination: 1 ... (cur-1) cur (cur+1) ... last
+    const pages = new Set<number>([1, totalPages, currentPage, currentPage - 1, currentPage + 1]);
+    const sorted = Array.from(pages)
+      .filter((p) => p >= 1 && p <= totalPages)
+      .sort((a, b) => a - b);
+    let last = 0;
+    for (const p of sorted) {
+      if (p - last > 1) addEllipsis();
+      addNum(p);
+      last = p;
+    }
+
+    prevBtn.toggleAttribute("disabled", currentPage <= 1);
+    nextBtn.toggleAttribute("disabled", currentPage >= totalPages);
+  };
+
+  const scrollToList = () => {
+    const portfolio = document.getElementById("portfolio");
+    if (portfolio) {
+      const top = portfolio.getBoundingClientRect().top + window.scrollY - 24;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
+
+  const applyPage = () => {
+    const filtered = filteredRows();
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    filtered.forEach((r, i) => {
+      if (i >= start && i < end) {
+        r.removeAttribute("hidden");
+      } else {
+        r.setAttribute("hidden", "");
+        r.removeAttribute("open");
+      }
+    });
+    // Update URL ?page=N
+    try {
+      const url = new URL(window.location.href);
+      if (currentPage === 1) {
+        url.searchParams.delete("page");
+      } else {
+        url.searchParams.set("page", String(currentPage));
+      }
+      const newSearch = url.searchParams.toString();
+      const newPath = url.pathname + (newSearch ? `?${newSearch}` : "") + url.hash;
+      history.replaceState(null, "", newPath);
+    } catch {
+      /* ignore */
+    }
+    renderPagination();
+  };
+
+  const apply = (pillar: string | null, resetPage = true) => {
+    currentPillar = pillar;
+    if (resetPage) currentPage = 1;
+
+    // Update pills active state
+    pills.forEach((p) => {
+      const isActive = (pillar === null && p.dataset.pill === "all") || p.dataset.pill === pillar;
+      p.setAttribute("aria-selected", String(isActive));
+    });
+
+    // Initial filter pass: hide non-matching rows
+    let visible = 0;
+    rows.forEach((r) => {
+      const match = pillar === null || r.dataset.cat === pillar;
+      if (match) {
+        r.removeAttribute("hidden");
+        visible++;
+      } else {
+        r.setAttribute("hidden", "");
+        r.removeAttribute("open");
+      }
+    });
+
+    // Empty-state for empty pillars
+    if (empty && list) {
+      if (visible === 0) {
+        empty.removeAttribute("hidden");
+        list.setAttribute("hidden", "");
+        if (pagination) pagination.setAttribute("hidden", "");
+      } else {
+        empty.setAttribute("hidden", "");
+        list.removeAttribute("hidden");
+        applyPage();
+      }
+    }
+
+    // Hash management
+    try {
+      if (pillar === null) {
+        if (window.location.hash.startsWith("#portfolio-")) {
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+      } else {
+        const newHash = `portfolio-${pillar}`;
+        if (window.location.hash !== `#${newHash}`) {
+          history.replaceState(null, "", `#${newHash}`);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const dispatch = (pillar: string | null, source: string) => {
+    document.documentElement.dataset.activePillar = pillar ?? "";
+    document.dispatchEvent(new CustomEvent("pillar:change", { detail: { pillar, source } }));
+  };
+
+  // React to external pillar changes (Kernschwerpunkte click)
+  document.addEventListener("pillar:change", (e) => {
+    const detail = (e as CustomEvent).detail as { pillar: string | null; source: string };
+    if (detail.source === "portfolio") return;
+    apply(detail.pillar);
+  });
+
+  // External request: focus a specific case (e.g. from Skills deep-link)
+  // Finds the page that contains the case, navigates there, opens + scrolls.
+  document.addEventListener("case:focus", (e) => {
+    const detail = (e as CustomEvent).detail as { id: string };
+    const target = document.getElementById(`case-${detail.id}`) as HTMLDetailsElement | null;
+    if (!target) return;
+    // Reset to "Alle" so case is in current filter
+    apply(null);
+    dispatch(null, "portfolio");
+    // Find which page the case is on after filtering
+    const filtered = filteredRows();
+    const idxInFiltered = filtered.indexOf(target);
+    if (idxInFiltered >= 0) {
+      const targetPage = Math.floor(idxInFiltered / PAGE_SIZE) + 1;
+      if (targetPage !== currentPage) {
+        currentPage = targetPage;
+        applyPage();
+      }
+    }
+    // Open + scroll
+    target.open = true;
+    requestAnimationFrame(() => {
+      const top = target.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top, behavior: "smooth" });
+    });
+  });
+
+  // Pill clicks
+  pills.forEach((p) => {
+    p.addEventListener("click", () => {
+      const pill = p.dataset.pill;
+      if (!pill) return;
+      const next = pill === "all" ? null : pill;
+      apply(next);
+      dispatch(next, "portfolio");
+    });
+  });
+
+  // Pagination prev/next buttons
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        applyPage();
+        scrollToList();
+      }
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      const filtered = filteredRows();
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      if (currentPage < totalPages) {
+        currentPage++;
+        applyPage();
+        scrollToList();
+      }
+    });
+  }
+
+  // Initial state from URL hash + ?page=N
+  const initialPage = (() => {
+    try {
+      const url = new URL(window.location.href);
+      const p = Number(url.searchParams.get("page") ?? "1");
+      return Number.isFinite(p) && p >= 1 ? p : 1;
+    } catch {
+      return 1;
+    }
+  })();
+  currentPage = initialPage;
+
+  const hash = window.location.hash;
+  if (hash.startsWith("#portfolio-")) {
+    const cat = hash.replace("#portfolio-", "");
+    if (rows.some((r) => r.dataset.cat === cat)) {
+      apply(cat, false);
+      dispatch(cat, "portfolio");
+    } else {
+      apply(null, false);
+    }
+  } else {
+    apply(null, false);
+  }
+</script>
+
+<div class="divider"></div>

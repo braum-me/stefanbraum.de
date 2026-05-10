@@ -1,0 +1,49 @@
+---
+interface Props {
+  number: string;
+  title: string;
+}
+const { number, title } = Astro.props;
+---
+
+<div class="chapter-sep reveal-elem" aria-hidden="true">
+  <div class="max-w-7xl mx-auto px-6 md:px-12">
+    <div class="flex items-baseline gap-6 md:gap-10 py-6 md:py-10">
+      <span class="chapter-num">{number}</span>
+      <span class="chapter-rule"></span>
+      <span class="chapter-title">{title}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .chapter-sep {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+  }
+  .chapter-num {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    letter-spacing: -0.03em;
+    color: var(--mint);
+    line-height: 1;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+  }
+  .chapter-rule {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(0, 200, 150, 0.4) 0%,
+      rgba(242, 239, 228, 0.1) 100%
+    );
+  }
+  .chapter-title {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: rgba(242, 239, 228, 0.55);
+  }
+</style>

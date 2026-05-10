@@ -1,0 +1,44 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import Nav from "~/components/Nav.astro";
+import Hero from "~/components/Hero.astro";
+import MicroMetrics from "~/components/MicroMetrics.astro";
+import Kernschwerpunkte from "~/components/Kernschwerpunkte.astro";
+import ChapterSeparator from "~/components/ChapterSeparator.astro";
+import Timeline from "~/components/Timeline.astro";
+import Cases from "~/components/Cases.astro";
+import Skills from "~/components/Skills.astro";
+import Writing from "~/components/Writing.astro";
+import Contact from "~/components/Contact.astro";
+import Footer from "~/components/Footer.astro";
+import { getT } from "~/i18n";
+
+const locale = "en" as const;
+const t = getT(locale);
+
+const focus = Astro.url.searchParams.get("focus");
+const validFocus = focus === "consulting" ? focus : undefined;
+
+const pageDescription = validFocus === "consulting" ? t.meta.consultingDescription : t.meta.description;
+---
+
+<BaseLayout title={t.meta.title} description={pageDescription} ogFocus={validFocus} locale={locale}>
+  <Nav locale={locale} />
+  <main id="top">
+    <Hero locale={locale} />
+    <MicroMetrics locale={locale} />
+    <ChapterSeparator number="01" title={t.chapters["01"]} />
+    <Kernschwerpunkte locale={locale} />
+    <ChapterSeparator number="02" title={t.chapters["02"]} />
+    <Cases locale={locale} />
+    <ChapterSeparator number="03" title={t.chapters["03"]} />
+    <Skills locale={locale} />
+    <ChapterSeparator number="04" title={t.chapters["04"]} />
+    <Timeline locale={locale} />
+    <ChapterSeparator number="05" title={t.chapters["05"]} />
+    <Writing locale={locale} />
+    <ChapterSeparator number="06" title={t.chapters["06"]} />
+    <Contact locale={locale} />
+  </main>
+  <Footer locale={locale} />
+</BaseLayout>

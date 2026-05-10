@@ -1,0 +1,460 @@
+---
+import { getT, getLocalePrefix, localizePath, type Locale } from "~/i18n";
+
+interface Props {
+  locale?: Locale;
+}
+const { locale = "de" } = Astro.props;
+const t = getT(locale);
+const navItems = t.nav.items;
+
+const prefix = getLocalePrefix(locale);
+const homePath = prefix === "" ? "/" : `${prefix}/`;
+const isHome = Astro.url.pathname === homePath || Astro.url.pathname === prefix;
+const linkPrefix = isHome ? "" : homePath;
+const logoHref = isHome ? "#top" : homePath;
+const logoLabel = isHome ? t.nav.logoLabelHome : t.nav.logoLabelOther;
+
+// Language toggle target paths (mirror current path in the other locale)
+const dePath = localizePath(Astro.url.pathname, "de");
+const enPath = localizePath(Astro.url.pathname, "en");
+---
+
+<header id="site-nav" class="site-nav" data-at-top="true">
+  <nav class="site-nav-inner max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 h-full">
+    <!-- Logo -->
+    <a href={logoHref} class="nav-mark interactive" aria-label={logoLabel}>
+      <span class="nav-mark-letters">SB</span>
+      <span class="nav-mark-dot" aria-hidden="true"></span>
+    </a>
+
+    <!-- Desktop nav -->
+    <div class="nav-right">
+      <ul class="nav-links" role="list">
+        {navItems.map((item) => (
+          <li>
+            <a
+              href={`${linkPrefix}#${item.id}`}
+              class="nav-link interactive"
+              data-target={item.id}
+              aria-current="false"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <!-- Language toggle -->
+      <div class="nav-lang" role="group" aria-label={t.nav.languageLabel}>
+        <a
+          href={dePath}
+          class="nav-lang-chip interactive"
+          aria-current={locale === "de" ? "true" : "false"}
+          hreflang="de"
+          lang="de"
+        >DE</a>
+        <span class="nav-lang-sep" aria-hidden="true">/</span>
+        <a
+          href={enPath}
+          class="nav-lang-chip interactive"
+          aria-current={locale === "en" ? "true" : "false"}
+          hreflang="en"
+          lang="en"
+        >EN</a>
+      </div>
+    </div>
+
+    <!-- Mobile hamburger -->
+    <button
+      type="button"
+      class="nav-burger interactive"
+      id="nav-burger"
+      aria-label={t.nav.burgerOpen}
+      aria-controls="nav-mobile"
+      aria-expanded="false"
+    >
+      <span class="nav-burger-bar"></span>
+      <span class="nav-burger-bar"></span>
+      <span class="nav-burger-bar"></span>
+    </button>
+  </nav>
+
+  <!-- Mobile dropdown -->
+  <div class="nav-mobile" id="nav-mobile" hidden>
+    <ul class="nav-mobile-list" role="list">
+      {navItems.map((item) => (
+        <li>
+          <a
+            href={`${linkPrefix}#${item.id}`}
+            class="nav-mobile-link interactive"
+            data-target-mobile={item.id}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+    <div class="nav-mobile-lang" role="group" aria-label={t.nav.languageLabel}>
+      <a
+        href={dePath}
+        class="nav-lang-chip interactive"
+        aria-current={locale === "de" ? "true" : "false"}
+        hreflang="de"
+        lang="de"
+      >DE</a>
+      <span class="nav-lang-sep" aria-hidden="true">/</span>
+      <a
+        href={enPath}
+        class="nav-lang-chip interactive"
+        aria-current={locale === "en" ? "true" : "false"}
+        hreflang="en"
+        lang="en"
+      >EN</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    z-index: 40;
+    background: rgba(2, 8, 6, 0.72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-bottom: 1px solid rgba(242, 239, 228, 0.08);
+    transform: translateY(0);
+    transition:
+      transform 0.35s cubic-bezier(0.22, 0.8, 0.22, 1),
+      background 0.3s ease,
+      border-color 0.3s ease;
+  }
+  .site-nav[data-at-top="true"] {
+    background: rgba(2, 8, 6, 0.3);
+    border-bottom-color: transparent;
+  }
+  .site-nav[data-hidden="true"] {
+    transform: translateY(-100%);
+  }
+  @media (max-width: 768px) {
+    .site-nav { height: 56px; }
+  }
+
+  /* Logo */
+  .nav-mark {
+    display: inline-flex;
+    align-items: flex-end;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--cream);
+    gap: 0.05em;
+    text-decoration: none;
+    transition: color 0.25s ease;
+  }
+  .nav-mark:hover {
+    color: var(--mint);
+  }
+  .nav-mark-letters {
+    display: inline-block;
+  }
+  .nav-mark-dot {
+    display: inline-block;
+    width: 0.16em;
+    height: 0.16em;
+    background: var(--mint);
+    border-radius: 50%;
+    margin-bottom: 0.08em;
+    box-shadow: 0 0 14px rgba(0, 200, 150, 0.5);
+  }
+
+  /* Desktop links */
+  .nav-right {
+    display: none;
+    align-items: center;
+    gap: 24px;
+  }
+  @media (min-width: 900px) {
+    .nav-right {
+      display: inline-flex;
+    }
+  }
+  .nav-links {
+    display: inline-flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+    gap: 28px;
+  }
+
+  /* Language toggle */
+  .nav-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 18px;
+    border-left: 1px solid rgba(242, 239, 228, 0.1);
+  }
+  .nav-lang-chip {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(242, 239, 228, 0.5);
+    text-decoration: none;
+    padding: 4px 6px;
+    border-radius: 3px;
+    transition: color 0.25s ease, background 0.25s ease;
+  }
+  .nav-lang-chip:hover {
+    color: var(--cream);
+  }
+  .nav-lang-chip[aria-current="true"] {
+    color: var(--mint);
+  }
+  .nav-lang-sep {
+    color: rgba(242, 239, 228, 0.2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  .nav-mobile-lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 4px 6px;
+    border-top: 1px solid rgba(242, 239, 228, 0.06);
+    margin-top: 8px;
+  }
+  .nav-link {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(242, 239, 228, 0.5);
+    text-decoration: none;
+    padding: 6px 0;
+    position: relative;
+    transition: color 0.25s ease;
+  }
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--mint);
+    transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .nav-link:hover {
+    color: var(--cream);
+  }
+  .nav-link:hover::after {
+    width: 100%;
+  }
+  .nav-link[aria-current="true"] {
+    color: var(--mint);
+  }
+  .nav-link[aria-current="true"]::after {
+    width: 100%;
+  }
+
+  /* Hamburger */
+  .nav-burger {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid rgba(242, 239, 228, 0.12);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.25s ease;
+    padding: 0;
+  }
+  .nav-burger:hover {
+    border-color: rgba(0, 200, 150, 0.4);
+  }
+  .nav-burger-bar {
+    display: block;
+    width: 16px;
+    height: 1.5px;
+    background: var(--cream);
+    border-radius: 1px;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s ease;
+  }
+  .nav-burger[aria-expanded="true"] .nav-burger-bar:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+  .nav-burger[aria-expanded="true"] .nav-burger-bar:nth-child(2) {
+    opacity: 0;
+  }
+  .nav-burger[aria-expanded="true"] .nav-burger-bar:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+  @media (min-width: 900px) {
+    .nav-burger {
+      display: none;
+    }
+  }
+
+  /* Mobile dropdown */
+  .nav-mobile {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(2, 8, 6, 0.96);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border-bottom: 1px solid rgba(242, 239, 228, 0.08);
+    overflow: hidden;
+    animation: nav-mobile-enter 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .nav-mobile[hidden] {
+    display: none;
+  }
+  @keyframes nav-mobile-enter {
+    from { transform: translateY(-12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .nav-mobile-list {
+    list-style: none;
+    margin: 0;
+    padding: 16px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nav-mobile-link {
+    display: block;
+    padding: 14px 4px;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+    color: var(--cream);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(242, 239, 228, 0.06);
+    transition: color 0.25s ease;
+  }
+  .nav-mobile-link:hover,
+  .nav-mobile-link:focus {
+    color: var(--mint);
+  }
+</style>
+
+<script>
+  const nav = document.getElementById("site-nav");
+  const burger = document.getElementById("nav-burger") as HTMLButtonElement | null;
+  const mobile = document.getElementById("nav-mobile") as HTMLDivElement | null;
+  const desktopLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>(".nav-link"));
+  const mobileLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>(".nav-mobile-link"));
+
+  // Smart-scroll: hide on scroll-down, show on scroll-up
+  if (nav) {
+    let lastY = window.scrollY;
+    let ticking = false;
+    const threshold = 8;
+    const topZone = 80;
+
+    const update = () => {
+      const y = window.scrollY;
+      const dy = y - lastY;
+
+      nav.dataset.atTop = String(y < topZone);
+
+      if (Math.abs(dy) > threshold) {
+        if (dy > 0 && y > topZone) {
+          nav.dataset.hidden = "true";
+          // Auto-close mobile menu on scroll-down
+          if (mobile && burger && burger.getAttribute("aria-expanded") === "true") {
+            mobile.setAttribute("hidden", "");
+            burger.setAttribute("aria-expanded", "false");
+          }
+        } else {
+          nav.dataset.hidden = "false";
+        }
+        lastY = y;
+      }
+      ticking = false;
+    };
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      },
+      { passive: true },
+    );
+    update();
+  }
+
+  // Hamburger toggle
+  if (burger && mobile) {
+    burger.addEventListener("click", () => {
+      const expanded = burger.getAttribute("aria-expanded") === "true";
+      burger.setAttribute("aria-expanded", String(!expanded));
+      if (expanded) {
+        mobile.setAttribute("hidden", "");
+      } else {
+        mobile.removeAttribute("hidden");
+      }
+    });
+    // Close on link click
+    mobileLinks.forEach((link) => {
+      link.addEventListener("click", () => {
+        burger.setAttribute("aria-expanded", "false");
+        mobile.setAttribute("hidden", "");
+      });
+    });
+  }
+
+  // Scrollspy: track which section is in view, mark corresponding link
+  const sectionIds = desktopLinks.map((l) => l.dataset.target).filter(Boolean) as string[];
+  const sections = sectionIds
+    .map((id) => ({ id, el: document.getElementById(id) }))
+    .filter((s): s is { id: string; el: HTMLElement } => s.el !== null);
+
+  if (sections.length > 0) {
+    const setActive = (id: string | null) => {
+      desktopLinks.forEach((l) => {
+        l.setAttribute("aria-current", String(l.dataset.target === id));
+      });
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        // Find the entry closest to top of viewport that is intersecting
+        const intersecting = entries.filter((e) => e.isIntersecting);
+        if (intersecting.length === 0) return;
+        // Choose the section with smallest distance from top
+        const closest = intersecting.reduce((best, e) => {
+          const r = e.boundingClientRect.top;
+          if (best === null) return { entry: e, dist: Math.abs(r) };
+          return Math.abs(r) < best.dist ? { entry: e, dist: Math.abs(r) } : best;
+        }, null as null | { entry: IntersectionObserverEntry; dist: number });
+        if (closest) {
+          const id = (closest.entry.target as HTMLElement).id;
+          setActive(id);
+        }
+      },
+      { rootMargin: "-30% 0px -55% 0px", threshold: 0 },
+    );
+
+    sections.forEach(({ el }) => io.observe(el));
+  }
+</script>

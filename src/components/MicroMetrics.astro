@@ -1,0 +1,167 @@
+---
+// News-Banner-Strip mit Live-Status + harten Zahlen.
+// Marquee-Animation per CSS, Items doppelt gerendert für seamless loop.
+import { getT, type Locale } from "~/i18n";
+
+interface Props {
+  locale?: Locale;
+}
+const { locale = "de" } = Astro.props;
+const t = getT(locale);
+
+const now = new Date();
+const berlinHour = Number(new Intl.DateTimeFormat("de-DE", { hour: "numeric", hour12: false, timeZone: "Europe/Berlin" }).format(now));
+const weekdayName = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "Europe/Berlin" }).format(now);
+const isWeekend = weekdayName === "Sat" || weekdayName === "Sun";
+const inWorkingHours = !isWeekend && berlinHour >= 8 && berlinHour < 18;
+const availabilityState: "on" | "off" = inWorkingHours ? "on" : "off";
+
+interface Item {
+  label: string;
+  value: string;
+  dot?: "on" | "off";
+}
+
+const items: Item[] = [
+  { label: t.microMetrics.pillars, value: "6" },
+  { label: t.microMetrics.location, value: t.microMetrics.locationValue, dot: availabilityState },
+  { label: t.microMetrics.practice, value: t.microMetrics.practiceValue },
+  { label: t.microMetrics.projects, value: t.microMetrics.projectsValue },
+];
+---
+
+<div class="micro-metrics" aria-label={t.microMetrics.aria}>
+  <div class="micro-metrics-viewport">
+    <div class="micro-metrics-track">
+      {/* Group 1 (visible) */}
+      {items.map((item, i) => (
+        <>
+          <span class="mm-cell">
+            {item.dot && (
+              <span class={`mm-dot mm-dot-${item.dot}`} aria-hidden="true"></span>
+            )}
+            <span class="mm-label">{item.label}</span>
+            <span class="mm-value">{item.value}</span>
+          </span>
+          {i < items.length - 1 && <span class="mm-sep" aria-hidden="true">·</span>}
+        </>
+      ))}
+      <span class="mm-sep" aria-hidden="true">·</span>
+      {/* Group 2 (clone for seamless loop) */}
+      {items.map((item, i) => (
+        <>
+          <span class="mm-cell" aria-hidden="true">
+            {item.dot && (
+              <span class={`mm-dot mm-dot-${item.dot}`} aria-hidden="true"></span>
+            )}
+            <span class="mm-label">{item.label}</span>
+            <span class="mm-value">{item.value}</span>
+          </span>
+          {i < items.length - 1 && <span class="mm-sep" aria-hidden="true">·</span>}
+        </>
+      ))}
+      <span class="mm-sep" aria-hidden="true">·</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .micro-metrics {
+    width: 100%;
+    overflow: hidden;
+    border-top: 1px solid rgba(242, 239, 228, 0.08);
+    border-bottom: 1px solid rgba(242, 239, 228, 0.08);
+    background: rgba(5, 30, 22, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    /* Edge-Fade-Mask für sanftes ein/ausblenden am Rand */
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      rgba(0, 0, 0, 1) 80px,
+      rgba(0, 0, 0, 1) calc(100% - 80px),
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      rgba(0, 0, 0, 1) 80px,
+      rgba(0, 0, 0, 1) calc(100% - 80px),
+      transparent 100%
+    );
+  }
+  .micro-metrics-viewport {
+    overflow: hidden;
+    padding: 12px 0;
+  }
+  .micro-metrics-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    color: rgba(242, 239, 228, 0.65);
+    animation: mm-marquee 60s linear infinite;
+    will-change: transform;
+  }
+  .micro-metrics:hover .micro-metrics-track {
+    animation-play-state: paused;
+  }
+  @keyframes mm-marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .mm-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .mm-label {
+    color: rgba(242, 239, 228, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+  }
+  .mm-value {
+    color: var(--cream);
+  }
+  .mm-sep {
+    color: rgba(242, 239, 228, 0.15);
+    flex-shrink: 0;
+  }
+  .mm-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .mm-dot-on {
+    background: var(--mint);
+    box-shadow: 0 0 6px var(--mint);
+    animation: mm-pulse 2.2s ease-in-out infinite;
+  }
+  .mm-dot-off {
+    background: rgba(242, 239, 228, 0.3);
+  }
+  @keyframes mm-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.88); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .micro-metrics-track {
+      animation: none;
+    }
+    .mm-dot-on {
+      animation: none;
+    }
+  }
+</style>

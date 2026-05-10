@@ -1,0 +1,136 @@
+---
+import { timeline } from "~/data/timeline.ts";
+import { getT, type Locale } from "~/i18n";
+
+interface Props {
+  locale?: Locale;
+}
+const { locale = "de" } = Astro.props;
+const t = getT(locale);
+
+// Merge translated period labels (by year) onto timeline entries while keeping
+// company/role/summary/tags from the canonical DE data.
+const periodOverrides = new Map(
+  t.timeline.entries.map((e) => [e.year, e.period]),
+);
+const entries = timeline.map((e) => ({
+  ...e,
+  period: periodOverrides.get(e.year) ?? e.period,
+}));
+---
+
+<section id="stationen" class="relative px-6 md:px-12 py-28 md:py-40">
+  <div class="max-w-7xl mx-auto relative">
+    <div class="section-intro">
+      <div class="reveal-elem">
+        <div class="eyebrow mb-8">{t.timeline.eyebrow}</div>
+        <h2 class="heading-giant text-cream max-w-2xl" data-anim="section-title">{t.timeline.headline}</h2>
+      </div>
+      <div class="reveal-elem">
+        <p class="font-body text-lg md:text-xl text-cream/70 leading-[1.55] max-w-[58ch]">
+          {t.timeline.subline}
+        </p>
+      </div>
+    </div>
+
+    <div class="timeline-track relative" id="timeline-track">
+      <!-- Animated connector line -->
+      <div class="timeline-line" aria-hidden="true">
+        <div class="timeline-line-fill"></div>
+      </div>
+
+      <div class="space-y-10 md:space-y-12 reveal-stagger pl-6 md:pl-10">
+        {entries.map((entry) => (
+          <div class="timeline-item grid md:grid-cols-[auto_1fr] gap-6 md:gap-12 items-start interactive relative">
+            <div class="timeline-node" aria-hidden="true"></div>
+            <div class="min-w-[140px] md:min-w-[180px]">
+              <div class="timeline-year">{entry.year}</div>
+              <div class="kicker text-cream/35 mt-2">{entry.period}</div>
+            </div>
+            <div>
+              <div class="kicker text-mint mb-2">{entry.company}</div>
+              <h3 class="font-display text-xl md:text-2xl font-medium text-cream tracking-tight leading-tight mb-4">
+                {entry.role}
+              </h3>
+              <p class="font-body text-[15.5px] md:text-[16.5px] text-cream/70 leading-[1.65] max-w-[62ch] mb-5">
+                {entry.summary}
+              </p>
+              <div class="flex flex-wrap gap-2">
+                {entry.tags.map((tag) => (
+                  <span class="chip">{tag}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <style>
+      .timeline-line {
+        position: absolute;
+        left: 6px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: rgba(242, 239, 228, 0.08);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      @media (min-width: 768px) {
+        .timeline-line { left: 14px; }
+      }
+      .timeline-line-fill {
+        width: 100%;
+        height: calc(var(--line-progress, 0) * 100%);
+        background: linear-gradient(
+          180deg,
+          rgba(0, 200, 150, 0) 0%,
+          rgba(0, 200, 150, 0.85) 25%,
+          rgba(0, 200, 150, 0.85) 100%
+        );
+        box-shadow: 0 0 8px rgba(0, 200, 150, 0.4);
+        transition: height 0.1s linear;
+      }
+      .timeline-node {
+        position: absolute;
+        left: -24px;
+        top: 12px;
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(242, 239, 228, 0.25);
+        border-radius: 50%;
+        background: var(--bg-app);
+        transition: all 0.3s ease;
+      }
+      @media (min-width: 768px) {
+        .timeline-node { left: -40px; }
+      }
+      .timeline-item:hover .timeline-node {
+        border-color: var(--mint);
+        box-shadow: 0 0 12px var(--mint);
+      }
+    </style>
+
+    <script>
+      const track = document.getElementById("timeline-track");
+      if (track) {
+        const update = () => {
+          const rect = track.getBoundingClientRect();
+          const vh = window.innerHeight;
+          // progress: how much of the track has passed into viewport
+          const enter = vh * 0.6;
+          const total = rect.height + enter;
+          const progressed = enter - rect.top;
+          const p = Math.max(0, Math.min(1, progressed / total));
+          track.style.setProperty("--line-progress", String(p));
+        };
+        update();
+        window.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update);
+      }
+    </script>
+  </div>
+</section>
+
+<div class="divider"></div>

@@ -1,0 +1,191 @@
+---
+// Full-viewport fragment-shader background with mouse-glow + drift + scanlines.
+// Three.js wird lazy via dynamic-import geladen — der CSS-Fallback unten zeigt
+// während Loading bereits einen statischen Forest-Gradient, sodass das Hero
+// nie auf nacktem Schwarz erscheint.
+---
+
+<div class="ambient-fallback" aria-hidden="true"></div>
+<canvas class="ambient-shader" id="ambient-shader" aria-hidden="true"></canvas>
+
+<style>
+  .ambient-fallback {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 55% at 18% 28%, rgba(26, 93, 70, 0.45), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 82% 18%, rgba(0, 200, 150, 0.12), transparent 55%),
+      radial-gradient(ellipse 80% 70% at 50% 110%, rgba(5, 30, 22, 0.7), transparent 65%),
+      #020806;
+  }
+  .ambient-shader {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .ambient-shader.is-ready {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  const canvas = document.getElementById("ambient-shader") as HTMLCanvasElement | null;
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const isLowEnd = navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency < 4;
+  const dataSaver =
+    "connection" in navigator &&
+    (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+
+  // Skip shader entirely on reduced-motion, low-end devices, or save-data:
+  // CSS fallback already covers visual baseline.
+  if (canvas && !prefersReduced && !isLowEnd && !dataSaver) {
+    // Defer Three.js import until idle so it doesn't block initial paint
+    const start = async () => {
+      const THREE = await import("three");
+
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+      const uniforms = {
+        u_time: { value: 0 },
+        u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+        u_mouse: { value: new THREE.Vector2(0.5, 0.5) },
+      };
+
+      const material = new THREE.ShaderMaterial({
+        uniforms,
+        transparent: true,
+        vertexShader: /* glsl */ `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: /* glsl */ `
+          precision highp float;
+          uniform float u_time;
+          uniform vec2 u_resolution;
+          uniform vec2 u_mouse;
+          varying vec2 vUv;
+
+          float hash(vec2 p) {
+            return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+          }
+
+          void main() {
+            vec2 uv = vUv;
+            float aspect = u_resolution.x / u_resolution.y;
+            vec2 p = (uv - 0.5) * vec2(aspect, 1.0);
+
+            vec3 base = vec3(0.006, 0.024, 0.018);
+
+            vec2 m = (u_mouse - 0.5) * vec2(aspect, 1.0);
+            float md = distance(p, m);
+            float glow = exp(-md * 3.5);
+            vec3 glowColor = vec3(0.0, 0.784, 0.588) * glow * 0.08;
+
+            float scan1 = sin(uv.y * 800.0) * 0.5 + 0.5;
+            scan1 = smoothstep(0.5, 1.0, scan1) * 0.015;
+
+            float band = sin((uv.y + u_time * 0.02) * 3.14159 * 2.0) * 0.5 + 0.5;
+            band = pow(band, 6.0) * 0.04;
+
+            float grain = hash(uv * u_resolution + u_time * 60.0) * 0.015;
+
+            vec3 forest = vec3(0.06, 0.24, 0.18);
+            vec3 cream = vec3(0.95, 0.94, 0.89);
+
+            vec3 color = base;
+            color += forest * band;
+            color += cream * scan1 * 0.25;
+            color += glowColor;
+            color += vec3(grain);
+
+            float vig = smoothstep(1.1, 0.2, length(uv - 0.5));
+            color *= mix(0.6, 1.0, vig);
+
+            gl_FragColor = vec4(color, 1.0);
+          }
+        `,
+      });
+
+      const geometry = new THREE.PlaneGeometry(2, 2);
+      const plane = new THREE.Mesh(geometry, material);
+      scene.add(plane);
+
+      const resize = () => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        renderer.setSize(w, h, false);
+        uniforms.u_resolution.value.set(w, h);
+      };
+      resize();
+      window.addEventListener("resize", resize);
+
+      let mouseX = 0.5;
+      let mouseY = 0.5;
+      let targetX = 0.5;
+      let targetY = 0.5;
+      window.addEventListener(
+        "mousemove",
+        (e) => {
+          targetX = e.clientX / window.innerWidth;
+          targetY = 1.0 - e.clientY / window.innerHeight;
+        },
+        { passive: true },
+      );
+
+      const startTime = performance.now();
+      let rafId = 0;
+      const tick = () => {
+        const t = (performance.now() - startTime) / 1000;
+        uniforms.u_time.value = t;
+        mouseX += (targetX - mouseX) * 0.04;
+        mouseY += (targetY - mouseY) * 0.04;
+        uniforms.u_mouse.value.set(mouseX, mouseY);
+        renderer.render(scene, camera);
+        rafId = requestAnimationFrame(tick);
+      };
+      tick();
+
+      // Reveal canvas after first frame to avoid flash
+      requestAnimationFrame(() => {
+        canvas.classList.add("is-ready");
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          cancelAnimationFrame(rafId);
+        } else {
+          tick();
+        }
+      });
+    };
+
+    // Defer until browser is idle (or fallback to setTimeout)
+    const safeStart = () => {
+      start().catch(() => {
+        /* CSS fallback stays */
+      });
+    };
+    const win = window as unknown as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
+    };
+    if (typeof win.requestIdleCallback === "function") {
+      win.requestIdleCallback(safeStart, { timeout: 2000 });
+    } else {
+      window.setTimeout(safeStart, 600);
+    }
+  }
+</script>
