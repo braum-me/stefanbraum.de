@@ -4,6 +4,7 @@ date: 2026-04-20
 excerpt: "Eine Bekannte hat mir erzählt, wie ihr Export-Compliance-Alltag wirklich aussieht. Eine Woche später hatte ich die ersten Datenquellen angebunden. Was daraus geworden ist und warum ich das nebenher mache."
 tags: ["saas", "aboutexport", "compliance", "build", "side-project"]
 readingTime: "5 min"
+coverImage: "/blog/warum-ich-aboutexport-baue/thumbnail.webp"
 ---
 
 ![AboutExport - Warum ich es baue](/blog/warum-ich-aboutexport-baue/thumbnail.webp)

@@ -4,6 +4,7 @@ date: 2026-03-29
 excerpt: "Wie man im Mittelstand zur Wissensbasis kommt, die besser in Copilot findbar ist als Microsofts eigene Tools."
 tags: ["m365", "copilot", "mcp", "knowledge-base", "self-hosted", "outline"]
 readingTime: "11 min"
+coverImage: "/blog/full-microsoft-stack/hero.webp"
 ---
 
 Microsoft 365. SAP. Azure. Copilot als AI-Backbone im Alltag. Ein Mittelständler, der seit Jahren konsequent im Microsoft-Ökosystem investiert. Wenn in einem solchen Setup die Frage aufkommt, wo künftig strukturiert dokumentiert werden soll, lautet die erwartbare Antwort: irgendwas aus dem Microsoft-Universum.

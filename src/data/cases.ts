@@ -170,6 +170,7 @@ export const cases: CaseStudy[] = [
     period: "2025 - laufend",
     kind: "Build",
     title: "braum.x - Personal Identity Hub",
+    blogSlug: "2026-05-10-vier-websites-mit-claude-code",
     anchor: "Eigenes Vorhaben · Astro 5 · braum.me / stefanbraum.de / braum.org / braum.dev",
     context:
       "Eigene Web-Properties mit klaren Rollen statt einer monolithischen Personal-Site. braum.me als Concierge-Visitenkarte (3-Sekunden-Hook), stefanbraum.de als Editorial-Hub, braum.org als Venture-Übersicht, braum.dev als Engineering-Sandbox. Alles aus einer Brand- und Tech-Linie.",

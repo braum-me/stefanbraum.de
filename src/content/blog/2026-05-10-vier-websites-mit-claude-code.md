@@ -4,7 +4,10 @@ date: 2026-05-10
 excerpt: "Vier Websites in zwei bis drei Wochen auf modernem Stack, mit hohem Claude-Code-Anteil. Was das über die nächsten fünf Jahre sagt, wenn dieselben Tools demnächst jeder im Mittelstand nutzt."
 tags: ["claude-code", "ai", "build", "stack", "websites"]
 readingTime: "7 min"
+coverImage: "/blog/vier-websites-mit-claude-code/thumbnail.webp"
 ---
+
+![Vier Websites mit Claude Code](/blog/vier-websites-mit-claude-code/thumbnail.webp)
 
 In den letzten Wochen sind vier neue Websites online gegangen: stefanbraum.de, braum.me, braum.org und braum.dev. Selber Stack, eigene Funktion pro Website. Astro 5 als Backbone, React für interaktive Komponenten, Tailwind 4 für das Styling, GSAP für die Bewegung, Coolify für den Deploy. Pro Website ein eigenes Repo, eigenes Layout, eigene Tonality.
 

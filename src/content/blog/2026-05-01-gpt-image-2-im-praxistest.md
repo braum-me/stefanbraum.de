@@ -4,6 +4,7 @@ date: 2026-05-01
 excerpt: "Praxistest des neuen OpenAI-Bildmodells gegen den aktuellen M365-Copilot-Default. Vier reale Mittelstands-Aufgaben, ein klares Ergebnis und eine unangenehme Schwachstelle."
 tags: ["ai", "image-generation", "m365", "copilot", "praxistest"]
 readingTime: "7 min"
+coverImage: "/blog/gpt-image-2-im-praxistest/gpt2main.webp"
 ---
 
 ![GPT Image 2 im Praxistest - Cover](/blog/gpt-image-2-im-praxistest/gpt2main.webp)

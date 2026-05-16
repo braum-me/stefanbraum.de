@@ -10,7 +10,7 @@ type Post = CollectionEntry<"blog">;
 export async function GET(context: APIContext) {
   const all = (await getCollection("blog")) as Post[];
   const posts = all
-    .filter((p) => !p.data.draft)
+    .filter((p) => !p.data.draft && p.data.date.valueOf() <= Date.now())
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
   const siteUrl =

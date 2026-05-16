@@ -16,10 +16,12 @@ type Post = CollectionEntry<"blog">;
 
 export async function getStaticPaths() {
   const posts = (await getCollection("blog")) as Post[];
-  return posts.map((post: Post) => ({
-    params: { slug: post.id },
-    props: { post },
-  }));
+  return posts
+    .filter((p: Post) => !p.data.draft && p.data.date.valueOf() <= Date.now())
+    .map((post: Post) => ({
+      params: { slug: post.id },
+      props: { post },
+    }));
 }
 
 const { post } = Astro.props as { post: Post };
@@ -43,7 +45,7 @@ const dateShortFmt = new Intl.DateTimeFormat("de-DE", {
 // Related Posts: max 3 mit gemeinsamen Tags, Fallback latest 3
 const allPosts = (await getCollection("blog")) as Post[];
 const otherPosts = allPosts
-  .filter((p) => !p.data.draft && p.id !== post.id)
+  .filter((p) => !p.data.draft && p.data.date.valueOf() <= Date.now() && p.id !== post.id)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const currentTags = new Set(post.data.tags);
@@ -92,6 +94,7 @@ const blogPostingJsonLd = {
 <BaseLayout
   title={`${post.data.title} · Stefan Braum`}
   description={post.data.excerpt}
+  ogImage={post.data.coverImage}
   locale="de"
 >
   <Nav locale="de" />

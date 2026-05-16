@@ -10,18 +10,20 @@ interface Props {
   description?: string;
   noindex?: boolean;
   ogFocus?: "consulting";
+  ogImage?: string;
   locale?: Locale;
 }
 
 const {
   locale = "de",
   ogFocus,
+  ogImage,
 } = Astro.props;
 const t = getT(locale);
 
 const title = Astro.props.title ?? t.meta.title;
 const description = Astro.props.description ?? t.meta.description;
-const noindex = Astro.props.noindex ?? true;
+const noindex = Astro.props.noindex ?? false;
 
 const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
@@ -34,7 +36,10 @@ const ogParams = new URLSearchParams({
   subtitle: ogSubtitle,
 });
 if (ogFocus) ogParams.set("focus", ogFocus);
-const ogImageUrl = new URL(`/api/og.png?${ogParams.toString()}`, siteUrl).toString();
+const ogImageUrl = ogImage
+  ? new URL(ogImage, siteUrl).toString()
+  : new URL(`/api/og.png?${ogParams.toString()}`, siteUrl).toString();
+const ogImageIsCustom = Boolean(ogImage);
 
 // hreflang alternates pointing to the equivalent path in each locale
 const hreflangAlternates = (
@@ -48,8 +53,11 @@ const hreflangAlternates = (
   href: new URL(localizePath(Astro.url.pathname, entry.locale), siteUrl).toString(),
 }));
 
-const umamiScript = env("UMAMI_SCRIPT_URL");
+const umamiScriptRaw = env("UMAMI_SCRIPT_URL");
 const umamiWebsiteId = env("UMAMI_WEBSITE_ID");
+const umamiScript = umamiScriptRaw
+  ? (umamiScriptRaw.endsWith(".js") ? umamiScriptRaw : `${umamiScriptRaw.replace(/\/$/, "")}/script.js`)
+  : undefined;
 const umamiEnabled = Boolean(umamiScript && umamiWebsiteId);
 
 const personJsonLd = {
@@ -118,8 +126,8 @@ const personJsonLd = {
     <meta property="og:locale" content={t.ogLocale} />
     <meta property="og:locale:alternate" content={locale === "en" ? "de_DE" : "en_US"} />
     <meta property="og:image" content={ogImageUrl} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    {!ogImageIsCustom && <meta property="og:image:width" content="1200" />}
+    {!ogImageIsCustom && <meta property="og:image:height" content="630" />}
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
@@ -147,7 +155,6 @@ const personJsonLd = {
           defer
           src={umamiScript}
           data-website-id={umamiWebsiteId}
-          data-do-not-track="true"
         />
       )
     }

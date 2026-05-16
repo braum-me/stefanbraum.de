@@ -12,7 +12,7 @@ const prefix = getLocalePrefix(locale);
 type Post = CollectionEntry<"blog">;
 const allPosts = (await getCollection("blog")) as Post[];
 const posts: Post[] = allPosts
-  .filter((p: Post) => !p.data.draft)
+  .filter((p: Post) => !p.data.draft && p.data.date.valueOf() <= Date.now())
   .sort((a: Post, b: Post) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 4);
 

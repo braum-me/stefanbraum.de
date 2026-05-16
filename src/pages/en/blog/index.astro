@@ -14,7 +14,7 @@ const t = getT(locale);
 type Post = CollectionEntry<"blog">;
 const allPosts = (await getCollection("blog")) as Post[];
 const posts: Post[] = allPosts
-  .filter((p: Post) => !p.data.draft)
+  .filter((p: Post) => !p.data.draft && p.data.date.valueOf() <= Date.now())
   .sort((a: Post, b: Post) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const dateFmt = new Intl.DateTimeFormat(t.intlLocale, {
@@ -50,7 +50,7 @@ const blogJsonLd = {
     dateModified: p.data.date.toISOString(),
     url: new URL(`/blog/${p.id}/`, siteUrl).toString(),
     keywords: p.data.tags.join(", "),
-    inLanguage: "de-DE",
+    inLanguage: "de-DE", // posts sind auf Deutsch, auch auf der EN-Seite
     author: {
       "@type": "Person",
       name: "Stefan Braum",
@@ -110,7 +110,7 @@ const blogJsonLd = {
               class="blog-item"
               data-tags={post.data.tags.join(",")}
             >
-              <a href={`/blog/${post.id}/`} class="blog-link interactive" lang="de" hreflang="de">
+              <a href={`/blog/${post.id}/`} class="blog-link interactive" lang="de">
                 <div class="blog-meta">
                   <time datetime={post.data.date.toISOString()}>
                     {dateFmt.format(post.data.date)}
