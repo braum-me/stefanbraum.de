@@ -2,6 +2,10 @@
 
 Personal site source. Astro 5 SSR with the Node adapter, TypeScript strict, Tailwind 4. Forest-green dark theme, two locales (`de` default, `en` under `/en/`), self-hosted blog, dynamic OG-image generation.
 
+**Live:** [stefanbraum.de](https://stefanbraum.de)
+
+![Preview](.github/preview.jpg)
+
 ## Stack
 
 - [Astro 5](https://astro.build) with `@astrojs/node` (standalone mode)
