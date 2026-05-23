@@ -45,19 +45,25 @@ const t = getT(locale);
       <!-- Right: portrait -->
       <div class="order-1 lg:order-2 w-full" data-anim="portrait">
         <figure class="hero-portrait">
-          <div class="hero-portrait-frame">
+          <div class="hero-portrait-frame" id="portrait-frame">
             <img
-              src="/portrait.webp"
+              src="/portrait-normal.webp"
               alt={t.hero.portraitAlt}
-              width="750"
-              height="1000"
+              width="1050"
+              height="1500"
               loading="eager"
               fetchpriority="high"
-              class="hero-portrait-img"
+              class="hero-portrait-img hero-portrait-img-clean"
             />
-            <div class="hero-portrait-fade" aria-hidden="true"></div>
-            <div class="hero-portrait-grain" aria-hidden="true"></div>
-            <span class="hero-portrait-accent" aria-hidden="true"></span>
+            <img
+              src="/portrait-green.webp"
+              alt=""
+              width="1050"
+              height="1500"
+              loading="eager"
+              class="hero-portrait-img hero-portrait-img-glow"
+              aria-hidden="true"
+            />
           </div>
           <figcaption class="hero-portrait-caption">
             <span class="hero-portrait-caption-name">{t.hero.portraitName}</span>
@@ -78,6 +84,61 @@ const t = getT(locale);
       if (sub) {
         const text = sub.dataset.subConsulting;
         if (text) sub.textContent = text;
+      }
+    }
+
+    // Spotlight reveal: glow follows cursor over portrait frame
+    const motionOk = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+    const frame = document.getElementById("portrait-frame");
+    if (frame && motionOk) {
+      const glow = frame.querySelector(".hero-portrait-img-glow") as HTMLElement | null;
+      if (glow) {
+        const OFF = -400;
+        let targetX = OFF;
+        let targetY = OFF;
+        let currentX = OFF;
+        let currentY = OFF;
+        let raf = 0;
+
+        const apply = () => {
+          glow.style.setProperty("--mx", `${currentX}px`);
+          glow.style.setProperty("--my", `${currentY}px`);
+        };
+
+        const tick = () => {
+          raf = 0;
+          currentX += (targetX - currentX) * 0.18;
+          currentY += (targetY - currentY) * 0.18;
+          apply();
+          if (Math.abs(targetX - currentX) > 0.6 || Math.abs(targetY - currentY) > 0.6) {
+            raf = requestAnimationFrame(tick);
+          }
+        };
+
+        const schedule = () => {
+          if (!raf) raf = requestAnimationFrame(tick);
+        };
+
+        frame.addEventListener("pointermove", (e) => {
+          const rect = frame.getBoundingClientRect();
+          targetX = e.clientX - rect.left;
+          targetY = e.clientY - rect.top;
+          schedule();
+        });
+        frame.addEventListener("pointerenter", (e) => {
+          const rect = frame.getBoundingClientRect();
+          // teleport in close to entry point so first frame doesn't jump
+          currentX = e.clientX - rect.left;
+          currentY = e.clientY - rect.top;
+          targetX = currentX;
+          targetY = currentY;
+          apply();
+        });
+        frame.addEventListener("pointerleave", () => {
+          targetX = OFF;
+          targetY = OFF;
+          schedule();
+        });
       }
     }
   </script>
@@ -105,59 +166,47 @@ const t = getT(locale);
       width: 100%;
       border-radius: 4px;
       overflow: hidden;
-      background: linear-gradient(160deg, #0d3d2e 0%, #051e16 65%, #020806 100%);
-      box-shadow:
-        0 30px 70px -25px rgba(0, 0, 0, 0.7),
-        0 0 60px -20px rgba(0, 200, 150, 0.18),
-        inset 0 0 0 1px rgba(242, 239, 228, 0.08);
+      background: transparent;
       isolation: isolate;
     }
 
-    /* Subtle Mint-Akzent: dünne Linie unten, fade-out zur Seite */
-    .hero-portrait-accent {
-      position: absolute;
-      left: 16%;
-      right: 16%;
-      bottom: 0;
-      height: 1px;
-      pointer-events: none;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(0, 200, 150, 0.7) 50%,
-        transparent 100%
-      );
-      box-shadow: 0 0 14px rgba(0, 200, 150, 0.35);
-      z-index: 2;
-    }
-
     .hero-portrait-img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
       object-position: 50% 18%;
-      filter: contrast(1.06) brightness(0.94) saturate(0.92);
       display: block;
     }
-
-    .hero-portrait-fade {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 90% 60% at 50% 110%, rgba(5, 30, 22, 0.85), transparent 65%),
-        linear-gradient(180deg, transparent 55%, rgba(5, 30, 22, 0.55) 100%);
+    .hero-portrait-img-clean {
+      z-index: 1;
     }
-
-    .hero-portrait-grain {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.18;
-      mix-blend-mode: overlay;
-      background-image:
-        radial-gradient(rgba(255, 255, 255, 0.5) 0.5px, transparent 0.6px);
-      background-size: 3px 3px;
+    .hero-portrait-img-glow {
+      z-index: 2;
+      --mx: -400px;
+      --my: -400px;
+      -webkit-mask-image: radial-gradient(
+        circle 220px at var(--mx) var(--my),
+        #000 0%,
+        #000 35%,
+        transparent 85%
+      );
+      mask-image: radial-gradient(
+        circle 220px at var(--mx) var(--my),
+        #000 0%,
+        #000 35%,
+        transparent 85%
+      );
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-portrait-img-glow {
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+      .hero-portrait-img-clean {
+        display: none;
+      }
     }
 
 
