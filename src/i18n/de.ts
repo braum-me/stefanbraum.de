@@ -208,10 +208,9 @@ export const de: Translations = {
   },
   meta: {
     siteName: "stefanbraum.de",
-    title:
-      "Stefan Braum - Teamleiter IT Apps & stellv. Global Head of IT/SAP",
+    title: "Stefan Braum - Operator, Builder, Schreiber",
     description:
-      "Teamleiter IT Applications und stellv. Global Head of IT/SAP bei einem Automotive-Tier-2 mit 2.800 Mitarbeitern. Schwerpunkte: AI-Praxis, Enterprise-Architektur und IT-Strategie.",
+      "Personal Hub von Stefan Braum: IT-Leitung im Mittelstand, AI-Adoption, Side-Projects, Schreiben. Blog über Stack, Architektur und Praxistests.",
     consultingDescription:
       "Beratung im Mittelstand zu AI, Enterprise-Architektur und IT-Strategie. Erstgespräch über braum.consulting.",
     skipLink: "Zum Hauptinhalt springen",

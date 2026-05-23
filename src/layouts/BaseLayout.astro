@@ -60,11 +60,17 @@ const umamiScript = umamiScriptRaw
   : undefined;
 const umamiEnabled = Boolean(umamiScript && umamiWebsiteId);
 
+const portraitUrl = new URL("/portrait.webp", siteUrl).toString();
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": `${siteUrl.replace(/\/$/, "")}/#stefan-braum`,
   name: "Stefan Braum",
+  givenName: "Stefan",
+  familyName: "Braum",
   url: siteUrl,
+  mainEntityOfPage: canonicalUrl,
+  image: portraitUrl,
   description,
   inLanguage: locale === "en" ? "en-US" : "de-DE",
   jobTitle: locale === "en"
@@ -77,8 +83,12 @@ const personJsonLd = {
   sameAs: [
     "https://braum.me",
     "https://braum.consulting",
+    "https://braum.org",
+    "https://braum.dev",
     "https://aboutexport.com",
     "https://linkedin.com/in/stefanbraum",
+    "https://github.com/braum-me",
+    "https://stefanbraum.substack.com",
   ],
   address: {
     "@type": "PostalAddress",

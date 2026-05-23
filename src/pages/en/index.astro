@@ -22,7 +22,7 @@ const validFocus = focus === "consulting" ? focus : undefined;
 const pageDescription = validFocus === "consulting" ? t.meta.consultingDescription : t.meta.description;
 ---
 
-<BaseLayout title={t.meta.title} description={pageDescription} ogFocus={validFocus} locale={locale}>
+<BaseLayout title={t.meta.title} description={pageDescription} ogFocus={validFocus} ogImage="/og-home.jpg" locale={locale}>
   <Nav locale={locale} />
   <main id="top">
     <Hero locale={locale} />

@@ -22,10 +22,9 @@ export const en: Translations = {
   },
   meta: {
     siteName: "stefanbraum.de",
-    title:
-      "Stefan Braum - Team Lead IT Apps & Deputy Global Head of IT/SAP",
+    title: "Stefan Braum - Operator, Builder, Writer",
     description:
-      "Team Lead IT Applications and deputy Global Head of IT/SAP at an automotive Tier-2 with 2,800 employees. Focus areas: applied AI, enterprise architecture, IT strategy.",
+      "Personal hub of Stefan Braum: IT leadership in the German Mittelstand, applied AI, side projects, writing. Blog on stack, architecture, and field tests.",
     consultingDescription:
       "Mid-market consulting on AI, enterprise architecture, and IT strategy. Initial conversation via braum.consulting.",
     skipLink: "Skip to main content",
