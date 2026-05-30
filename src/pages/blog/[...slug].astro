@@ -16,8 +16,10 @@ type Post = CollectionEntry<"blog">;
 
 export async function getStaticPaths() {
   const posts = (await getCollection("blog")) as Post[];
+  // Auch zukuenftig datierte Posts werden gebaut: per Direktlink vorab erreichbar.
+  // Die Sichtbarkeit in Listen/RSS regelt der Datum-Filter dort (SSR).
   return posts
-    .filter((p: Post) => !p.data.draft && p.data.date.valueOf() <= Date.now())
+    .filter((p: Post) => !p.data.draft)
     .map((post: Post) => ({
       params: { slug: post.id },
       props: { post },

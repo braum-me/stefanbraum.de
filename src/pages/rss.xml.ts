@@ -3,7 +3,8 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import type { APIContext } from "astro";
 import { env } from "~/lib/env.ts";
 
-export const prerender = true;
+// SSR: Datum-Filter pro Request, vordatierte Posts erscheinen automatisch ab Datum.
+export const prerender = false;
 
 type Post = CollectionEntry<"blog">;
 

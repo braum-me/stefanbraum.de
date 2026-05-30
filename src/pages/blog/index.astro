@@ -1,5 +1,7 @@
 ---
-export const prerender = true;
+// SSR: Datum-Filter wird pro Request ausgewertet, vordatierte Posts erscheinen
+// automatisch ab ihrem Datum - ohne Rebuild.
+export const prerender = false;
 
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import Nav from "~/components/Nav.astro";
