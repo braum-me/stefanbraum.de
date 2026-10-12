@@ -12,7 +12,9 @@
     "astro": "astro",
     "check": "astro check && tsc --noEmit",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "test:smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.5",
