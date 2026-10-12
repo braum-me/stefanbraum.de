@@ -1,4 +1,6 @@
+import type { CaseDomainTag } from "../data/cases.ts";
 import type { HomeSectionId } from "../data/sections.ts";
+import type { CaseStatus } from "../lib/caseStatus.ts";
 
 /**
  * German translations. This is the source-of-truth for the locale shape.
@@ -79,10 +81,14 @@ export interface Translations {
     filterAria: string;
     filterAll: string;
     empty: string;
-    statusOngoing: string;
-    statusConcept: string;
+    /** Sichtbare Status-Labels (Pill). */
+    status: Record<CaseStatus, string>;
+    /** Bedeutung des Status (Tooltip / Screenreader). */
+    statusHint: Record<CaseStatus, string>;
+    domainTags: Record<CaseDomainTag, string>;
     featured: string;
     periodOngoing: string;
+    periodSince: string;
     domain: string;
     intervention: string;
     signals: string;
@@ -303,10 +309,33 @@ export const de: Translations = {
     filterAria: "Portfolio-Filter",
     filterAll: "Alle",
     empty: "Projekte in dieser Säule folgen.",
-    statusOngoing: "Ongoing",
-    statusConcept: "Zielbild",
+    status: {
+      ongoing: "Laufend",
+      "in-operation": "Im Betrieb",
+      pilot: "Pilot",
+      preparation: "Vorbereitung",
+      concept: "Zielbild",
+      completed: "Abgeschlossen",
+      "handed-over": "Abgeschlossen & übergeben",
+      "pre-evaluation-completed": "Vorevaluierung abgeschlossen",
+    },
+    statusHint: {
+      ongoing: "Projekt in aktiver Umsetzung",
+      "in-operation": "Eingeführt und im laufenden Betrieb, wird weiterentwickelt",
+      pilot: "Pilotphase mit begrenztem Nutzerkreis, Rollout schrittweise",
+      preparation: "In Vorbereitung, noch keine Umsetzung abgeschlossen",
+      concept: "Zielbild bzw. Konzept, noch nicht umgesetzt",
+      completed: "Projekt abgeschlossen",
+      "handed-over": "Konzipiert, abgeschlossen und an das verantwortliche Team übergeben",
+      "pre-evaluation-completed":
+        "Vorevaluierung abgeschlossen, Entscheidung liegt beim Management",
+    },
+    domainTags: {
+      "modern-workplace": "Modern Workplace",
+    },
     featured: "Ausgewählt",
     periodOngoing: "laufend",
+    periodSince: "seit",
     domain: "Domäne",
     intervention: "Intervention",
     signals: "Signale",

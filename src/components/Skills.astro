@@ -1,8 +1,9 @@
 ---
-import { cases } from "~/data/cases.ts";
+import { cases, formatCasePeriod, localizeCase, portfolioOrder } from "~/data/cases.ts";
 import { certifications } from "~/data/certifications.ts";
 import { type SkillDomain, skillDomains, skills } from "~/data/skills.ts";
 import { getT, type Locale } from "~/i18n";
+import { langAttr } from "~/i18n/localized.ts";
 
 interface Props {
   locale?: Locale;
@@ -23,11 +24,22 @@ const groupedSkills = (Object.keys(skillDomains) as SkillDomain[]).map((d) => ({
 const MAX_PROJECTS = 6;
 const MAX_CERTS = 1;
 
+// Gleiche Reihenfolge wie im Portfolio; Titel/Zeitraum lokalisiert.
+const ordered = portfolioOrder(cases);
+const periodLabels = { ongoing: t.cases.periodOngoing, since: t.cases.periodSince };
+
 const skillDetails = skills.map((s) => {
-  const allProjects = s.projects
-    .map((pid) => cases.find((c) => c.id === pid))
-    .filter((c): c is NonNullable<typeof c> => c !== undefined)
-    .sort((a, b) => cases.indexOf(a) - cases.indexOf(b));
+  const allProjects = ordered
+    .filter((c) => s.projects.includes(c.id))
+    .map((c) => {
+      const title = localizeCase(c, locale).title;
+      return {
+        id: c.id,
+        title: title.value,
+        titleLang: langAttr(title, locale),
+        period: formatCasePeriod(c.period, periodLabels),
+      };
+    });
   const allCerts = s.certificates
     .map((cid) => certifications.find((c) => c.id === cid))
     .filter((c): c is NonNullable<typeof c> => c !== undefined);
@@ -154,7 +166,7 @@ const skillDetails = skills.map((s) => {
                       >
                         <span class="proof-badge proof-badge-proj">{t.skills.proofProj}</span>
                         <span class="proof-text">
-                          <span class="proof-title">{p.title}</span>
+                          <span class="proof-title" lang={p.titleLang}>{p.title}</span>
                           <span class="proof-sub">{p.period}</span>
                         </span>
                       </button>

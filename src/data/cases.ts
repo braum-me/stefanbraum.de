@@ -1,10 +1,17 @@
 import type { ContentLocale, Resolved } from "../i18n/localized.ts";
 import { resolveLocalized } from "../i18n/localized.ts";
 import type { CaseStatus } from "../lib/caseStatus.ts";
+import { isActiveStatus, parsePeriod, resolveCaseStatus } from "../lib/caseStatus.ts";
 import type { CaseCategoryId } from "./caseCategories.ts";
 
-export type { CaseStatus } from "../lib/caseStatus.ts";
+export type { CaseStatus, CaseStatusPill } from "../lib/caseStatus.ts";
 export { caseStatusPill, resolveCaseStatus } from "../lib/caseStatus.ts";
+
+/** Herkunft: Projekt beim Arbeitgeber oder eigenes Vorhaben. */
+export type CaseOrigin = "employer" | "own";
+
+/** Sichtbare Fachdomänen ohne eigene Filter-Kachel (Labels in i18n `cases.domainTags`). */
+export type CaseDomainTag = "modern-workplace";
 
 export interface CaseMetric {
   value: string;
@@ -22,14 +29,23 @@ export interface CaseTextFields {
 }
 
 export interface CaseStudy extends CaseTextFields {
+  /** Stabile ID, öffentlich sichtbar als Anker `#case-<id>`. Keine Produkt-/Kundennamen. */
   id: string;
+  origin: CaseOrigin;
+  /** Hauptkategorie (Filter, Pill). */
   category: CaseCategoryId;
+  /** Weitere Kategorien: ebenfalls als Pill sichtbar und über ihren Filter auffindbar. */
+  secondaryCategories?: CaseCategoryId[];
+  /** Zusätzliche sichtbare Fachdomänen ohne eigenen Filter. */
+  domainTags?: CaseDomainTag[];
+  /** Sichtbares Zeitraum-Label, z.B. "2025 - 2027", "2026 - laufend", "seit 2024". */
   period: string;
   tags: string[];
   /** Optional: englische Fassung. Einzelne Felder dürfen fehlen; sie fallen
       dann auf Deutsch zurück und werden mit lang="de" gekennzeichnet. */
   en?: Partial<CaseTextFields>;
-  /** Optionaler Override. Sonst aus `period` abgeleitet, siehe lib/caseStatus.ts. */
+  /** Redaktionell gesetzter fachlicher Status. Hat Vorrang vor der Ableitung aus
+      `period` (siehe lib/caseStatus.ts). Nur setzen, wenn ausdrücklich entschieden. */
   status?: CaseStatus;
   /** Hard-Override: keinen Status-Pill anzeigen, auch wenn auto-detect 'ongoing' sagt.
       Nutzbar für laufende Mandate, die nicht als 'Projekt mit Ongoing-Status' wirken sollen
@@ -43,6 +59,58 @@ export interface CaseStudy extends CaseTextFields {
   /** Sortierung innerhalb der Featured-Gruppe: kleiner = weiter vorne.
       Ohne Wert gilt die Reihenfolge im Array. */
   priority?: number;
+}
+
+/** Alle Kategorien eines Cases, Hauptkategorie zuerst. */
+export function caseCategories(c: Pick<CaseStudy, "category" | "secondaryCategories">) {
+  return [c.category, ...(c.secondaryCategories ?? []).filter((x) => x !== c.category)];
+}
+
+export function caseMatchesCategory(
+  c: Pick<CaseStudy, "category" | "secondaryCategories">,
+  category: CaseCategoryId | null,
+): boolean {
+  return category === null || caseCategories(c).includes(category);
+}
+
+/**
+ * Sichtbares Zeitraum-Label je Sprache. Feste Zeiträume bleiben wörtlich,
+ * "laufend" und "seit" werden übersetzt ("2026 - ongoing", "since 2024").
+ */
+export function formatCasePeriod(period: string, labels: { ongoing: string; since: string }) {
+  const parsed = parsePeriod(period);
+  if (!parsed || parsed.endYear !== null) return period;
+  if (/^\s*(seit|since)\b/i.test(period)) return `${labels.since} ${parsed.startYear}`;
+  return `${parsed.startYear} - ${labels.ongoing}`;
+}
+
+/** Startjahr aus dem Zeitraum-Label (für Sortierung). */
+export function caseStartYear(c: Pick<CaseStudy, "period">): number {
+  const parsed = parsePeriod(c.period);
+  if (!parsed) throw new Error(`Unparseable case period: "${c.period}"`);
+  return parsed.startYear;
+}
+
+/**
+ * Chronologische Portfolio-Reihenfolge:
+ *   1. Startjahr absteigend
+ *   2. innerhalb eines Jahres aktive (laufend, im Betrieb, Pilot, Vorbereitung)
+ *      vor abgeschlossenen
+ *   3. sonst stabile Reihenfolge des Quell-Arrays
+ */
+export function sortCasesChronologically<T extends CaseStudy>(
+  list: readonly T[],
+  now: Date = new Date(),
+): T[] {
+  return list
+    .map((c, index) => ({
+      c,
+      index,
+      year: caseStartYear(c),
+      active: isActiveStatus(resolveCaseStatus(c, now)) ? 0 : 1,
+    }))
+    .sort((a, b) => b.year - a.year || a.active - b.active || a.index - b.index)
+    .map(({ c }) => c);
 }
 
 /**
@@ -69,6 +137,40 @@ export function orderCasesForDisplay<T extends Pick<CaseStudy, "featured" | "pri
     .map(({ c }) => c);
 }
 
+/** Vollständige Portfolio-Reihenfolge für die Anzeige (chronologisch, dann Featured nach vorn). */
+export function portfolioOrder(list: readonly CaseStudy[] = cases, now: Date = new Date()) {
+  return orderCasesForDisplay(sortCasesChronologically(list, now));
+}
+
+/**
+ * Alte Case-IDs (zusammengeführt oder umbenannt) -> kanonische ID.
+ * Wird im Client für `#case-<alte-id>`-Deep-Links ausgewertet und ist damit
+ * öffentlich: keine Produkt-, Anbieter- oder Kundennamen als Schlüssel.
+ * Für solche IDs `LEGACY_CASE_ID_PREFIXES` verwenden.
+ */
+export const LEGACY_CASE_IDS: Readonly<Record<string, string>> = {
+  "odw-central-eigenentwicklung": "power-platform-coe",
+  "copilot-agents-rollout": "copilot-adoption-program",
+  "kpi-restructuring-data-automation": "global-bi-platform",
+  "team-data-analytics": "global-bi-platform",
+};
+
+/** Präfix-Aliase für alte IDs, deren voller Name nicht veröffentlicht werden soll. */
+export const LEGACY_CASE_ID_PREFIXES: ReadonlyArray<{ prefix: string; id: string }> = [
+  { prefix: "managed-soc-", id: "managed-soc-endpoint-security" },
+  { prefix: "hr-", id: "hr-transformation-evaluation" },
+];
+
+/** Aktuelle ID zu einer (ggf. alten) Case-ID oder `null`, wenn es keinen Case gibt. */
+export function resolveCaseId(id: string, list: readonly CaseStudy[] = cases): string | null {
+  if (list.some((c) => c.id === id)) return id;
+  const exact = LEGACY_CASE_IDS[id];
+  if (exact && list.some((c) => c.id === exact)) return exact;
+  const byPrefix = LEGACY_CASE_ID_PREFIXES.find((a) => id.startsWith(a.prefix));
+  if (byPrefix && list.some((c) => c.id === byPrefix.id)) return byPrefix.id;
+  return null;
+}
+
 export type LocalizedCase = Omit<CaseStudy, keyof CaseTextFields | "en"> & {
   [K in keyof CaseTextFields]: Resolved<CaseTextFields[K]>;
 };
@@ -89,51 +191,124 @@ export function localizeCase(c: CaseStudy, locale: ContentLocale): LocalizedCase
   };
 }
 
-// Reihenfolge: chronologisch absteigend nach Startjahr, dann Endjahr.
-// 'laufend' zaehlt als Endjahr 9999.
+// Portfolio-Stand 12.10.2026 (Phase 2): 27 Arbeitgeber-Projekte + 2 eigene Vorhaben.
+// Reihenfolge im Array = Anzeige-Reihenfolge (Startjahr absteigend, aktive vor
+// abgeschlossenen). `sortCasesChronologically` erzwingt das zur Laufzeit, ein Test
+// prüft, dass Quelle und Sortierung übereinstimmen.
+// Vertraulichkeit: keine Personen-, Kunden-, Akquisitions- oder Security-Anbieternamen,
+// keine technischen Interna, keine Budget-/Vertragszahlen (Ausnahme laut Freigabe: SoSafe).
 export const cases: CaseStudy[] = [
   // ─── 2026 ───────────────────────────────────────────────
   {
     id: "outline-knowledge-base",
+    origin: "employer",
     category: "engineering",
     period: "2026 - laufend",
+    status: "ongoing",
     kind: "Build",
     title: "Enterprise-Wissensbasis mit Outline (self-hosted)",
-    anchor: "Tier-2 Automotive · Self-Hosted · MCP + Graph Connector",
+    anchor: "Tier-2 Automotive · IT-Dokumentation · Self-Hosted · 6 Standorte",
     context:
-      "Microsoft-Stack-Mittelständler mit M365, SAP, Azure und Copilot als AI-Backbone, aber ohne strukturierte Wissensbasis. Copilot ohne fütterbare Quellen liefert allgemeine Floskeln und veraltete SharePoint-Fundstücke. OneNote, Confluence, Loop und Notion alle nicht passend - jeweils aus unterschiedlichen Gründen (Struktur, Alter, Lose Granularität, AI-Silo-Konflikt).",
+      "Microsoft-Stack-Mittelständler mit M365, SAP, Azure und Copilot als AI-Backbone, aber ohne strukturierte IT-Dokumentation. Copilot ohne fütterbare Quellen liefert allgemeine Floskeln und veraltete SharePoint-Fundstücke. OneNote, Confluence, Loop und Notion alle nicht passend - jeweils aus unterschiedlichen Gründen (Struktur, Alter, Lose Granularität, AI-Silo-Konflikt).",
     intervention:
-      "Outline (BSL 1.1) als Wiki-Foundation, self-hosted im eigenen Rechenzentrum als Docker-Container. Drei Integrationsebenen selbst gebaut: Microsoft Graph Connector speist Outline-Inhalte in den M365-Search-Index, damit Copilot sie wie SharePoint-Dokumente findet. MCP-Server vor der Outline-API erlaubt Copilot-Agenten gezielte Queries (Lesen, Suchen, Schreiben). Spezialisierter Copilot-Agent in Copilot Studio für Onboarding, Schnellsuche und Übersichten. Compliance-Profil ISO 27001 / TISAX / NIS2 durch Datenresidenz, Versionshistorie, Audit-Logs und granulare Berechtigungen.",
+      "Outline (BSL 1.1) als Wiki-Foundation für die IT-Dokumentation, self-hosted im eigenen Rechenzentrum als Docker-Container, Anmeldung über Entra-SSO. Im Einsatz für alle IT-Teams an 6 Standorten, gegliedert in 9 thematische Collections. KI-Dokumentations-Agent in Copilot Studio für Onboarding, Schnellsuche und Übersichten; die Anbindung über einen MCP-Server ist geplant. Compliance-Profil ISO 27001 / TISAX / NIS2 durch Datenresidenz, Versionshistorie, Audit-Logs und granulare Berechtigungen. Abgrenzung: Outline ist die IT-Dokumentation, das unternehmensweite Wissen liegt im Intranet.",
     metrics: [
       { value: "Self-Host", label: "Eigenes Rechenzentrum" },
-      { value: "3 Ebenen", label: "Graph + MCP + Agent" },
-      { value: "ISO/TISAX/NIS2", label: "Audit-tauglich" },
+      { value: "6 Standorte", label: "Alle IT-Teams" },
+      { value: "9 Collections", label: "Thematisch strukturiert" },
     ],
-    tags: ["Wissensbasis", "Outline", "Self-Host", "MCP", "Copilot", "Graph Connector"],
+    tags: ["IT-Dokumentation", "Outline", "Self-Host", "Copilot Studio", "Entra SSO"],
     blogSlug: "2026-03-29-full-microsoft-stack-open-source-doku",
+    en: {
+      kind: "Build",
+      title: "Enterprise Knowledge Base with Outline (self-hosted)",
+      anchor: "Tier-2 automotive · IT documentation · Self-hosted · 6 sites",
+      context:
+        "Mid-sized company on the Microsoft stack, with M365, SAP, Azure and Copilot as its AI backbone, but without structured IT documentation. Without sources to draw on, Copilot returned generic phrases and outdated SharePoint findings. OneNote, Confluence, Loop and Notion each fell short for different reasons (structure, age, granularity, competing AI silo).",
+      intervention:
+        "Outline (BSL 1.1) as the wiki foundation for IT documentation, self-hosted as a Docker container in the company's own data center, with Entra SSO sign-in. Used by all IT teams across 6 sites and organized into 9 thematic collections. An AI documentation agent in Copilot Studio supports onboarding, quick search and overviews; an MCP server integration is planned. Compliance profile for ISO 27001 / TISAX / NIS2 through data residency, version history, audit logs and granular permissions. Scope: Outline holds IT documentation; company-wide knowledge lives in the intranet.",
+      metrics: [
+        { value: "Self-host", label: "Own data center" },
+        { value: "6 sites", label: "All IT teams" },
+        { value: "9 collections", label: "Organized by topic" },
+      ],
+    },
   },
   {
-    id: "tacto-ai-purchasing",
-    category: "ai",
+    id: "microsoft-places-hybrid-workplace",
+    origin: "employer",
+    category: "enterprise",
+    domainTags: ["modern-workplace"],
     period: "2026 - laufend",
-    kind: "Applied AI",
-    title: "Tacto AI Purchasing - KI-gestützte Einkaufs-Analytik",
-    anchor: "Tier-2 Automotive · Procurement & Data · Tacto-Plattform",
+    status: "pilot",
+    kind: "Adoption",
+    title: "Microsoft Places - Hybrid Workplace & Desk Booking",
+    anchor: "Tier-2 Automotive · Modern Workplace · Pilot mit drei Bereichen",
     context:
-      "Strategischer Einkauf ohne durchgängige Datensicht. Lieferanten-, Material- und Vertragsdaten verteilt auf SAP, Excel und Mailpostfächer. Kein Frühwarnsystem für Risiko-Signale, keine systematische Spend-Analyse, keine KI-Unterstützung im Sourcing-Prozess.",
+      "Hybrides Arbeiten braucht eine verlässliche Sicht darauf, wer wann vor Ort ist und welche Arbeitsplätze und Räume verfügbar sind. Bisher fehlte dafür eine einheitliche, in Microsoft 365 integrierte Lösung.",
     intervention:
-      "Einführung der Tacto-Plattform als KI-gestützte Einkaufs-Schicht über SAP-Stammdaten. Anbindung Bestell- und Lieferantendaten, automatisierte Spend-Klassifizierung, KI-Auswertung von Risiko-Indikatoren (Compliance, Lieferketten, Bonität). Aufbau Self-Service-Analytik für Strategischen Einkauf, Definition Operating-Model gemeinsam mit Procurement-Lead.",
+      "Einführung von Microsoft Places, zunächst als Pilot mit drei Bereichen (IT Applications, SAP, IT-Leitung). Gruppenbasierte Freigabe, Arbeitsplatz- und Raumstruktur über mehrere Gebäude und getrennte Buchungsrechte je Arbeitsplatz. Der weitere Rollout erfolgt schrittweise über Pilotgruppen.",
     metrics: [
-      { value: "SAP-Linked", label: "Stammdaten integriert" },
-      { value: "Risk-Signals", label: "KI-Frühwarn-Layer" },
-      { value: "Self-Service", label: "Procurement-Enablement" },
+      { value: "Pilot", label: "Drei Bereiche" },
+      { value: "Mehrere Gebäude", label: "Arbeitsplatz- und Raumstruktur" },
+      { value: "Schrittweise", label: "Rollout über Pilotgruppen" },
     ],
-    tags: ["AI", "Procurement", "Spend-Analytics", "Tacto", "SAP"],
+    tags: ["Microsoft Places", "Hybrid Work", "Desk Booking", "M365"],
+    en: {
+      kind: "Adoption",
+      title: "Microsoft Places - Hybrid Workplace & Desk Booking",
+      anchor: "Tier-2 automotive · Modern workplace · Pilot with three departments",
+      context:
+        "Hybrid work needs a reliable view of who is on site when, and which desks and rooms are available. A consistent solution integrated into Microsoft 365 was missing.",
+      intervention:
+        "Introduction of Microsoft Places, starting as a pilot with three departments (IT Applications, SAP, IT management). Group-based access, a desk and room structure across several buildings, and separate booking rights per desk. Further rollout proceeds step by step through pilot groups.",
+      metrics: [
+        { value: "Pilot", label: "Three departments" },
+        { value: "Several buildings", label: "Desk and room structure" },
+        { value: "Step by step", label: "Rollout via pilot groups" },
+      ],
+    },
+  },
+  {
+    id: "catena-x-preparation",
+    origin: "employer",
+    category: "transformation",
+    period: "2026 - laufend",
+    status: "preparation",
+    kind: "Datenraum",
+    title: "Catena-X - Vorbereitung Datenraum & Traceability",
+    anchor: "Tier-2 Automotive · Kundenanforderung Automobil-OEM · Vorbereitung",
+    context:
+      "Ein Automobil-OEM fordert von seinen Zulieferern die Anbindung an das Catena-X-Datenökosystem. Damit verbunden sind Anforderungen an die Rückverfolgbarkeit in der Lieferkette bis auf Einzelteilebene.",
+    intervention:
+      "Vorbereitung der Catena-X-Anbindung: Bewertung der Onboarding-Optionen, Aufnahme der Anforderungen an Lieferketten- und Einzelteil-Rückverfolgbarkeit (u. a. über Maschinendaten) und erste Architekturentscheidungen. Das Vorhaben befindet sich in der Vorbereitung und ist nicht abgeschlossen.",
+    metrics: [
+      { value: "Vorbereitung", label: "Kein Abschluss" },
+      { value: "Onboarding", label: "Optionen bewertet" },
+      { value: "Traceability", label: "Anforderungen aufgenommen" },
+    ],
+    tags: ["Catena-X", "Traceability", "Datenraum", "Supply Chain"],
+    en: {
+      kind: "Data Space",
+      title: "Catena-X - Preparing Data Space Connection & Traceability",
+      anchor: "Tier-2 automotive · Requirement from an automotive OEM · Preparation",
+      context:
+        "An automotive OEM requires its suppliers to connect to the Catena-X data ecosystem. This comes with requirements for supply-chain traceability down to individual parts.",
+      intervention:
+        "Preparing the Catena-X connection: assessing onboarding options, capturing requirements for supply-chain and part-level traceability (including via machine data), and making initial architecture decisions. The initiative is in preparation and not completed.",
+      metrics: [
+        { value: "Preparation", label: "Not completed" },
+        { value: "Onboarding", label: "Options assessed" },
+        { value: "Traceability", label: "Requirements captured" },
+      ],
+    },
   },
   {
     id: "aboutexport-saas",
+    origin: "own",
     category: "engineering",
     period: "2026 - laufend",
+    status: "ongoing",
     kind: "SaaS Build",
     title: "AboutExport - SaaS für Exportkontroll-Compliance",
     anchor: "Eigenes Vorhaben · Pre-Launch 2026 · TypeScript + AI",
@@ -150,65 +325,81 @@ export const cases: CaseStudy[] = [
     blogSlug: "2026-04-20-warum-ich-aboutexport-baue",
   },
 
-  // ─── 2025 - laufend ─────────────────────────────────────
+  // ─── 2025 ───────────────────────────────────────────────
   {
-    id: "modern-intranet-ai-knowledge-agent",
-    category: "ai",
-    period: "2025 - laufend",
-    kind: "Applied AI",
-    title: "Modern Intranet Redesign & AI Knowledge Agent",
-    anchor: "Tier-2 Automotive · 2.800 MA · SharePoint-basiert",
+    id: "sap-modernization-azure",
+    origin: "employer",
+    category: "enterprise",
+    period: "2025 - 2027",
+    status: "ongoing",
+    kind: "Architecture",
+    title: "SAP Landscape Modernization in die Private Cloud",
+    anchor: "Tier-2 Automotive · SAP S/4HANA · Azure · Zielarchitektur & Roadmap",
     context:
-      "Klassisches Intranet als Friedhof von Dokumenten. Wissen verteilt zwischen SharePoint, Teams, HR-Tools, Prozess-Handbüchern. Mitarbeiter finden Antworten nicht oder zu langsam. Bedarf an einem modernen Wissens-Layer mit KI-First-Antwortlogik.",
+      "On-Premises SAP-Betrieb mit hohem technischen Schulden-Niveau, Custom-Code-Wildwuchs, kein Clean Core. Vorbereitung auf AI-gestützte SAP-Use-Cases (Joule, SAP OC) nicht möglich. Roadmap-Druck bis 2027.",
     intervention:
-      "Konzeption eines neuen Intranets auf SharePoint-Basis mit AI-Knowledge-Agent als Front-Door. Orchestrator-Agent mit spezialisierten Sub-Agents für HR, IT und Prozess-Anfragen. Anbindung an Quell-Systeme über kontrollierte Wissens-Indexe. Authoring- und Pflege-Modell mit Fachbereichs-Verantwortung. Governance, Audit-Logs, Halluzinations-Reduktion durch RAG-Strategie.",
+      "Erarbeitung von Zielarchitektur und Modernisierungs-Roadmap für eine historisch gewachsene SAP-Landschaft: SAP on Azure, Clean-Core-Ansatz mit Bewertung des Custom Codes, Identity- und SSO-Konzept, Teststrategie sowie Cutover- und Hypercare-Konzept. Meine Rolle umfasst Architektur und Roadmap, nicht die Gesamtumsetzung des Programms.",
     metrics: [
-      { value: "SharePoint", label: "Plattform-Foundation" },
-      { value: "Orchestrator", label: "+ Sub-Agents (HR, IT, Prozesse)" },
-      { value: "RAG", label: "Quellgebunden, audit-fähig" },
+      { value: "2027", label: "Roadmap-Horizont" },
+      { value: "Clean Core", label: "Zielbild definiert" },
+      { value: "Architektur", label: "+ Roadmap, keine Gesamtumsetzung" },
     ],
-    tags: ["AI", "Knowledge", "Multi-Agent", "RAG", "SharePoint"],
+    tags: ["SAP S/4HANA", "Azure", "Clean Core", "Zielarchitektur", "Roadmap"],
+    en: {
+      kind: "Architecture",
+      title: "SAP Landscape Modernization into the Private Cloud",
+      anchor: "Tier-2 automotive · SAP S/4HANA · Azure · Target architecture & roadmap",
+      context:
+        "On-premises SAP operations with significant technical debt, sprawling custom code and no clean core. AI-supported SAP use cases (Joule, SAP OC) were out of reach. Roadmap pressure through 2027.",
+      intervention:
+        "Developing the target architecture and modernization roadmap for an SAP landscape that grew over many years: SAP on Azure, a clean-core approach with custom-code assessment, an identity and SSO concept, a test strategy, and cutover and hypercare concepts. My role covers architecture and roadmap, not the end-to-end delivery of the program.",
+      metrics: [
+        { value: "2027", label: "Roadmap horizon" },
+        { value: "Clean core", label: "Target state defined" },
+        { value: "Architecture", label: "+ roadmap, not full delivery" },
+      ],
+    },
   },
   {
-    id: "odw-central-eigenentwicklung",
-    category: "engineering",
-    period: "2025 - laufend",
-    kind: "Build",
-    title: "Cloud-native Prozessplattform als Power-Platform-Nachfolger",
-    anchor: "Tier-2 Automotive · Eigenentwicklung · Container",
+    id: "plm-web-client-evolution",
+    origin: "employer",
+    category: "enterprise",
+    period: "2025 - 2026",
+    status: "ongoing",
+    kind: "Platform",
+    title: "PLM-Weiterentwicklung & Vorbereitung Web-Client-Wechsel",
+    anchor: "Tier-2 Automotive · PLM · CONTACT CIM Database",
     context:
-      "Power Platform stieß in kritischen Szenarien an Grenzen (Skalierung, Governance, Entwicklungstiefe). Bedarf nach einer kontrollierbaren, eigenen Prozessplattform jenseits der Low-Code-Limits.",
+      "Die zentrale PLM-Plattform führt Produktdaten und Entwicklungsprozesse. Anders als die EDM-Plattform für CAD- und Engineering-Daten steht hier die Produktdaten- und Prozessführung im Mittelpunkt. Plattform und Betriebsumgebung mussten auf einen aktuellen Stand gebracht und auf den nächsten Major-Release vorbereitet werden.",
     intervention:
-      "Konzeption cloud-native Eigenentwicklung auf Container-Basis. Zielarchitektur, Betriebsmodell, Security-by-Design (Mandantentrennung, Secrets-Handling, Audit-Logs, RBAC). UI/UX-Entwurf für einheitliches Prozess-Frontend. Engineering-Prinzipien (CI/CD, Tests, Definition of Done). DevOps Operating Model. Integration KI-gestützter Entwicklung mit Quality-Gates.",
+      "Betrieb und Weiterentwicklung der PLM-Plattform CONTACT CIM Database. Servicelevel-Update einschließlich Migration von Betriebssystem und Laufzeitumgebung, strukturierte Testphasen mit den Fachbereichen und Aufbau einer Key-User-Organisation. Parallel Vorbereitung des Major-Release-Wechsels auf einen reinen Web-Client.",
     metrics: [
-      { value: "MVP", label: "Scope definiert" },
-      { value: "Container", label: "Cloud-native Foundation" },
-      { value: "Agentic", label: "Coding integriert" },
+      { value: "Servicelevel", label: "Update inkl. OS + Runtime" },
+      { value: "Key-User", label: "Organisation aufgebaut" },
+      { value: "Web-Client", label: "Major-Release vorbereitet" },
     ],
-    tags: ["Build", "Container", "DevOps", "Agentic Coding"],
-  },
-  {
-    id: "hr-successfactors",
-    category: "transformation",
-    period: "2025 - laufend",
-    kind: "Program",
-    title: "HR Transformation - SAP HCM zu SuccessFactors",
-    anchor: "Tier-2 Automotive · HR · End-of-Life-Druck SAP HCM (R/3)",
-    context:
-      "SAP HCM auf R/3-Basis nähert sich End-of-Life. HR-Prozesse und -Daten an Legacy-System gekoppelt, kein Cloud-Modell, keine moderne Self-Service-Erfahrung für Mitarbeiter und Führungskräfte. Druck auf State-of-the-Art-System mit Cloud-Lifecycle.",
-    intervention:
-      "Programm-Vorbereitung HR-Plattform-Wechsel weg vom HCM. Systemvergleich SuccessFactors, Microsoft Dynamics HR und Workday auf Funktionsumfang, Integrationsfähigkeit, TCO und HR-Strategie-Fit. Zielarchitektur, Migrations-Pfad, Identity- und Daten-Modell. Stakeholder-Alignment HR und Geschäftsführung.",
-    metrics: [
-      { value: "EOL HCM", label: "Migrations-Druck adressiert" },
-      { value: "SF / D365 / Workday", label: "Systemvergleich" },
-      { value: "Cloud-First", label: "Zielarchitektur" },
-    ],
-    tags: ["HR", "SAP", "SuccessFactors", "Workday", "Dynamics HR"],
+    tags: ["PLM", "CIM Database", "Key-User", "Release-Management"],
+    en: {
+      kind: "Platform",
+      title: "PLM Evolution & Preparing the Move to a Web Client",
+      anchor: "Tier-2 automotive · PLM · CONTACT CIM Database",
+      context:
+        "The central PLM platform manages product data and development processes. Unlike the EDM platform for CAD and engineering data, its focus is product data and process management. The platform and its runtime environment had to be brought up to date and prepared for the next major release.",
+      intervention:
+        "Operating and evolving the PLM platform CONTACT CIM Database. Service-level update including migration of the operating system and runtime environment, structured test phases with the business units, and a key-user organization. In parallel, preparing the major-release switch to a web-only client.",
+      metrics: [
+        { value: "Service level", label: "Update incl. OS + runtime" },
+        { value: "Key users", label: "Organization established" },
+        { value: "Web client", label: "Major release prepared" },
+      ],
+    },
   },
   {
     id: "braum-x-hub",
+    origin: "own",
     category: "engineering",
     period: "2025 - laufend",
+    status: "ongoing",
     kind: "Build",
     title: "braum.x - Personal Identity Hub",
     blogSlug: "2026-05-10-vier-websites-mit-claude-code",
@@ -224,48 +415,80 @@ export const cases: CaseStudy[] = [
     ],
     tags: ["Astro", "TypeScript", "Tailwind", "Three.js", "OSS"],
   },
-
-  // ─── 2025 mit definiertem Endjahr ─────────────────────────
   {
-    id: "sap-modernization-azure",
-    category: "enterprise",
-    period: "2025 - 2027",
-    kind: "Program",
-    title: "SAP Landscape Modernization in die Private Cloud",
-    anchor: "Tier-2 Automotive · SAP S/4HANA · Azure",
-    context:
-      "On-Premises SAP-Betrieb mit hohem technischen Schulden-Niveau, Custom-Code-Wildwuchs, kein Clean Core. Vorbereitung auf AI-gestützte SAP-Use-Cases (Joule, SAP OC) nicht möglich. Roadmap-Druck bis 2027.",
-    intervention:
-      "Definition Zielarchitektur und Hosting-/Betriebsmodell für SAP on Azure. Clean-Core-Ansatz: Custom-Code-Inventar, Bewertungslogik, priorisierter Refactoring-Backlog Fit-to-Standard. Identity- und Access-Modell überarbeitet (SAML SSO, Rollenmodell, Lifecycle). Migrationsplanung mit Teststrategie, Cutover und Hypercare.",
-    metrics: [
-      { value: "2027", label: "Roadmap-Horizont" },
-      { value: "Clean Core", label: "Approach etabliert" },
-      { value: "AI-Ready", label: "Daten-Foundation" },
-    ],
-    tags: ["SAP S/4HANA", "Azure", "Clean Core", "Migration"],
-  },
-  {
-    id: "copilot-agents-rollout",
+    id: "modern-intranet-ai-knowledge-agent",
+    origin: "employer",
     category: "ai",
     period: "2025 - 2026",
+    status: "handed-over",
     kind: "Applied AI",
-    title: "Microsoft Copilot Agents Rollout & Custom AI Assistants",
-    anchor: "Tier-2 Automotive · Cross-Function · 4 Use-Case-Domains",
+    title: "Modern Intranet Redesign & AI Knowledge Agent",
+    anchor: "Tier-2 Automotive · 2.800 MA · SharePoint-basiert",
     context:
-      "AI als Thema kam ins Unternehmen, aber praktisches Verständnis fehlte: kaum jemand wusste konkret, was Künstliche Intelligenz im Tagesgeschäft leisten kann oder wo sich agentische Workflows lohnen. Risiko von Schatten-AI in Fachbereichen, kein gemeinsames Vokabular.",
+      "Klassisches Intranet als Friedhof von Dokumenten. Wissen verteilt zwischen SharePoint, Teams, HR-Tools, Prozess-Handbüchern. Mitarbeiter finden Antworten nicht oder zu langsam. Bedarf an einem modernen Wissens-Layer für das unternehmensweite Wissen.",
     intervention:
-      "System aufgesetzt - Identifikation und Priorisierung erster Agent-Use-Cases für IT, Export Controls, Logistics und HR. Aber der größere Anteil war Change Management und Enablement: Verständnis in den Fachbereichen aufgebaut, Enabler direkt in den Abteilungen verankert, gemeinsames Vokabular geschaffen, Use-Cases gemeinsam mit Anwendern erarbeitet. Aufbau Betriebs- und Verbesserungsmodell (Feedback-Loops, Prompt-Tuning, Monitoring, Ownership).",
+      "Konzeption eines modernen SharePoint-Intranets mit KI-gestützter Wissenssuche: Orchestrator-Agent mit spezialisierten HR-, IT- und Prozess-Agenten, RAG, Quellenverwaltung und Governance. Das Projekt wurde konzipiert und vollständig an das verantwortliche Team übergeben.",
     metrics: [
-      { value: "4 Domänen", label: "IT, Export, Logistics, HR" },
-      { value: "Enabler", label: "in den Fachbereichen verankert" },
-      { value: "Change-First", label: "Verständnis vor Tooling" },
+      { value: "SharePoint", label: "Plattform-Foundation" },
+      { value: "Orchestrator", label: "+ HR-, IT- und Prozess-Agenten" },
+      { value: "Übergeben", label: "An das verantwortliche Team" },
     ],
-    tags: ["AI", "Copilot", "Agents", "Change-Management"],
+    tags: ["AI", "Knowledge", "Multi-Agent", "RAG", "SharePoint"],
+    en: {
+      kind: "Applied AI",
+      title: "Modern Intranet Redesign & AI Knowledge Agent",
+      anchor: "Tier-2 automotive · 2,800 employees · SharePoint-based",
+      context:
+        "A classic intranet that had become a document graveyard. Knowledge was scattered across SharePoint, Teams, HR tools and process manuals, and employees could not find answers, or not fast enough. A modern knowledge layer for company-wide knowledge was needed.",
+      intervention:
+        "Concept for a modern SharePoint intranet with AI-supported knowledge search: an orchestrator agent with specialized HR, IT and process agents, RAG, source management and governance. The project was designed and fully handed over to the responsible team.",
+      metrics: [
+        { value: "SharePoint", label: "Platform foundation" },
+        { value: "Orchestrator", label: "+ HR, IT and process agents" },
+        { value: "Handed over", label: "To the responsible team" },
+      ],
+    },
+  },
+  {
+    id: "hr-transformation-evaluation",
+    origin: "employer",
+    category: "transformation",
+    period: "2025 - 2026",
+    status: "pre-evaluation-completed",
+    kind: "Evaluation",
+    title: "HR Transformation - Vorevaluierung Nachfolge SAP HCM",
+    anchor: "Tier-2 Automotive · HR · Lebenszyklus SAP HCM",
+    context:
+      "Der Lebenszyklus von SAP HCM macht eine Modernisierung der HR-Systemlandschaft notwendig. HR-Prozesse und -Daten hängen am bestehenden System.",
+    intervention:
+      "Vorevaluierung der HR-Systemmodernisierung: Vergleich von SuccessFactors, Dynamics HR und Workday nach Funktionsumfang, TCO und Integrationen. Daraus entstanden eine erste Zielarchitektur, Migrationsoptionen und eine IT-seitige Entscheidungsvorlage für das Management.",
+    metrics: [
+      { value: "3 Systeme", label: "Funktion, TCO, Integration" },
+      { value: "Zielarchitektur", label: "Erste Fassung" },
+      { value: "Vorlage", label: "IT-seitig für das Management" },
+    ],
+    tags: ["HR", "SAP HCM", "Evaluierung", "Zielarchitektur"],
+    en: {
+      kind: "Evaluation",
+      title: "HR Transformation - Pre-Evaluation of the SAP HCM Successor",
+      anchor: "Tier-2 automotive · HR · SAP HCM lifecycle",
+      context:
+        "The SAP HCM lifecycle makes modernizing the HR system landscape necessary. HR processes and data are tied to the existing system.",
+      intervention:
+        "Pre-evaluation of the HR system modernization: comparing SuccessFactors, Dynamics HR and Workday on functionality, TCO and integrations. The result was an initial target architecture, migration options and an IT-side decision paper for management.",
+      metrics: [
+        { value: "3 systems", label: "Function, TCO, integration" },
+        { value: "Target architecture", label: "Initial version" },
+        { value: "Decision paper", label: "IT perspective for management" },
+      ],
+    },
   },
   {
     id: "adobe-sign-digital-signature",
+    origin: "employer",
     category: "transformation",
     period: "2025 - 2026",
+    status: "completed",
     kind: "Adoption",
     title: "Adobe Sign End-to-End Digital Signature",
     anchor: "Tier-2 Automotive · Cross-Function · Papierloser Workflow",
@@ -282,8 +505,10 @@ export const cases: CaseStudy[] = [
   },
   {
     id: "lexisnexis-patent-analytics",
+    origin: "employer",
     category: "ai",
-    period: "2025",
+    period: "2025 - 2026",
+    status: "completed",
     kind: "Applied AI",
     title: "LexisNexis Patent Analytics Enablement",
     anchor: "Tier-2 Automotive · R&D + IP · PatentSight & TechDiscovery",
@@ -298,37 +523,89 @@ export const cases: CaseStudy[] = [
     ],
     tags: ["AI", "IP-Analytics", "PatentSight", "Innovation", "R&D"],
   },
-  {
-    id: "kpi-restructuring-data-automation",
-    category: "transformation",
-    period: "2025",
-    kind: "Refactor",
-    title: "KPI-Restrukturierung & Datenautomatisierung",
-    anchor: "Tier-2 Automotive · Cross-Function · Reporting-Layer",
-    context:
-      "KPI-Definitionen über die Jahre auseinandergedriftet, Reporting-Aufwand hoch, Werks- und Funktions-spezifische Sonderlogiken. Jede Management-Sicht eine eigene Excel-Geschichte, kein gemeinsames Verständnis von Steuerungs-Größen.",
-    intervention:
-      "Refactoring der KPI-Landschaft: Definitionen vereinheitlicht, Owner pro KPI festgelegt, Datenflüsse standardisiert. Wo möglich automatisiert (Sammeln-Bereinigen-Verteilen über Datenpipelines, Anbindung an die globale BI-Plattform); wo Excel sinnvoll bleibt, mit klaren Owner und Audit-Trail. Reporting-Frequenzen und Verteiler harmonisiert. Aus heterogenen Lieferketten ein verlässlicheres Daten-Asset entwickelt.",
-    metrics: [
-      { value: "Vereinheitlicht", label: "KPI-Definitionen + Owner" },
-      { value: "Konsolidiert", label: "Daten-Lieferketten" },
-      { value: "Cross-Func", label: "Werks-übergreifend" },
-    ],
-    tags: ["Data", "KPI", "Reporting", "Automation"],
-  },
 
   // ─── 2024 ───────────────────────────────────────────────
   {
+    id: "copilot-adoption-program",
+    origin: "employer",
+    category: "ai",
+    period: "2024 - 2026",
+    status: "ongoing",
+    kind: "Program",
+    title: "Microsoft Copilot & Agents Programm",
+    anchor: "Tier-2 Automotive · Cross-Function · Von Greenfield zum Agent-Programm",
+    context:
+      "Microsoft 365 Copilot kam ohne Strategie, definierte Use-Cases oder Betriebsmodell ins Unternehmen. Praktisches Verständnis dafür, was KI im Tagesgeschäft leisten kann, fehlte; es bestand das Risiko von Schatten-AI in den Fachbereichen.",
+    intervention:
+      "Aufbau des M365-Copilot-Programms von null bis zum unternehmensweiten Agent-Programm. Phase 1: Pilotgruppen, Champions-Netzwerk, Lizenz- und Datenschutz-Governance, Schulungen, Prompt-Coaching und Erfolgsmessung. Phase 2: Custom Agents mit Use-Cases in IT, Exportkontrolle, Logistik und HR, Agent-Governance, Enabler in den Fachbereichen, Feedback-Loops und eine Organizational-Skilling-Initiative mit Microsoft.",
+    metrics: [
+      { value: "Greenfield", label: "Von 0 aufgebaut" },
+      { value: "4 Domänen", label: "IT, Export, Logistik, HR" },
+      { value: "Governance", label: "Lizenz, Datenschutz, Agents" },
+    ],
+    tags: ["AI", "Copilot", "Agents", "Adoption", "Change-Management"],
+    en: {
+      kind: "Program",
+      title: "Microsoft Copilot & Agents Program",
+      anchor: "Tier-2 automotive · Cross-functional · From greenfield to agent program",
+      context:
+        "Microsoft 365 Copilot arrived without a strategy, defined use cases or an operating model. Practical understanding of what AI can do in day-to-day work was missing, and shadow AI in the business units was a real risk.",
+      intervention:
+        "Building the M365 Copilot program from zero to a company-wide agent program. Phase 1: pilot groups, a champions network, licensing and data-protection governance, training, prompt coaching and success measurement. Phase 2: custom agents with use cases in IT, export control, logistics and HR, agent governance, enablers in the business units, feedback loops and an organizational skilling initiative with Microsoft.",
+      metrics: [
+        { value: "Greenfield", label: "Built from zero" },
+        { value: "4 domains", label: "IT, export, logistics, HR" },
+        { value: "Governance", label: "Licensing, privacy, agents" },
+      ],
+    },
+  },
+  {
+    id: "global-it-governance-service-management",
+    origin: "employer",
+    category: "leadership",
+    period: "2024 - 2026",
+    status: "ongoing",
+    kind: "Operating Model",
+    title: "Global IT Governance & Service Management",
+    anchor: "Tier-2 Automotive · 6 Standorte · DE, HU, UA, MK, MX, TN",
+    context:
+      "IT-Teams an sechs Standorten in sechs Ländern arbeiteten mit unterschiedlichen Abläufen, Standards und Dokumentationsständen. Der Service Desk brauchte eine Struktur, die sich an Services statt an Systemen orientiert.",
+    intervention:
+      "Aufbau gemeinsamer Governance- und Service-Strukturen für die IT-Teams an 6 Standorten (DE, HU, UA, MK, MX, TN): Global IT Meetings und regelmäßige Calls, gemeinsame Standards und Dokumentationspflichten. Dazu kontinuierliche Optimierung des Service Desks mit serviceorientierter Kategorienstruktur und Maßnahmen zur Akzeptanzverbesserung.",
+    metrics: [
+      { value: "6 Standorte", label: "Gemeinsame Standards" },
+      { value: "Global IT", label: "Meetings + regelmäßige Calls" },
+      { value: "Service Desk", label: "Serviceorientierte Kategorien" },
+    ],
+    tags: ["IT-Governance", "Service Management", "Service Desk", "Global IT"],
+    en: {
+      kind: "Operating Model",
+      title: "Global IT Governance & Service Management",
+      anchor: "Tier-2 automotive · 6 sites · DE, HU, UA, MK, MX, TN",
+      context:
+        "IT teams at six sites in six countries worked with different processes, standards and levels of documentation. The service desk needed a structure organized around services rather than systems.",
+      intervention:
+        "Establishing shared governance and service structures for the IT teams at 6 sites (DE, HU, UA, MK, MX, TN): global IT meetings and regular calls, common standards and documentation requirements. Alongside, continuous improvement of the service desk with a service-oriented category structure and measures to increase user acceptance.",
+      metrics: [
+        { value: "6 sites", label: "Common standards" },
+        { value: "Global IT", label: "Meetings + regular calls" },
+        { value: "Service desk", label: "Service-oriented categories" },
+      ],
+    },
+  },
+  {
     id: "sosafe-security-awareness",
+    origin: "employer",
     category: "compliance",
-    period: "2024 - 2025",
+    period: "seit 2024",
+    status: "in-operation",
     kind: "Program",
     title: "SoSafe Security Awareness Programm",
     anchor: "Tier-2 Automotive · 2.800 MA · Mehrsprachig",
     context:
       "Phishing- und Social-Engineering-Risiko als größter realer Angriffspfad. Awareness-Maßnahmen waren einmalige Schulungen, kein kontinuierlicher Loop, kein Reifegrad-Reporting an Geschäftsführung.",
     intervention:
-      "Einführung SoSafe als kontinuierliches Awareness-Programm. Mehrsprachige Lerninhalte, regelmäßige Phishing-Simulationen, Klickraten-Tracking und Reifegrad-KPIs. Roll-out-Strategie pro Standort, Eskalations-Pfad bei wiederholter Auffälligkeit, Verankerung im ISMS-Maßnahmen-Backlog.",
+      "Einführung SoSafe als kontinuierliches Awareness-Programm. Mehrsprachige Lerninhalte, regelmäßige Phishing-Simulationen, Klickraten-Tracking und Reifegrad-KPIs. Roll-out-Strategie pro Standort, Eskalations-Pfad bei wiederholter Auffälligkeit, Verankerung im ISMS-Maßnahmen-Backlog. Das Programm wird kontinuierlich weiterentwickelt, unter anderem um neue Module.",
     metrics: [
       { value: "Mehrsprachig", label: "Globale Belegschaft" },
       { value: "Phishing-Sim", label: "Kontinuierlich" },
@@ -338,8 +615,10 @@ export const cases: CaseStudy[] = [
   },
   {
     id: "ai-elearning-platform",
+    origin: "employer",
     category: "ai",
-    period: "2024 - 2025",
+    period: "2024 - 2026",
+    status: "in-operation",
     kind: "Applied AI",
     title: "AI-Enabled E-Learning Platform mit multilingualen Avataren",
     anchor: "Tier-2 Automotive · 2.800 MA · 6 Sprachen",
@@ -356,6 +635,7 @@ export const cases: CaseStudy[] = [
   },
   {
     id: "azure-landing-zone",
+    origin: "employer",
     category: "enterprise",
     period: "2024 - 2025",
     kind: "Foundation",
@@ -372,48 +652,48 @@ export const cases: CaseStudy[] = [
     ],
     tags: ["Azure", "Landing Zone", "IaC", "GitOps", "Governance"],
   },
-  {
-    id: "copilot-adoption-program",
-    category: "ai",
-    period: "2024",
-    kind: "Adoption",
-    title: "Microsoft Copilot Adoption Program",
-    anchor: "Tier-2 Automotive · Cross-Function · Greenfield-Adoption",
-    context:
-      "Microsoft 365 Copilot kam als Tool ins Unternehmen, aber ohne klare Strategie, ohne definierte Use-Cases, ohne Betriebsmodell. Adoption war komplettes Greenfield - von 0 angefangen, alles musste aufgebaut werden.",
-    intervention:
-      "Aufbau eines Adoption-Programms von Grund auf. Pilot-Wave mit klaren Use-Cases, Champions-Netzwerk in den Fachbereichen, Governance-Rahmen für Lizenz und Datenschutz. Schulungsformate, Prompt-Coaching, Erfolgs-KPIs. Roll-out-Wellen mit Feedback-Loop und kontinuierlicher Verbesserung. Verankerung im Modern-Work-Operating-Model.",
-    metrics: [
-      { value: "Greenfield", label: "Von 0 aufgebaut" },
-      { value: "Champions", label: "Netzwerk in Fachbereichen" },
-      { value: "Governance", label: "Lizenz + Datenschutz geklärt" },
-    ],
-    tags: ["AI", "Copilot", "Adoption", "Modern Work"],
-  },
 
-  // ─── 2023 - 2024 ────────────────────────────────────────
+  // ─── 2023 ───────────────────────────────────────────────
   {
-    id: "managed-soc-arctic-wolf",
+    id: "managed-soc-endpoint-security",
+    origin: "employer",
     category: "enterprise",
-    period: "2023 - 2024",
+    period: "2023 - 2026",
+    status: "in-operation",
     kind: "Security Operations",
-    title: "Managed SOC mit Arctic Wolf - 24/7 Detection & Response",
-    anchor: "Tier-2 Automotive · Arctic Wolf · Cloud + On-Prem Telemetrie",
+    title: "Managed SOC & Endpoint Security - 24/7 Detection & Response",
+    anchor: "Tier-2 Automotive · Managed-SOC-Anbieter · Cloud, On-Premises & Endpoints",
     context:
-      "Reaktive Security-Operations ohne 24/7-Coverage. Logs verteilt über Cloud, On-Prem-Server, Endgeräte und Netzwerk-Komponenten - keine zentrale Sicht. Mean-Time-to-Detect war qualitativ unbekannt.",
+      "Ziel war eine durchgängige Erkennung und Reaktion rund um die Uhr über Cloud-, On-Premises- und Endpoint-Umgebungen, mit einer zentralen Sicht statt verteilter Einzelquellen.",
     intervention:
-      "Einführung Managed SOC mit Arctic Wolf als externem Provider. Anbindung heterogener Log- und Telemetriequellen, zentrale Detection & Response. Standardisierte Use-Cases (Detections, Alerts, Response Playbooks) inkl. Quarantäne-/Containment-Prozessen. Kontinuierlicher Verbesserungsprozess (Tuning, False-Positive-Reduktion, Reporting).",
+      "Einführung eines Managed Security Operations Centers mit einem spezialisierten Anbieter. Zusammenführung von Cloud-, On-Premises- und Endpoint-Telemetrie, Detection Use-Cases, Response Playbooks und kontinuierliches Tuning. Erweitert um die Endpoint-Security- und Endpoint-Management-Lösung desselben Anbieters.",
     metrics: [
-      { value: "24/7", label: "Coverage live" },
-      { value: "Cloud + On-Prem", label: "Telemetrie konsolidiert" },
-      { value: "Playbooks", label: "Response standardisiert" },
+      { value: "24/7", label: "Detection & Response" },
+      { value: "Cloud + On-Prem", label: "+ Endpoint-Telemetrie" },
+      { value: "Endpoint", label: "Security + Management ergänzt" },
     ],
-    tags: ["SOC", "SIEM", "Arctic Wolf", "Detection & Response"],
+    tags: ["SOC", "Detection & Response", "Endpoint Security", "Managed Service"],
+    en: {
+      kind: "Security Operations",
+      title: "Managed SOC & Endpoint Security - 24/7 Detection & Response",
+      anchor: "Tier-2 automotive · Managed SOC provider · Cloud, on-premises & endpoints",
+      context:
+        "The goal was continuous, round-the-clock detection and response across cloud, on-premises and endpoint environments, with one central view instead of scattered individual sources.",
+      intervention:
+        "Introduction of a managed security operations center with a specialized provider. Consolidation of cloud, on-premises and endpoint telemetry, detection use cases, response playbooks and continuous tuning. Extended with the same provider's endpoint security and endpoint management solution.",
+      metrics: [
+        { value: "24/7", label: "Detection & response" },
+        { value: "Cloud + on-prem", label: "+ endpoint telemetry" },
+        { value: "Endpoint", label: "Security + management added" },
+      ],
+    },
   },
   {
     id: "cyber-risk-bcm-framework",
+    origin: "employer",
     category: "compliance",
     period: "2023 - 2024",
+    status: "completed",
     kind: "Framework",
     title: "Cyber Risk Management & BCM Framework",
     anchor: "Tier-2 Automotive · 2.800 MA · Krisen-Resilienz",
@@ -428,46 +708,46 @@ export const cases: CaseStudy[] = [
     ],
     tags: ["Cyber Risk", "BCM", "Framework"],
   },
-  {
-    id: "global-bi-platform",
-    category: "transformation",
-    period: "2023 - 2024",
-    kind: "Platform",
-    title: "Globale BI-Plattform SAP SAC/DWC + Power BI",
-    anchor: "Tier-2 Automotive · Cross-Function · Single Source of Truth",
-    context:
-      "Reporting-Wildwuchs aus Excel-Inseln, lokale Power-BI-Insellösungen, keine konsolidierte Sicht über die globale Organisation. Management-Reports manuell zusammengetragen, KPI-Definitionen pro Funktion unterschiedlich.",
-    intervention:
-      "Konzeption einer globalen BI-Plattform auf SAP SAC und SAP DWC als Single Source of Truth, Power BI als Sekundär-Tool für Self-Service. Daten- und KPI-Modell harmonisiert, Migration der lokalen Reports auf zentrale Plattform, Governance über Modelle, Berechtigungen und Lifecycle.",
-    metrics: [
-      { value: "Single Source", label: "Of Truth etabliert" },
-      { value: "SAC + DWC", label: "+ Power BI Self-Service" },
-      { value: "Cross-Func", label: "Reporting konsolidiert" },
-    ],
-    tags: ["BI", "SAP SAC", "SAP DWC", "Power BI", "Data Platform"],
-  },
 
   // ─── 2022 ───────────────────────────────────────────────
   {
-    id: "team-data-analytics",
-    category: "leadership",
-    period: "2022 - 2024",
-    kind: "Team-Build",
-    title: "Aufbau Team Data Analytics & BI",
-    anchor: "Tier-2 Automotive · Cross-Function · Self-Service-Enablement",
+    id: "global-bi-platform",
+    origin: "employer",
+    category: "transformation",
+    secondaryCategories: ["leadership"],
+    period: "2022 - 2026",
+    status: "ongoing",
+    kind: "Platform",
+    title: "Data, KPI & BI-Plattform inkl. KPI-Datenerfassungsplattform",
+    anchor: "Tier-2 Automotive · Cross-Function · Team, Plattform, KPIs",
     context:
-      "Reporting-Wildwuchs aus Excel-Inseln, keine konsolidierte BI-Plattform, keine konsistenten KPIs zwischen Werken und Funktionsbereichen. Data-Anfragen liefen manuell durch IT-Tickets.",
+      "Reporting-Wildwuchs aus Excel-Inseln und lokalen Power-BI-Lösungen, keine konsolidierte Sicht über die globale Organisation. KPI-Definitionen pro Werk und Funktion unterschiedlich, Management-Reports manuell zusammengetragen, KPI-Erfassung in Excel.",
     intervention:
-      "Aufbau und Mitverantwortung für Data- und Analytics-Strategie. Governance der BI-Plattform (SAP SAC/DWC, Power BI, Microsoft Fabric), KPI- und Reporting-Standards für Management und Fachbereiche, Self-Service-Enablement. Aus Ticket-getriebener IT-Reporting-Schleife eine Plattform für Fachbereichs-Eigenständigkeit gemacht.",
+      "Vier Bausteine: Team Data Analytics & BI mitaufgebaut und strategisch weiterentwickelt. Globale BI-Plattform mit SAP Analytics Cloud, SAP Datasphere/DWC, Power BI und Microsoft Fabric, Migration lokaler Reports, Governance und Self-Service. KPI-Restrukturierung mit einheitlichen Definitionen über Werke und Fachbereiche, klaren Datenverantwortlichkeiten und Konsolidierung heterogener Excel-Reports. Neu: eine zentrale KPI-Datenerfassungsplattform löst die Excel-basierte Erfassung ab, u. a. für ISMS-, IT- und OT-KPIs, mit automatisierten Datenflüssen.",
     metrics: [
-      { value: "Multi-Tool", label: "SAC/DWC + Power BI + Fabric" },
-      { value: "Self-Service", label: "Fachbereichs-Enablement" },
-      { value: "Cross-Function", label: "Standortübergreifend" },
+      { value: "Team", label: "Data Analytics & BI" },
+      { value: "SAC + Datasphere", label: "+ Power BI + Fabric" },
+      { value: "KPI-Erfassung", label: "Zentral statt Excel" },
     ],
-    tags: ["Data Analytics", "BI", "Team-Build", "Self-Service"],
+    tags: ["Data", "BI", "KPI", "SAP SAC", "Power BI", "Microsoft Fabric"],
+    en: {
+      kind: "Platform",
+      title: "Data, KPI & BI Platform incl. KPI Data Capture Platform",
+      anchor: "Tier-2 automotive · Cross-functional · Team, platform, KPIs",
+      context:
+        "Reporting sprawl across Excel islands and local Power BI solutions, with no consolidated view of the global organization. KPI definitions differed by plant and function, management reports were compiled by hand, and KPIs were captured in Excel.",
+      intervention:
+        "Four building blocks: co-building the Data Analytics & BI team and developing it strategically. A global BI platform with SAP Analytics Cloud, SAP Datasphere/DWC, Power BI and Microsoft Fabric, including migration of local reports, governance and self-service. KPI restructuring with consistent definitions across plants and business units, clear data ownership and consolidation of heterogeneous Excel reports. New: a central KPI data capture platform replaces Excel-based collection, including ISMS, IT and OT KPIs, with automated data flows.",
+      metrics: [
+        { value: "Team", label: "Data analytics & BI" },
+        { value: "SAC + Datasphere", label: "+ Power BI + Fabric" },
+        { value: "KPI capture", label: "Central instead of Excel" },
+      ],
+    },
   },
   {
     id: "autodesk-vault-edm",
+    origin: "employer",
     category: "enterprise",
     period: "2022 - 2023",
     kind: "Platform",
@@ -486,26 +766,43 @@ export const cases: CaseStudy[] = [
   },
   {
     id: "it-due-diligence",
+    origin: "employer",
     category: "compliance",
     period: "2022",
+    status: "completed",
     kind: "Assessment",
     title: "IT Due Diligence Pre-Acquisition Assessment",
-    anchor: "Tier-2 Automotive · M&A · IT-Bewertung Zielunternehmen",
+    anchor: "Tier-2 Automotive · M&A · IT-Bewertung",
     context:
-      "Akquisitionsvorhaben eines Zielunternehmens. IT-Landschaft, Risiken und Integrations-Aufwand unbekannt. Entscheidungs-Druck im Deal-Window mit klarer Zeitlinie für Bewertungs-Report.",
+      "Für ein geplantes Akquisitionsvorhaben mussten IT-Landschaft, Risiken und Integrationsaufwand innerhalb eines festen Zeitfensters bewertet werden.",
     intervention:
-      "IT-Due-Diligence im Auftrag der Geschäftsführung. Bewertung der IT-Landschaft (Infrastruktur, Anwendungen, Lizenzen, Verträge, Security-Posture, Compliance, Personal). Risiko- und Integrations-Aufwand quantifiziert, Quick-Wins und rote Flaggen für Verhandlungen markiert. Vollständiger Report als Entscheidungs-Vorlage.",
+      "IT-Due-Diligence im Auftrag der Geschäftsführung: Bewertung von Infrastruktur, Anwendungen, Lizenzen, Verträgen, IT-Security, Compliance und Personal. Daraus eine Risikoanalyse und ein Entscheidungsbericht für die Geschäftsführung.",
     metrics: [
       { value: "End-to-End", label: "IT-Landschaft bewertet" },
-      { value: "Report", label: "Entscheidungs-Vorlage" },
-      { value: "Risiken", label: "Quantifiziert + Roadmap" },
+      { value: "Risikoanalyse", label: "Strukturiert" },
+      { value: "Bericht", label: "Entscheidungsgrundlage" },
     ],
     tags: ["M&A", "Due Diligence", "Assessment"],
+    en: {
+      kind: "Assessment",
+      title: "IT Due Diligence Pre-Acquisition Assessment",
+      anchor: "Tier-2 automotive · M&A · IT assessment",
+      context:
+        "For a planned acquisition, the IT landscape, risks and integration effort had to be assessed within a fixed time window.",
+      intervention:
+        "IT due diligence on behalf of executive management: assessment of infrastructure, applications, licenses, contracts, IT security, compliance and staff. The result was a risk analysis and a decision report for executive management.",
+      metrics: [
+        { value: "End-to-end", label: "IT landscape assessed" },
+        { value: "Risk analysis", label: "Structured" },
+        { value: "Report", label: "Basis for decision" },
+      ],
+    },
   },
 
   // ─── 2021 ───────────────────────────────────────────────
   {
     id: "team-aufbau-apps",
+    origin: "employer",
     category: "leadership",
     period: "2021 - laufend",
     kind: "Team-Build",
@@ -516,7 +813,8 @@ export const cases: CaseStudy[] = [
     intervention:
       "Komplett-Aufbau eines neuen IT-Sub-Teams für Applications bei ODW-ELEKTRIK: Hiring, Onboarding, Skill-Profile, Verantwortungsmatrix, Kommunikation in die bestehende IT-Organisation. Heute eigene Lieferfähigkeit mit Direct Reports und Mandate-Coverage über die globale Organisation.",
     metrics: [
-      { value: "6 DR", label: "Direct Reports disziplinarisch" },
+      // Anzahl der Direct Reports offen (5 oder 6), bis zur Freigabe ohne Zahl.
+      { value: "Direct Reports", label: "Disziplinarische Führung" },
       { value: "Global", label: "Mandate-Coverage" },
       { value: "Greenfield", label: "Team-Build" },
     ],
@@ -525,6 +823,7 @@ export const cases: CaseStudy[] = [
   },
   {
     id: "m365-zero-trust-identity",
+    origin: "employer",
     category: "enterprise",
     period: "2021 - 2022",
     kind: "Program",
@@ -533,7 +832,7 @@ export const cases: CaseStudy[] = [
     context:
       "Heterogene Identity-Landschaft mit lokalen ADs pro Standort, fragmentiertes MFA, kein einheitliches Conditional Access. Zero-Trust-Anspruch auf Papier, in der Realität kein durchgängiges Modell. Lifecycle-Prozesse manuell.",
     intervention:
-      "Konzeption und Roll-out einer Single-Identity-Architektur auf Microsoft Entra ID. Conditional Access als zentrales Policy-Layer, MFA flächendeckend, SSO für Kern-Anwendungen. Identity-Lifecycle-Modell mit klarer Owner-Zuweisung. Migrations- und Cutover-Plan über alle Standorte.",
+      "Konzeption und Roll-out einer Single-Identity-Architektur auf Microsoft Entra ID. Conditional Access als zentrales Policy-Layer, MFA flächendeckend, SSO für Kern-Anwendungen. Identity-Lifecycle-Modell mit klarer Owner-Zuweisung. Migrations- und Cutover-Plan über alle Standorte. Die Authentifizierungsmethoden werden seitdem kontinuierlich weiterentwickelt.",
     metrics: [
       { value: "Single Identity", label: "Konzernweit" },
       { value: "Zero Trust", label: "Conditional Access live" },
@@ -545,6 +844,7 @@ export const cases: CaseStudy[] = [
   // ─── 2020 ───────────────────────────────────────────────
   {
     id: "isms-iso27001-tisax",
+    origin: "employer",
     category: "compliance",
     period: "2020 - 2023",
     kind: "Program",
@@ -563,6 +863,7 @@ export const cases: CaseStudy[] = [
   },
   {
     id: "tenfold-iam-rollout",
+    origin: "employer",
     category: "enterprise",
     period: "2020 - 2022",
     kind: "Program",
@@ -581,44 +882,77 @@ export const cases: CaseStudy[] = [
   },
   {
     id: "sap-r3-s4hana-brownfield",
+    origin: "employer",
     category: "enterprise",
     period: "2020 - 2021",
-    kind: "Migration",
+    kind: "Beteiligung",
     title: "SAP R/3 → S/4HANA Brownfield Transition (HCM/HR)",
-    anchor: "Tier-2 Automotive · SAP HCM/HR · Periphere Beteiligung",
+    anchor: "Tier-2 Automotive · SAP HCM/HR · Mitarbeit in Teilbereichen",
     context:
-      "SAP R/3 als Plattform für HR/HCM am End-of-Life-Horizont. Brownfield-Pfad zu S/4HANA gewählt, um Custom-Code und Prozess-Investitionen zu erhalten. Komplexe Custom-Z-Welt im HCM-Kontext, Berater-Wechselwirkungen mit Fachbereichen.",
+      "SAP R/3 als Plattform für HR/HCM am End-of-Life-Horizont. Brownfield-Pfad zu S/4HANA gewählt, um Custom-Code und Prozess-Investitionen zu erhalten. Komplexe Custom-Z-Welt im HCM-Kontext.",
     intervention:
-      "Mitarbeit an der HCM-Brownfield-Migration in Teilbereichen - Custom-Code-Inventur, Bewertungs-Logiken, frühe Refactoring-Backlog-Sortierung, Schnittstellen-Themen. Hauptverantwortung lag bei dedizierten SAP-HCM-Teams; mein Beitrag war fokussiert und peripher.",
+      "Mitarbeit in ausgewählten Teilbereichen eines SAP-HCM-Brownfield-Projekts: Unterstützung bei der Custom-Code-Inventur sowie bei der Bewertung von Anpassungen und Schnittstellen. Die Projektverantwortung lag bei den dedizierten SAP-HCM-Teams.",
     metrics: [
       { value: "Brownfield", label: "Pfad mit Custom-Erhalt" },
-      { value: "Custom-Code", label: "Inventur + Bewertung" },
-      { value: "Peripher", label: "Beitrag in Teilbereichen" },
+      { value: "Custom-Code", label: "Inventur unterstützt" },
+      { value: "Mitarbeit", label: "In Teilbereichen" },
     ],
     tags: ["SAP S/4HANA", "SAP HCM", "Brownfield", "Migration"],
+    en: {
+      kind: "Contribution",
+      title: "SAP R/3 → S/4HANA Brownfield Transition (HCM/HR)",
+      anchor: "Tier-2 automotive · SAP HCM/HR · Contribution to selected areas",
+      context:
+        "SAP R/3 as the HR/HCM platform was approaching end of life. A brownfield path to S/4HANA was chosen to preserve custom code and process investments. Complex custom Z-objects in the HCM context.",
+      intervention:
+        "Contribution to selected areas of an SAP HCM brownfield project: supporting the custom-code inventory and the assessment of modifications and interfaces. Project responsibility lay with the dedicated SAP HCM teams.",
+      metrics: [
+        { value: "Brownfield", label: "Path preserving custom code" },
+        { value: "Custom code", label: "Inventory supported" },
+        { value: "Contribution", label: "In selected areas" },
+      ],
+    },
   },
 
   // ─── 2019 ───────────────────────────────────────────────
   {
     id: "power-platform-coe",
-    category: "transformation",
-    period: "2019 - 2020",
-    kind: "Program",
-    title: "Power Platform Automation Program & Center of Excellence",
-    anchor: "Tier-2 Automotive · Citizen Developer · CoE-Modell",
+    origin: "employer",
+    category: "engineering",
+    secondaryCategories: ["transformation"],
+    period: "2019 - 2026",
+    status: "ongoing",
+    kind: "Platform",
+    title: "Prozessplattform: Power Platform CoE → Eigenentwicklung als Ablöse",
+    anchor: "Tier-2 Automotive · Citizen Developer → Eigenentwicklung · Container",
     context:
-      "Aufkommende Schatten-IT durch Excel-Makros und Einzelautomatisierungen. Fachbereiche wollten schneller liefern, IT konnte nicht skalieren. Risiko unkontrollierter Citizen-Development ohne Governance.",
+      "Schatten-IT durch Excel-Makros und Einzelautomatisierungen, Fachbereiche wollten schneller liefern. Die Power Platform schuf dafür einen kontrollierten Rahmen, stieß in kritischen Szenarien später aber an Grenzen bei Skalierung, Governance und Entwicklungstiefe.",
     intervention:
-      "Aufbau eines Power-Platform-Center-of-Excellence mit DEV/TEST/PROD-Umgebungs-Strategie, Connector-Governance, Lizenz-Modell und Datenschutz-Klärung. Citizen-Developer-Enablement mit Schulungen, Templates, Code-Review-Standards für komplexe Flows. Verzahnung mit Pro-Code-Engineering für Hand-Off-Szenarien.",
+      "2019-2020: Aufbau eines Power-Platform-Center-of-Excellence mit DEV/TEST/PROD, Connector-Governance, Lizenzierung, Templates, Citizen-Developer-Enablement und Standards für Code-Reviews und die Übergabe an Pro-Code. Ab 2025: Konzeption einer eigenen containerbasierten Prozessplattform als Ablösung der Power Platform, mit Security-by-Design, RBAC, Audit-Logs, UI/UX, CI/CD, DevOps-Betriebsmodell und KI-gestützter Entwicklung mit Quality Gates.",
     metrics: [
-      { value: "DEV/TEST/PROD", label: "Standard etabliert" },
-      { value: "Citizen-Dev", label: "Enablement-Pfad" },
-      { value: "Governance", label: "Connector + Lizenz geklärt" },
+      { value: "2019-2020", label: "Power Platform CoE" },
+      { value: "Ab 2025", label: "Eigene Prozessplattform" },
+      { value: "Container", label: "Security-by-Design + CI/CD" },
     ],
-    tags: ["Power Platform", "CoE", "Citizen Developer", "Automation"],
+    tags: ["Power Platform", "CoE", "Citizen Developer", "Container", "DevOps"],
+    en: {
+      kind: "Platform",
+      title: "Process Platform: Power Platform CoE → Custom Platform as Replacement",
+      anchor: "Tier-2 automotive · Citizen developers → custom build · Containers",
+      context:
+        "Shadow IT through Excel macros and one-off automations, with business units wanting to deliver faster. The Power Platform provided a controlled framework for this, but later reached its limits in critical scenarios around scaling, governance and development depth.",
+      intervention:
+        "2019-2020: building a Power Platform center of excellence with DEV/TEST/PROD, connector governance, licensing, templates, citizen-developer enablement and standards for code reviews and hand-off to pro-code. From 2025: designing a custom container-based process platform to replace the Power Platform, with security by design, RBAC, audit logs, UI/UX, CI/CD, a DevOps operating model and AI-assisted development with quality gates.",
+      metrics: [
+        { value: "2019-2020", label: "Power Platform CoE" },
+        { value: "From 2025", label: "Custom process platform" },
+        { value: "Containers", label: "Security by design + CI/CD" },
+      ],
+    },
   },
   {
     id: "modern-workplace-m365",
+    origin: "employer",
     category: "transformation",
     period: "2019 - 2020",
     kind: "Migration",
@@ -636,24 +970,25 @@ export const cases: CaseStudy[] = [
     tags: ["M365", "Exchange Online", "Teams", "SharePoint"],
   },
 
-  // ─── 2018 - laufend ──────────────────────────────────────
+  // ─── 2018 ───────────────────────────────────────────────
   {
     id: "it-strategie-odw-gesamtlaufzeit",
+    origin: "employer",
     category: "leadership",
     period: "2018 - laufend",
     kind: "Strategy",
-    title: "IT-Strategie über Gesamt-Laufzeit",
+    title: "IT-Strategie & Roadmap 2030",
     anchor: "Tier-2 Automotive · Hidden Champion · Mehrjährige Linie",
     context:
       "On-prem-getriebener Mittelständler ohne klare Cloud- oder AI-Roadmap. Hohes Daten-Sediment in Legacy-Systemen, IT als reaktiver Service. Wandel-Druck durch Kundenanforderungen, Compliance und Wettbewerb.",
     intervention:
-      "Mitgestaltung des Wegs vom on-prem-getriebenen Mittelständler zum AI-enabled, cloud-first IT-Setup eines Hidden Champion. Über die volle Laufzeit: Foundation (LZ, IAM), Modernisierung (SAP, M365), KI-Integration (Copilot, Agents), Sicherheits-Reife (ISMS, SOC). Eine IT-Organisation, die auf jede fachliche Frage eine Antwort hat.",
+      "Mitgestaltung des Wegs vom on-prem-getriebenen Mittelständler zum AI-enabled, cloud-first IT-Setup eines Hidden Champion. Über die volle Laufzeit: Foundation (LZ, IAM), Modernisierung (SAP, M365), KI-Integration (Copilot, Agents), Sicherheits-Reife (ISMS, SOC). Roadmap 2030 mit Quartalsreviews, Investitionsplanung für IT Applications und Enterprise-Architektur nach TOGAF. Eine IT-Organisation, die auf jede fachliche Frage eine Antwort hat.",
     metrics: [
       { value: "7+ Jahre", label: "Linienverantwortung" },
       { value: "On-Prem → Cloud", label: "Strategischer Wandel" },
       { value: "Reaktiv → Antwortfähig", label: "Operating Model" },
     ],
-    tags: ["Strategie", "Roadmap", "Cloud-First", "AI-Enablement"],
+    tags: ["Strategie", "Roadmap", "Cloud-First", "AI-Enablement", "TOGAF"],
     hidePill: true,
   },
 ];

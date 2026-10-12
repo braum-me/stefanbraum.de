@@ -29,7 +29,8 @@ const EXPECTED_SECTIONS = [
 ];
 const TRANSLATED = ["/", "/blog/", "/impressum/", "/datenschutz/"];
 /** Begriffe, die in Phase 1 nirgends im ausgelieferten HTML stehen dürfen. */
-const FORBIDDEN_TERMS = [/eissmann/i];
+const FORBIDDEN_TERMS = [/eissmann/i, /tacto/i];
+const EXPECTED_CASES = 29;
 
 const failures = [];
 const fail = (msg) => failures.push(msg);
@@ -246,6 +247,37 @@ async function main() {
     const chapterNums = [...body.matchAll(/class="chapter-num"[^>]*>(\d+)</g)].map((m) => m[1]);
     check(chapterNums.join() === "01,02,03,04,05,06", `${home}: Kapitelnummern ${chapterNums}`);
     check(body.includes(headlines[home]), `${home}: Hero-Headline fehlt`);
+
+    // Portfolio: Anzahl, Status-Labels, Mehrfachkategorien, Legacy-Aliase
+    const rows = [...body.matchAll(/<details[^>]*class="pf-row"[^>]*>/g)].map((m) => m[0]);
+    check(
+      rows.length === EXPECTED_CASES,
+      `${home}: ${rows.length} Cases (erwartet ${EXPECTED_CASES})`,
+    );
+    check(
+      rows.some((r) => /data-cats="engineering transformation"/.test(r)),
+      `${home}: Mehrfachkategorie (engineering transformation) fehlt`,
+    );
+    const statusLabels =
+      home === "/"
+        ? [
+            "Im Betrieb",
+            "Pilot",
+            "Vorbereitung",
+            "Abgeschlossen &amp; übergeben",
+            "Vorevaluierung abgeschlossen",
+          ]
+        : [
+            "In operation",
+            "Pilot",
+            "Preparation",
+            "Completed &amp; handed over",
+            "Pre-evaluation completed",
+          ];
+    for (const label of statusLabels)
+      check(body.includes(label), `${home}: Status-Label "${label}" fehlt`);
+    check(body.includes("data-case-aliases="), `${home}: Legacy-Alias-Daten fehlen`);
+    check(!body.includes('id="case-tacto'), `${home}: entfernter Case gerendert`);
   }
 
   // 7. Sprachumschalter auf Blogartikeln -> existierendes englisches Ziel
