@@ -48,5 +48,5 @@ Was ich umgebaut habe und warum, steht im Blog: [LINK]
 - [ ] Thumbnail als `public/blog/agi-jetzt-v3-observatorium/thumbnail.webp` ablegen
 - [ ] Thumbnail-Wording abgleichen ("Observatory" im Bild vs. "Observatorium" im Titel)
 - [ ] Redaktionsnotiz am Artikelende entfernen
-- [ ] `draft: true` entfernen
+- [ ] Manuell deployen (draft steht bereits auf false)
 - [ ] LinkedIn-Teaser: `[LINK]` ersetzen

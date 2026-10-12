@@ -4,7 +4,7 @@ date: 2026-10-12
 excerpt: "In den vergangenen Wochen habe ich agi.jetzt praktisch neu gebaut. Aus dem AGI-Tracker mit Score und Weekly wird ein Observatorium, das Fähigkeiten, Verfügbarkeit und Unsicherheit getrennt ausweist. Warum ich den Score abgeschafft habe und was sonst unter der Haube passiert ist."
 tags: ["agi", "ki", "agi-jetzt", "methodik", "build"]
 readingTime: "11 min"
-draft: true
+draft: false
 coverImage: "/blog/agi-jetzt-v3-observatorium/thumbnail.webp"
 ---
 
@@ -139,4 +139,4 @@ Wer reinschauen will: [agi.jetzt](https://agi.jetzt). Wer einen Fehler findet od
 > - Weekly-Archivstand prüfen (Stand Entwurf: KW01–KW41, 15 Ausgaben mit Spezialmodell-Abschnitt)
 > - Finalen Link/CTA prüfen
 > - Thumbnail als `public/blog/agi-jetzt-v3-observatorium/thumbnail.webp` ablegen
-> - `draft: true` entfernen
+> - Redaktionsnotiz entfernen, dann manuell deployen
