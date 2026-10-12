@@ -1,7 +1,7 @@
 import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "astro/config";
+import { defineConfig, passthroughImageService } from "astro/config";
 
 /**
  * Rehype-Plugin ohne Dependency: Bilder in Markdown-Posts laden nach dem ersten
@@ -60,6 +60,11 @@ export default defineConfig({
     assets: "_astro",
   },
   image: {
+    // Die Site nutzt keine Astro-Bildoptimierung (astro:assets). Passthrough statt
+    // Sharp: der SSR-Endpoint /_image verarbeitet keine Bilder, damit sind
+    // Sharp/libvips-Advisories (u. a. AVIF-RCE GHSA-26w7-cxv4-gfx2) zur Laufzeit
+    // nicht erreichbar.
+    service: passthroughImageService(),
     responsiveStyles: true,
   },
   experimental: {

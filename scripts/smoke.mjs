@@ -10,7 +10,7 @@
  * Sprachumschalter, JSON-LD, Sitemap und 404-Verhalten.
  */
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { findConfidentialTerms } from "./confidential-terms.mjs";
 
 const PORT = Number(process.env.SMOKE_PORT ?? 4399);
@@ -282,6 +282,32 @@ async function main() {
       check(body.includes(label), `${home}: Status-Label "${label}" fehlt`);
     check(body.includes("data-case-aliases="), `${home}: Legacy-Alias-Daten fehlen`);
     check(!body.includes('id="case-tacto'), `${home}: entfernter Case gerendert`);
+  }
+
+  // Impressum: keine Verweise auf die eingestellte EU-OS-Plattform (seit 20.07.2025)
+  for (const p of ["/impressum/", "/en/impressum/"]) {
+    const { body } = await get(p);
+    check(
+      !/ec\.europa\.eu\/consumers\/odr/i.test(body),
+      `${p}: Link zur eingestellten OS-Plattform`,
+    );
+    check(
+      /Verbraucherschlichtungsstelle|consumer arbitration board/.test(body),
+      `${p}: VSBG-Hinweis fehlt`,
+    );
+  }
+
+  // /_image verarbeitet keine Bilder (Passthrough statt Sharp, siehe astro.config.mjs)
+  {
+    const res = await fetch(`${BASE}/_image?href=/portrait.webp&w=64&f=png`);
+    const bytes = (await res.arrayBuffer()).byteLength;
+    const original = statSync("public/portrait.webp").size;
+    check(
+      res.status === 200 && bytes === original,
+      `/_image verarbeitet Bilder (${res.status}, ${bytes} B)`,
+    );
+    const remote = await fetch(`${BASE}/_image?href=https://example.com/x.png&w=64`);
+    check(remote.status === 403, `/_image erlaubt Remote-Bilder (${remote.status})`);
   }
 
   // OG-Endpoint rendert keinen frei wählbaren Text (Content-Spoofing)
