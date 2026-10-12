@@ -59,8 +59,8 @@ export const en: Translations = {
   microMetrics: {
     pillars: "Pillars",
     location: "Location",
-    practice: "Years in IT",
-    practiceValue: "12 Years",
+    practice: "Experience",
+    practiceValue: "12 years in IT",
     projects: "Projects",
     projectsValue: "{count} documented",
     aria: "Profile signals",
@@ -201,7 +201,7 @@ export const en: Translations = {
     listingHeadline: "Field Notes.",
     listingSubline:
       "What I am learning, building, observing. Mid-market IT, AI adoption, compliance reality, build notes. No marketing, no bullet lists. Just notes.",
-    listingTitle: "Writing - Stefan Braum",
+    listingTitle: "Writing · Stefan Braum",
     listingDescription:
       "Field notes from practice: AI adoption, mid-market IT, compliance, build notes.",
     backToList: "Writing",
@@ -268,7 +268,8 @@ export const en: Translations = {
     backToOverview: "Back to overview",
     impressum: {
       title: "Imprint - Stefan Braum",
-      description: "Provider information per Section 5 TMG for stefanbraum.de.",
+      description:
+        "Provider information per Section 5 DDG (German Digital Services Act) for stefanbraum.de.",
       h1: "Imprint",
     },
     datenschutz: {

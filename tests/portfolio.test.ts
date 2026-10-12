@@ -290,3 +290,41 @@ describe("finishing pass (content QA)", () => {
     assert.ok(!skills.some((s) => s.projects.some((p) => p.endsWith("-iam-rollout"))));
   });
 });
+
+describe("editorial tone (final QA)", () => {
+  it("avoids disparaging or security-sensitive statements about former states", () => {
+    const text = JSON.stringify(cases);
+    const phrases = [
+      /Audit-Readiness/i,
+      /auf Papier/i,
+      /Friedhof/i,
+      /Wildwuchs/i,
+      /größter realer Angriffspfad/i,
+      /lückenhaft/i,
+      /Kommunikationspfade in einer Krise unklar/i,
+      /graveyard/i,
+      /\bsprawl/i,
+      /\bon paper\b/i,
+      /started from zero/i,
+      /most realistic attack path/i,
+      /gaps in audit trails/i,
+      /technical debt/i,
+      /Schulden-Niveau/i,
+    ];
+    for (const re of phrases) assert.doesNotMatch(text, re);
+  });
+
+  it("frames the reworked security and governance cases as intended", () => {
+    assert.match(byId("isms-iso27001-tisax").context, /einheitlichen ISMS- und Audit-Struktur/);
+    assert.match(byId("m365-zero-trust-identity").context, /konzernweiten Zero-Trust-Architektur/);
+    assert.match(byId("cyber-risk-bcm-framework").context, /übergreifenden Cyber-Risk-Governance/);
+    assert.match(byId("sosafe-security-awareness").context, /zentrale Risikofelder/);
+    assert.match(byId("sosafe-security-awareness").en?.context ?? "", /central risk areas/);
+  });
+
+  it("does not claim personal end-to-end delivery of the SAP program", () => {
+    const sap = byId("sap-modernization-azure");
+    assert.match(sap.intervention, /nicht die Gesamtumsetzung/);
+    assert.match(sap.en?.intervention ?? "", /not the end-to-end delivery/);
+  });
+});

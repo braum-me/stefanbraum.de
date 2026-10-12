@@ -363,7 +363,7 @@ export const cases: CaseStudy[] = [
     title: "SAP Landscape Modernization in die Private Cloud",
     anchor: "Tier-2 Automotive · SAP S/4HANA · Azure · Zielarchitektur & Roadmap",
     context:
-      "On-Premises SAP-Betrieb mit hohem technischen Schulden-Niveau, Custom-Code-Wildwuchs, kein Clean Core. Vorbereitung auf AI-gestützte SAP-Use-Cases (Joule, SAP OC) nicht möglich. Roadmap-Druck bis 2027.",
+      "Historisch gewachsene On-Premises-SAP-Landschaft mit umfangreichem Custom Code und ohne Clean Core. Für AI-gestützte SAP-Use-Cases (Joule, SAP OC) und den Roadmap-Horizont 2027 braucht es eine modernisierte Plattform.",
     intervention:
       "Erarbeitung von Zielarchitektur und Modernisierungs-Roadmap für eine historisch gewachsene SAP-Landschaft: SAP on Azure, Clean-Core-Ansatz mit Bewertung des Custom Codes, Identity- und SSO-Konzept, Teststrategie sowie Cutover- und Hypercare-Konzept. Meine Rolle umfasst Architektur und Roadmap, nicht die Gesamtumsetzung des Programms.",
     metrics: [
@@ -377,7 +377,7 @@ export const cases: CaseStudy[] = [
       title: "SAP Landscape Modernization into the Private Cloud",
       anchor: "Tier-2 automotive · SAP S/4HANA · Azure · Target architecture & roadmap",
       context:
-        "On-premises SAP operations with significant technical debt, sprawling custom code and no clean core. AI-supported SAP use cases (Joule, SAP OC) were out of reach. Roadmap pressure through 2027.",
+        "An on-premises SAP landscape that grew over many years, with extensive custom code and no clean core. AI-supported SAP use cases (Joule, SAP OC) and the 2027 roadmap horizon require a modernized platform.",
       intervention:
         "Developing the target architecture and modernization roadmap for an SAP landscape that grew over many years: SAP on Azure, a clean-core approach with custom-code assessment, an identity and SSO concept, a test strategy, and cutover and hypercare concepts. My role covers architecture and roadmap, not the end-to-end delivery of the program.",
       metrics: [
@@ -466,7 +466,7 @@ export const cases: CaseStudy[] = [
     title: "Modern Intranet Redesign & AI Knowledge Agent",
     anchor: "Tier-2 Automotive · 2.800 MA · SharePoint-basiert",
     context:
-      "Klassisches Intranet als Friedhof von Dokumenten. Wissen verteilt zwischen SharePoint, Teams, HR-Tools, Prozess-Handbüchern. Mitarbeiter finden Antworten nicht oder zu langsam. Bedarf an einem modernen Wissens-Layer für das unternehmensweite Wissen.",
+      "Das klassische Intranet war dokumentenzentriert, Wissen verteilt auf SharePoint, Teams, HR-Tools und Prozess-Handbücher. Antworten zu finden kostete Zeit. Gesucht war ein moderner Wissens-Layer für das unternehmensweite Wissen.",
     intervention:
       "Konzeption eines modernen SharePoint-Intranets mit KI-gestützter Wissenssuche: Orchestrator-Agent mit spezialisierten HR-, IT- und Prozess-Agenten, RAG, Quellenverwaltung und Governance. Das Projekt wurde konzipiert und vollständig an das verantwortliche Team übergeben.",
     metrics: [
@@ -480,7 +480,7 @@ export const cases: CaseStudy[] = [
       title: "Modern Intranet Redesign & AI Knowledge Agent",
       anchor: "Tier-2 automotive · 2,800 employees · SharePoint-based",
       context:
-        "A classic intranet that had become a document graveyard. Knowledge was scattered across SharePoint, Teams, HR tools and process manuals, and employees could not find answers, or not fast enough. A modern knowledge layer for company-wide knowledge was needed.",
+        "The classic intranet was document-centric, with knowledge spread across SharePoint, Teams, HR tools and process manuals. Finding answers took time. The goal was a modern knowledge layer for company-wide knowledge.",
       intervention:
         "Concept for a modern SharePoint intranet with AI-supported knowledge search: an orchestrator agent with specialized HR, IT and process agents, RAG, source management and governance. The project was designed and fully handed over to the responsible team.",
       metrics: [
@@ -604,7 +604,7 @@ export const cases: CaseStudy[] = [
     title: "Microsoft Copilot & Agents Programm",
     anchor: "Tier-2 Automotive · Cross-Function · Von Greenfield zum Agent-Programm",
     context:
-      "Microsoft 365 Copilot kam ohne Strategie, definierte Use-Cases oder Betriebsmodell ins Unternehmen. Praktisches Verständnis dafür, was KI im Tagesgeschäft leisten kann, fehlte; es bestand das Risiko von Schatten-AI in den Fachbereichen.",
+      "Mit der Einführung von Microsoft 365 Copilot brauchte es eine Strategie, definierte Use-Cases und ein Betriebsmodell. Praktisches Verständnis dafür, was KI im Tagesgeschäft leisten kann, musste aufgebaut werden, auch um Schatten-AI in den Fachbereichen vorzubeugen.",
     intervention:
       "Aufbau des M365-Copilot-Programms von null bis zum unternehmensweiten Agent-Programm. Phase 1: Pilotgruppen, Champions-Netzwerk, Lizenz- und Datenschutz-Governance, Schulungen, Prompt-Coaching und Erfolgsmessung. Phase 2: Custom Agents mit Use-Cases in IT, Exportkontrolle, Logistik und HR, Agent-Governance, Enabler in den Fachbereichen, Feedback-Loops und eine Organizational-Skilling-Initiative mit Microsoft.",
     metrics: [
@@ -618,7 +618,7 @@ export const cases: CaseStudy[] = [
       title: "Microsoft Copilot & Agents Program",
       anchor: "Tier-2 automotive · Cross-functional · From greenfield to agent program",
       context:
-        "Microsoft 365 Copilot arrived without a strategy, defined use cases or an operating model. Practical understanding of what AI can do in day-to-day work was missing, and shadow AI in the business units was a real risk.",
+        "Introducing Microsoft 365 Copilot called for a strategy, defined use cases and an operating model. Practical understanding of what AI can do in day-to-day work had to be built up, also to prevent shadow AI in the business units.",
       intervention:
         "Building the M365 Copilot program from zero to a company-wide agent program. Phase 1: pilot groups, a champions network, licensing and data-protection governance, training, prompt coaching and success measurement. Phase 2: custom agents with use cases in IT, export control, logistics and HR, agent governance, enablers in the business units, feedback loops and an organizational skilling initiative with Microsoft.",
       metrics: [
@@ -672,7 +672,7 @@ export const cases: CaseStudy[] = [
     title: "SoSafe Security Awareness Programm",
     anchor: "Tier-2 Automotive · 2.800 MA · Mehrsprachig",
     context:
-      "Phishing- und Social-Engineering-Risiko als größter realer Angriffspfad. Awareness-Maßnahmen waren einmalige Schulungen, kein kontinuierlicher Loop, kein Reifegrad-Reporting an Geschäftsführung.",
+      "Phishing und Social Engineering als zentrale Risikofelder der Informationssicherheit. Ziel war ein kontinuierliches Awareness-Programm statt einzelner Schulungen, mit Reifegrad-Reporting an die Geschäftsführung.",
     intervention:
       "Einführung SoSafe als kontinuierliches Awareness-Programm. Mehrsprachige Lerninhalte, regelmäßige Phishing-Simulationen, Klickraten-Tracking und Reifegrad-KPIs. Roll-out-Strategie pro Standort, Eskalations-Pfad bei wiederholter Auffälligkeit, Verankerung im ISMS-Maßnahmen-Backlog. Das Programm wird kontinuierlich weiterentwickelt, unter anderem um neue Module.",
     metrics: [
@@ -686,7 +686,7 @@ export const cases: CaseStudy[] = [
       title: "SoSafe Security Awareness Program",
       anchor: "Tier-2 automotive · 2,800 employees · Multilingual",
       context:
-        "Phishing and social engineering as the most realistic attack path. Awareness measures were one-off trainings, with no continuous loop and no maturity reporting to executive management.",
+        "Phishing and social engineering as central risk areas of information security. The goal was a continuous awareness program instead of individual trainings, with maturity reporting to executive management.",
       intervention:
         "Introduction of SoSafe as a continuous awareness program. Multilingual learning content, regular phishing simulations, click-rate tracking and maturity KPIs. Rollout strategy per site, an escalation path for repeated findings, anchored in the ISMS action backlog. The program is continuously developed further, including new modules.",
       metrics: [
@@ -739,7 +739,7 @@ export const cases: CaseStudy[] = [
     title: "Azure Landing Zone Level 400 als Enterprise-Foundation",
     anchor: "Tier-2 Automotive · 2.800 MA · Hybrid-Workloads",
     context:
-      "Wachsender Bedarf an Cloud-Workloads ohne tragfähige Foundation. Subscription-Wildwuchs, fehlende Policies, kein einheitliches Tagging. Risk: jedes Workload-Team baut eigene Standards.",
+      "Wachsender Bedarf an Cloud-Workloads erforderte eine tragfähige, einheitliche Foundation: gemeinsame Strukturen, Policies und Tagging-Standards, auf denen alle Workload-Teams aufbauen.",
     intervention:
       "Konzeption und Implementierung Azure Landing Zone bis Level 400. Management Groups, Subscription-Layout, Naming/Tagging-Standards. Security-Baseline (Policy-Framework, RBAC, zentrales Logging, Netzwerk- und Identity-Integration). Infrastructure as Code als Standard für jedes Workload und jede Konfiguration - Templates, Module, GitOps-Workflows. Onboarding-Prozess zwischen Plattform- und Workload-Teams.",
     metrics: [
@@ -753,7 +753,7 @@ export const cases: CaseStudy[] = [
       title: "Azure Landing Zone Level 400 as Enterprise Foundation",
       anchor: "Tier-2 automotive · 2,800 employees · Hybrid workloads",
       context:
-        "Growing demand for cloud workloads without a solid foundation. Subscription sprawl, missing policies, no consistent tagging. The risk: every workload team builds its own standards.",
+        "Growing demand for cloud workloads required a solid, consistent foundation: shared structures, policies and tagging standards that every workload team builds on.",
       intervention:
         "Design and implementation of an Azure landing zone up to level 400. Management groups, subscription layout, naming and tagging standards. Security baseline (policy framework, RBAC, central logging, network and identity integration). Infrastructure as code as the standard for every workload and every configuration: templates, modules, GitOps workflows. Onboarding process between platform and workload teams.",
       metrics: [
@@ -809,7 +809,7 @@ export const cases: CaseStudy[] = [
     title: "Cyber Risk Management & BCM Framework",
     anchor: "Tier-2 Automotive · 2.800 MA · Krisen-Resilienz",
     context:
-      "Kein durchgängiges Cyber-Risk-Modell, BCM-Pläne pro Standort fragmentiert. Tabletop-Übungen sporadisch, Eskalations- und Kommunikationspfade in einer Krise unklar. Versicherungs- und Audit-Druck steigend.",
+      "Harmonisierung standortspezifischer BCM- und Krisenmanagementprozesse sowie Aufbau einer übergreifenden Cyber-Risk-Governance. Treiber waren steigende Anforderungen aus Audits und Versicherungen.",
     intervention:
       "Aufbau eines konzernweiten Cyber-Risk-Frameworks (Risiko-Inventar, Bewertungs-Methodik, Maßnahmen-Tracking). Business-Continuity-Pläne harmonisiert, kritische Geschäftsprozesse priorisiert, Wiederanlauf-Zeiten definiert. Tabletop-Exercise mit Geschäftsführung und IT-Leads. Notfallpläne und Kommunikations-Templates verankert.",
     metrics: [
@@ -823,7 +823,7 @@ export const cases: CaseStudy[] = [
       title: "Cyber Risk Management & BCM Framework",
       anchor: "Tier-2 automotive · 2,800 employees · Crisis resilience",
       context:
-        "No consistent cyber risk model, fragmented BCM plans per site. Tabletop exercises were sporadic, escalation and communication paths in a crisis unclear. Rising pressure from insurers and audits.",
+        "Harmonizing site-specific BCM and crisis management processes and establishing overarching cyber risk governance. Drivers were rising requirements from audits and insurers.",
       intervention:
         "Building a group-wide cyber risk framework (risk inventory, assessment methodology, action tracking). Business continuity plans harmonized, critical business processes prioritized, recovery times defined. Tabletop exercise with executive management and IT leads. Emergency plans and communication templates established.",
       metrics: [
@@ -846,7 +846,7 @@ export const cases: CaseStudy[] = [
     title: "Data, KPI & BI-Plattform inkl. KPI-Datenerfassungsplattform",
     anchor: "Tier-2 Automotive · Cross-Function · Team, Plattform, KPIs",
     context:
-      "Reporting-Wildwuchs aus Excel-Inseln und lokalen Power-BI-Lösungen, keine konsolidierte Sicht über die globale Organisation. KPI-Definitionen pro Werk und Funktion unterschiedlich, Management-Reports manuell zusammengetragen, KPI-Erfassung in Excel.",
+      "Reporting verteilt auf Excel-Dateien und lokale Power-BI-Lösungen, ohne konsolidierte Sicht über die globale Organisation. KPI-Definitionen unterschieden sich je Werk und Funktion, Management-Reports und KPI-Erfassung liefen weitgehend manuell in Excel.",
     intervention:
       "Vier Bausteine: Team Data Analytics & BI mitaufgebaut und strategisch weiterentwickelt. Globale BI-Plattform mit SAP Analytics Cloud, SAP Datasphere/DWC, Power BI und Microsoft Fabric, Migration lokaler Reports, Governance und Self-Service. KPI-Restrukturierung mit einheitlichen Definitionen über Werke und Fachbereiche, klaren Datenverantwortlichkeiten und Konsolidierung heterogener Excel-Reports. Neu: eine zentrale KPI-Datenerfassungsplattform löst die Excel-basierte Erfassung ab, u. a. für ISMS-, IT- und OT-KPIs, mit automatisierten Datenflüssen.",
     metrics: [
@@ -860,7 +860,7 @@ export const cases: CaseStudy[] = [
       title: "Data, KPI & BI Platform incl. KPI Data Capture Platform",
       anchor: "Tier-2 automotive · Cross-functional · Team, platform, KPIs",
       context:
-        "Reporting sprawl across Excel islands and local Power BI solutions, with no consolidated view of the global organization. KPI definitions differed by plant and function, management reports were compiled by hand, and KPIs were captured in Excel.",
+        "Reporting was spread across Excel files and local Power BI solutions, without a consolidated view of the global organization. KPI definitions differed by plant and function, and management reports and KPI capture ran largely manually in Excel.",
       intervention:
         "Four building blocks: co-building the Data Analytics & BI team and developing it strategically. A global BI platform with SAP Analytics Cloud, SAP Datasphere/DWC, Power BI and Microsoft Fabric, including migration of local reports, governance and self-service. KPI restructuring with consistent definitions across plants and business units, clear data ownership and consolidation of heterogeneous Excel reports. New: a central KPI data capture platform replaces Excel-based collection, including ISMS, IT and OT KPIs, with automated data flows.",
       metrics: [
@@ -948,7 +948,7 @@ export const cases: CaseStudy[] = [
     title: "Aufbau Team IT Applications",
     anchor: "Tier-2 Automotive · Neues Sub-Team · Globale Coverage",
     context:
-      "Kein dediziertes Applications-Team in der bestehenden IT-Organisation. Anwendungen wurden ad-hoc zwischen Infrastructure-Team und Fachbereichen verwaltet, unklare Verantwortung, keine Lieferfähigkeit für M365-, AI- oder Eigenentwicklungs-Initiativen.",
+      "Die IT-Organisation hatte kein dediziertes Applications-Team. Anwendungen wurden zwischen Infrastruktur-Team und Fachbereichen betreut. Für M365-, AI- und Eigenentwicklungs-Initiativen brauchte es eine eigene Einheit mit klaren Verantwortlichkeiten.",
     intervention:
       "Komplett-Aufbau eines neuen IT-Sub-Teams für Applications bei ODW-ELEKTRIK: Hiring, Onboarding, Skill-Profile, Verantwortungsmatrix, Kommunikation in die bestehende IT-Organisation. Heute eigene Lieferfähigkeit mit sechs disziplinarischen Direct Reports und Mandate-Coverage über die globale Organisation.",
     metrics: [
@@ -963,7 +963,7 @@ export const cases: CaseStudy[] = [
       title: "Building the IT Applications Team",
       anchor: "Tier-2 automotive · New sub-team · Global coverage",
       context:
-        "No dedicated applications team in the existing IT organization. Applications were managed ad hoc between the infrastructure team and the business units, with unclear responsibilities and no capacity to deliver M365, AI or in-house development initiatives.",
+        "The IT organization had no dedicated applications team. Applications were looked after between the infrastructure team and the business units. M365, AI and in-house development initiatives needed a dedicated unit with clear responsibilities.",
       intervention:
         "Building a new IT sub-team for applications at ODW-ELEKTRIK from scratch: hiring, onboarding, skill profiles, responsibility matrix, communication into the existing IT organization. Today the team delivers on its own, with six direct reports under my line management and coverage across the global organization.",
       metrics: [
@@ -982,7 +982,7 @@ export const cases: CaseStudy[] = [
     title: "M365 Zero Trust & Single Identity Architecture",
     anchor: "Tier-2 Automotive · 2.800 MA · 6 Sites international",
     context:
-      "Heterogene Identity-Landschaft mit lokalen ADs pro Standort, fragmentiertes MFA, kein einheitliches Conditional Access. Zero-Trust-Anspruch auf Papier, in der Realität kein durchgängiges Modell. Lifecycle-Prozesse manuell.",
+      "Modernisierung einer historisch gewachsenen Identity-Landschaft mit standortbezogenen Verzeichnisdiensten hin zu einer konzernweiten Zero-Trust-Architektur mit einheitlicher Identität, MFA, Conditional Access und SSO.",
     intervention:
       "Konzeption und Roll-out einer Single-Identity-Architektur auf Microsoft Entra ID. Conditional Access als zentrales Policy-Layer, MFA flächendeckend, SSO für Kern-Anwendungen. Identity-Lifecycle-Modell mit klarer Owner-Zuweisung. Migrations- und Cutover-Plan über alle Standorte. Die Authentifizierungsmethoden werden seitdem kontinuierlich weiterentwickelt.",
     metrics: [
@@ -996,7 +996,7 @@ export const cases: CaseStudy[] = [
       title: "M365 Zero Trust & Single Identity Architecture",
       anchor: "Tier-2 automotive · 2,800 employees · 6 sites internationally",
       context:
-        "Heterogeneous identity landscape with local ADs per site, fragmented MFA, no consistent conditional access. Zero trust on paper, but no end-to-end model in practice. Manual lifecycle processes.",
+        "Modernizing an identity landscape that had grown over time, with site-based directory services, toward a group-wide zero trust architecture with a single identity, MFA, conditional access and SSO.",
       intervention:
         "Design and rollout of a single identity architecture on Microsoft Entra ID. Conditional access as the central policy layer, MFA across the board, SSO for core applications. Identity lifecycle model with clear ownership. Migration and cutover plan across all sites. Authentication methods have been developed further continuously since.",
       metrics: [
@@ -1017,7 +1017,7 @@ export const cases: CaseStudy[] = [
     title: "ISMS-Programm bis ISO 27001 Matrix-Zertifizierung & TISAX Level 3",
     anchor: "Tier-2 Automotive · 2.800 MA · 6 Sites international",
     context:
-      "Kein einheitliches ISMS, fragmentierte Sicherheits-Policies pro Standort, Druck durch Kundenanforderungen (TISAX) und ISO-Zertifizierungs-Roadmap. Audit-Readiness lag bei null.",
+      "Aufbau einer einheitlichen ISMS- und Audit-Struktur für eine international aufgestellte IT-Organisation. Treiber waren Kundenanforderungen (TISAX) und eine ISO-Zertifizierungs-Roadmap.",
     intervention:
       "Aufbau eines ISMS von Grund auf - Policies, Standards, Risikomanagement, SoA, Dokumentenlenkung, Rollenmodell. Zentrale Security-Prozesse (Incident Handling, Vulnerability Reviews, Maßnahmen-Tracking). ISMS-Workflows automatisiert über Power Automate (Permission Reviews, Audit-Trail, Lieferantenmanagement). Interne Audits geplant und durchgeführt, externe Auditierungen begleitet.",
     metrics: [
@@ -1031,7 +1031,7 @@ export const cases: CaseStudy[] = [
       title: "ISMS Program to ISO 27001 Matrix Certification & TISAX Level 3",
       anchor: "Tier-2 automotive · 2,800 employees · 6 sites internationally",
       context:
-        "No unified ISMS, fragmented security policies per site, pressure from customer requirements (TISAX) and an ISO certification roadmap. Audit readiness started from zero.",
+        "Establishing a unified ISMS and audit structure for an internationally organized IT function. Drivers were customer requirements (TISAX) and an ISO certification roadmap.",
       intervention:
         "Building an ISMS from the ground up: policies, standards, risk management, SoA, document control, role model. Central security processes (incident handling, vulnerability reviews, action tracking). ISMS workflows automated with Power Automate (permission reviews, audit trail, supplier management). Internal audits planned and conducted, external audits supported.",
       metrics: [
@@ -1050,7 +1050,7 @@ export const cases: CaseStudy[] = [
     title: "Enterprise IAM – Identity Lifecycle & Self-Service",
     anchor: "Tier-2 Automotive · IAM-Toolchain · Identity Lifecycle",
     context:
-      "Berechtigungsverwaltung über manuelle Tickets. Keine Self-Service-Möglichkeit für Fachbereiche, Lifecycle-Schritte zogen sich, Audit-Spuren lückenhaft. Wachsender Druck durch ISMS-Anforderungen.",
+      "Berechtigungen wurden über manuelle Tickets verwaltet. Ziel war ein durchgängiger, nachvollziehbarer Identity Lifecycle mit Self-Service für die Fachbereiche, abgestimmt auf die Anforderungen des ISMS.",
     intervention:
       "Einführung einer zentralen IAM-Plattform. Anbindung Active Directory, M365, SAP und Fachanwendungen. Self-Service-Anträge mit Approval-Workflows, automatisierter Joiner-Mover-Leaver-Prozess, Re-Zertifizierungs-Kampagnen. Rollenmodell harmonisiert, Audit-Trail über Lifecycle-Ereignisse.",
     metrics: [
@@ -1064,7 +1064,7 @@ export const cases: CaseStudy[] = [
       title: "Enterprise IAM – Identity Lifecycle & Self-Service",
       anchor: "Tier-2 automotive · IAM toolchain · Identity lifecycle",
       context:
-        "Permission management through manual tickets. No self-service for business units, lifecycle steps dragged on, gaps in audit trails. Growing pressure from ISMS requirements.",
+        "Permissions were managed through manual tickets. The goal was a consistent, traceable identity lifecycle with self-service for the business units, aligned with ISMS requirements.",
       intervention:
         "Introduction of a central IAM platform. Connection of Active Directory, M365, SAP and business applications. Self-service requests with approval workflows, an automated joiner-mover-leaver process, recertification campaigns. Harmonized role model and an audit trail across lifecycle events.",
       metrics: [
@@ -1189,7 +1189,7 @@ export const cases: CaseStudy[] = [
     title: "IT-Strategie & Roadmap 2030",
     anchor: "Tier-2 Automotive · Hidden Champion · Mehrjährige Linie",
     context:
-      "On-prem-getriebener Mittelständler ohne klare Cloud- oder AI-Roadmap. Hohes Daten-Sediment in Legacy-Systemen, IT als reaktiver Service. Wandel-Druck durch Kundenanforderungen, Compliance und Wettbewerb.",
+      "Mittelständler mit gewachsener On-Premises-Landschaft und ohne ausformulierte Cloud- und AI-Roadmap. Kundenanforderungen, Compliance und Wettbewerb erhöhten den Veränderungsdruck auf die IT.",
     intervention:
       "Mitgestaltung des Wegs vom on-prem-getriebenen Mittelständler zum AI-enabled, cloud-first IT-Setup eines Hidden Champion. Über die volle Laufzeit: Foundation (LZ, IAM), Modernisierung (SAP, M365), KI-Integration (Copilot, Agents), Sicherheits-Reife (ISMS, SOC). Roadmap 2030 mit Quartalsreviews, Investitionsplanung für IT Applications und Enterprise-Architektur nach TOGAF. Eine IT-Organisation, die auf jede fachliche Frage eine Antwort hat.",
     metrics: [
@@ -1204,7 +1204,7 @@ export const cases: CaseStudy[] = [
       title: "IT Strategy & Roadmap 2030",
       anchor: "Tier-2 automotive · Hidden champion · Multi-year line role",
       context:
-        "A mid-sized company driven by on-premises IT, without a clear cloud or AI roadmap. Lots of data sediment in legacy systems, IT as a reactive service. Pressure to change from customer requirements, compliance and competition.",
+        "A mid-sized company with an established on-premises landscape and no formulated cloud and AI roadmap. Customer requirements, compliance and competition increased the pressure on IT to change.",
       intervention:
         "Helping shape the path from an on-premises-driven mid-sized company to the AI-enabled, cloud-first IT setup of a hidden champion. Over the full period: foundation (landing zone, IAM), modernization (SAP, M365), AI integration (Copilot, agents), security maturity (ISMS, SOC). Roadmap 2030 with quarterly reviews, investment planning for IT Applications and enterprise architecture based on TOGAF. An IT organization that has an answer to every business question.",
       metrics: [

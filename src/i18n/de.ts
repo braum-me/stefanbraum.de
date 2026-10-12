@@ -395,7 +395,7 @@ export const de: Translations = {
     listingHeadline: "Notizen aus der Praxis.",
     listingSubline:
       "Was ich gerade lerne, baue, beobachte. Mittelstands-IT, AI-Adoption, Compliance-Realität, Build-Notes. Kein Marketing, keine Liste mit Punkten. Einfach Notizen.",
-    listingTitle: "Schreiben - Stefan Braum",
+    listingTitle: "Schreiben · Stefan Braum",
     listingDescription:
       "Notizen aus der Praxis: AI-Adoption, Mittelstands-IT, Compliance, Build-Notes.",
     backToList: "Schreiben",
@@ -462,7 +462,7 @@ export const de: Translations = {
     backToOverview: "Zurück zur Übersicht",
     impressum: {
       title: "Impressum - Stefan Braum",
-      description: "Anbieterkennzeichnung nach Paragraph 5 TMG für stefanbraum.de.",
+      description: "Anbieterkennzeichnung nach § 5 DDG für stefanbraum.de.",
       h1: "Impressum",
     },
     datenschutz: {

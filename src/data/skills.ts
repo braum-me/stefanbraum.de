@@ -17,6 +17,14 @@ export interface Skill {
   projects: string[];
   /** matches Certification.id */
   certificates: string[];
+  /** Englische Bezeichnungen; ohne Angabe gelten `name`/`subSkills` (Produktnamen). */
+  en?: { name?: string; subSkills?: string[] };
+}
+
+/** Name und Sub-Skills in der gewünschten Sprache. */
+export function localizeSkill(s: Skill, locale: "de" | "en"): Skill {
+  if (locale !== "en" || !s.en) return s;
+  return { ...s, name: s.en.name ?? s.name, subSkills: s.en.subSkills ?? s.subSkills };
 }
 
 export const skillDomains: Record<SkillDomain, string> = {
@@ -43,6 +51,7 @@ export const skills: Skill[] = [
       "global-bi-platform",
     ],
     certificates: [],
+    en: { subSkills: ["S/4HANA", "Brownfield migration", "Clean Core", "SAP SAC", "SAP DWC"] },
   },
   {
     id: "m365",
@@ -86,6 +95,7 @@ export const skills: Skill[] = [
       "it-due-diligence",
     ],
     certificates: ["itil-v4-foundation"],
+    en: { name: "IT Security & ISMS" },
   },
   {
     id: "ai-copilot",
@@ -101,6 +111,10 @@ export const skills: Skill[] = [
       "outline-knowledge-base",
     ],
     certificates: ["ai-strategic-leverage"],
+    en: {
+      name: "AI / Copilot / Agents",
+      subSkills: ["Copilot", "Custom Agents", "MCP", "RAG", "Prompt engineering", "AI adoption"],
+    },
   },
   {
     id: "power-platform",
@@ -128,6 +142,9 @@ export const skills: Skill[] = [
       "plm-web-client-evolution",
     ],
     certificates: ["digital-transformation-mgmt"],
+    en: {
+      subSkills: ["Vendor management", "Architecture reviews", "Stack decisions", "Build vs. buy"],
+    },
   },
   {
     id: "itil-ops",
@@ -142,6 +159,10 @@ export const skills: Skill[] = [
       "global-it-governance-service-management",
     ],
     certificates: ["itil-v4-foundation"],
+    en: {
+      name: "ITIL & IT Operations",
+      subSkills: ["Service management", "Incident", "Change", "Problem management"],
+    },
   },
   {
     id: "digital-transformation",
@@ -160,6 +181,9 @@ export const skills: Skill[] = [
       "catena-x-preparation",
     ],
     certificates: ["digital-transformation-mgmt", "management-training"],
+    en: {
+      subSkills: ["Change management", "Adoption", "Processes", "Self-service enablement"],
+    },
   },
   {
     id: "data-bi",
@@ -169,6 +193,7 @@ export const skills: Skill[] = [
     subSkills: ["SAP SAC", "SAP DWC", "Power BI", "Microsoft Fabric", "KPI-Reporting"],
     projects: ["global-bi-platform", "lexisnexis-patent-analytics"],
     certificates: [],
+    en: { subSkills: ["SAP SAC", "SAP DWC", "Power BI", "Microsoft Fabric", "KPI reporting"] },
   },
   {
     id: "leadership-team",
@@ -183,5 +208,9 @@ export const skills: Skill[] = [
       "global-it-governance-service-management",
     ],
     certificates: ["management-training"],
+    en: {
+      name: "Leadership & Team",
+      subSkills: ["Hiring", "Coaching", "Stakeholder management", "Direct reports"],
+    },
   },
 ];
