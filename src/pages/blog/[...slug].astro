@@ -74,7 +74,7 @@ const blogPostingJsonLd = {
   headline: post.data.title,
   description: post.data.excerpt,
   datePublished: post.data.date.toISOString(),
-  dateModified: post.data.date.toISOString(),
+  dateModified: (post.data.updated ?? post.data.date).toISOString(),
   inLanguage: "de-DE",
   keywords: post.data.tags.join(", "),
   author: {

@@ -11,6 +11,7 @@
  */
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
+import { findConfidentialTerms } from "./confidential-terms.mjs";
 
 const PORT = Number(process.env.SMOKE_PORT ?? 4399);
 const HOST = "127.0.0.1";
@@ -167,6 +168,9 @@ async function main() {
     const { body } = await get(p);
 
     for (const re of FORBIDDEN_TERMS) check(!re.test(body), `${p}: enthält ${re}`);
+    const confidential = findConfidentialTerms(body);
+    check(confidential.length === 0, `${p}: vertraulicher Anbietername (Hash ${confidential})`);
+    check(!/\d\s*(Mio|Mrd)\.?\s*€|€\s*\d|\d\s*€/.test(body), `${p}: Geldbetrag im Inhalt`);
     check(!body.includes("entry-boot"), `${p}: Boot-Splash ist noch vorhanden`);
 
     for (const href of links(body)) {

@@ -155,19 +155,32 @@ export const LEGACY_CASE_IDS: Readonly<Record<string, string>> = {
   "team-data-analytics": "global-bi-platform",
 };
 
-/** Präfix-Aliase für alte IDs, deren voller Name nicht veröffentlicht werden soll. */
-export const LEGACY_CASE_ID_PREFIXES: ReadonlyArray<{ prefix: string; id: string }> = [
-  { prefix: "managed-soc-", id: "managed-soc-endpoint-security" },
-  { prefix: "hr-", id: "hr-transformation-evaluation" },
+/**
+ * Muster-Aliase für alte IDs, deren voller Name nicht veröffentlicht werden soll
+ * (z.B. Anbieter- oder Herstellernamen). Es wird nur der neutrale Teil der alten ID
+ * ausgeliefert: Präfix oder Suffix.
+ */
+export const LEGACY_CASE_ID_PATTERNS: ReadonlyArray<{
+  match: "prefix" | "suffix";
+  value: string;
+  id: string;
+}> = [
+  { match: "prefix", value: "managed-soc-", id: "managed-soc-endpoint-security" },
+  { match: "prefix", value: "hr-", id: "hr-transformation-evaluation" },
+  { match: "suffix", value: "-iam-rollout", id: "enterprise-iam-self-service" },
 ];
+
+function matchesLegacyPattern(id: string, p: (typeof LEGACY_CASE_ID_PATTERNS)[number]) {
+  return p.match === "prefix" ? id.startsWith(p.value) : id.endsWith(p.value);
+}
 
 /** Aktuelle ID zu einer (ggf. alten) Case-ID oder `null`, wenn es keinen Case gibt. */
 export function resolveCaseId(id: string, list: readonly CaseStudy[] = cases): string | null {
   if (list.some((c) => c.id === id)) return id;
   const exact = LEGACY_CASE_IDS[id];
   if (exact && list.some((c) => c.id === exact)) return exact;
-  const byPrefix = LEGACY_CASE_ID_PREFIXES.find((a) => id.startsWith(a.prefix));
-  if (byPrefix && list.some((c) => c.id === byPrefix.id)) return byPrefix.id;
+  const byPattern = LEGACY_CASE_ID_PATTERNS.find((p) => matchesLegacyPattern(id, p));
+  if (byPattern && list.some((c) => c.id === byPattern.id)) return byPattern.id;
   return null;
 }
 
@@ -323,6 +336,20 @@ export const cases: CaseStudy[] = [
     ],
     tags: ["SaaS", "TypeScript", "AI", "Compliance", "Build"],
     blogSlug: "2026-04-20-warum-ich-aboutexport-baue",
+    en: {
+      kind: "SaaS Build",
+      title: "AboutExport - SaaS for Export Control Compliance",
+      anchor: "Own venture · Pre-launch 2026 · TypeScript + AI",
+      context:
+        "Export control is a compliance topic with heavy manual effort for mid-sized companies: classification, end-use checks, sanctions list screening. Existing tools on the market are enterprise-heavy and expensive.",
+      intervention:
+        "Concept and build of a SaaS product for export control compliance. AI-supported classification of goods and end-use indicators, integrated sanctions list screening, a workflow engine for approvals. Stack: TypeScript, Node, a modern frontend, a database layer with audit. My own venture, my own pace.",
+      metrics: [
+        { value: "Pre-launch", label: "2026" },
+        { value: "AI-first", label: "Classification + list screening" },
+        { value: "Workflow", label: "Approvals + audit trail" },
+      ],
+    },
   },
 
   // ─── 2025 ───────────────────────────────────────────────
@@ -414,6 +441,20 @@ export const cases: CaseStudy[] = [
       { value: "Self-Host", label: "Coolify + Docker" },
     ],
     tags: ["Astro", "TypeScript", "Tailwind", "Three.js", "OSS"],
+    en: {
+      kind: "Build",
+      title: "braum.x - Personal Identity Hub",
+      anchor: "Own venture · Astro 5 · braum.me / stefanbraum.de / braum.org / braum.dev",
+      context:
+        "Own web properties with clear roles instead of one monolithic personal site. braum.me as a concierge business card (3-second hook), stefanbraum.de as the editorial hub, braum.org as a venture overview, braum.dev as an engineering sandbox. All from one brand and tech line.",
+      intervention:
+        "Own build of the hub stack on Astro 5, TypeScript strict, Tailwind 4 and @astrojs/node. Forest-green palette as the visual foundation, editorial-first layout. Three.js skill sphere, GSAP entry animations, AmbientShader (lazy via idle callback), DIY SplitText, custom cursor. Self-hosted on Coolify with Docker multi-stage builds. Repos published as OSS on GitHub as sanitized snapshots.",
+      metrics: [
+        { value: "4 properties", label: "One brand line" },
+        { value: "Astro 5", label: "+ TypeScript strict" },
+        { value: "Self-host", label: "Coolify + Docker" },
+      ],
+    },
   },
   {
     id: "modern-intranet-ai-knowledge-agent",
@@ -502,6 +543,20 @@ export const cases: CaseStudy[] = [
       { value: "Cross-Func", label: "HR + Verträge + Freigaben" },
     ],
     tags: ["Adobe Sign", "E-Signature", "Adoption", "Compliance"],
+    en: {
+      kind: "Adoption",
+      title: "Adobe Sign End-to-End Digital Signature",
+      anchor: "Tier-2 automotive · Cross-functional · Paperless workflow",
+      context:
+        "Contracts, internal approvals and HR documents relied on printed and scanned signatures. Postal delays, waiting times and media breaks shaped the process. Compliance pressure (traceability, audit trail) was growing.",
+      intervention:
+        "Introduction of Adobe Sign as the central e-signature tool. Integration into M365 and HR and contract workflows, a use-case catalog with the business units, a rights and template model. Adoption strategy with a wave plan and stakeholder mapping. Alignment with compliance and audit requirements.",
+      metrics: [
+        { value: "M365-integrated", label: "Workflow-native" },
+        { value: "Audit trail", label: "End to end" },
+        { value: "Cross-functional", label: "HR + contracts + approvals" },
+      ],
+    },
   },
   {
     id: "lexisnexis-patent-analytics",
@@ -522,6 +577,20 @@ export const cases: CaseStudy[] = [
       { value: "Power-User", label: "Enablement-Pfad" },
     ],
     tags: ["AI", "IP-Analytics", "PatentSight", "Innovation", "R&D"],
+    en: {
+      kind: "Applied AI",
+      title: "LexisNexis Patent Analytics Enablement",
+      anchor: "Tier-2 automotive · R&D + IP · PatentSight & TechDiscovery",
+      context:
+        "Innovation and patent research was manual, slow and concentrated on a few specialists. Competitor monitoring and white-space analysis remained qualitative. R&D needed systematic support from AI-based patent analytics.",
+      intervention:
+        "Introduction of LexisNexis PatentSight and TechDiscovery as an AI-supported IP platform. Use-case definition together with the innovation and patent leads. Integration into the innovation dashboard, power-user training and a reporting standard for competitor and white-space analyses.",
+      metrics: [
+        { value: "PatentSight", label: "+ TechDiscovery live" },
+        { value: "R&D", label: "White-space analytics" },
+        { value: "Power users", label: "Enablement path" },
+      ],
+    },
   },
 
   // ─── 2024 ───────────────────────────────────────────────
@@ -612,6 +681,20 @@ export const cases: CaseStudy[] = [
       { value: "KPI", label: "Reifegrad-Reporting" },
     ],
     tags: ["Awareness", "SoSafe", "Phishing", "ISMS-Linked"],
+    en: {
+      kind: "Program",
+      title: "SoSafe Security Awareness Program",
+      anchor: "Tier-2 automotive · 2,800 employees · Multilingual",
+      context:
+        "Phishing and social engineering as the most realistic attack path. Awareness measures were one-off trainings, with no continuous loop and no maturity reporting to executive management.",
+      intervention:
+        "Introduction of SoSafe as a continuous awareness program. Multilingual learning content, regular phishing simulations, click-rate tracking and maturity KPIs. Rollout strategy per site, an escalation path for repeated findings, anchored in the ISMS action backlog. The program is continuously developed further, including new modules.",
+      metrics: [
+        { value: "Multilingual", label: "Global workforce" },
+        { value: "Phishing sims", label: "Continuous" },
+        { value: "KPI", label: "Maturity reporting" },
+      ],
+    },
   },
   {
     id: "ai-elearning-platform",
@@ -632,6 +715,20 @@ export const cases: CaseStudy[] = [
       { value: "Moodle", label: "Plattform-Foundation" },
     ],
     tags: ["AI", "E-Learning", "HeyGen", "ElevenLabs", "Moodle"],
+    en: {
+      kind: "Applied AI",
+      title: "AI-Enabled E-Learning Platform with Multilingual Avatars",
+      anchor: "Tier-2 automotive · 2,800 employees · 6 languages",
+      context:
+        "Classic e-learning content is expensive to produce and localize, and hard to keep current. A global workforce across several sites needs training content in several languages, quickly and without a studio setup.",
+      intervention:
+        "Building an AI-enabled learning platform on Moodle with HeyGen (video AI) and ElevenLabs (voice AI). Content pipeline for avatar-based training videos in 6 languages, without external production. Integration into the learning lifecycle (authoring, review, publishing, reporting). Governance model for voice and avatar clones, including legal clarification.",
+      metrics: [
+        { value: "6", label: "Languages from one source" },
+        { value: "Avatar + voice", label: "HeyGen + ElevenLabs" },
+        { value: "Moodle", label: "Platform foundation" },
+      ],
+    },
   },
   {
     id: "azure-landing-zone",
@@ -651,6 +748,20 @@ export const cases: CaseStudy[] = [
       { value: "12 Mo", label: "End-to-End umgesetzt" },
     ],
     tags: ["Azure", "Landing Zone", "IaC", "GitOps", "Governance"],
+    en: {
+      kind: "Foundation",
+      title: "Azure Landing Zone Level 400 as Enterprise Foundation",
+      anchor: "Tier-2 automotive · 2,800 employees · Hybrid workloads",
+      context:
+        "Growing demand for cloud workloads without a solid foundation. Subscription sprawl, missing policies, no consistent tagging. The risk: every workload team builds its own standards.",
+      intervention:
+        "Design and implementation of an Azure landing zone up to level 400. Management groups, subscription layout, naming and tagging standards. Security baseline (policy framework, RBAC, central logging, network and identity integration). Infrastructure as code as the standard for every workload and every configuration: templates, modules, GitOps workflows. Onboarding process between platform and workload teams.",
+      metrics: [
+        { value: "Level 400", label: "Maturity reached" },
+        { value: "IaC", label: "Infrastructure as code standard" },
+        { value: "12 mo", label: "Delivered end to end" },
+      ],
+    },
   },
 
   // ─── 2023 ───────────────────────────────────────────────
@@ -707,6 +818,20 @@ export const cases: CaseStudy[] = [
       { value: "Tabletop", label: "Mit Geschäftsführung geübt" },
     ],
     tags: ["Cyber Risk", "BCM", "Framework"],
+    en: {
+      kind: "Framework",
+      title: "Cyber Risk Management & BCM Framework",
+      anchor: "Tier-2 automotive · 2,800 employees · Crisis resilience",
+      context:
+        "No consistent cyber risk model, fragmented BCM plans per site. Tabletop exercises were sporadic, escalation and communication paths in a crisis unclear. Rising pressure from insurers and audits.",
+      intervention:
+        "Building a group-wide cyber risk framework (risk inventory, assessment methodology, action tracking). Business continuity plans harmonized, critical business processes prioritized, recovery times defined. Tabletop exercise with executive management and IT leads. Emergency plans and communication templates established.",
+      metrics: [
+        { value: "Group-wide", label: "Unified risk model" },
+        { value: "BCM plans", label: "Recovery prioritized" },
+        { value: "Tabletop", label: "Practiced with executive management" },
+      ],
+    },
   },
 
   // ─── 2022 ───────────────────────────────────────────────
@@ -763,6 +888,20 @@ export const cases: CaseStudy[] = [
       { value: "Lifecycle", label: "Versionen + Freigaben" },
     ],
     tags: ["Autodesk Vault", "EDM", "CAD", "PLM"],
+    en: {
+      kind: "Platform",
+      title: "Autodesk Vault EDM Platform for Engineering Data",
+      anchor: "Tier-2 automotive · R&D + design engineering",
+      context:
+        "Engineering and CAD data spread across file servers, with local versioning per designer. No vault, no central search, no access or lifecycle model for engineering artifacts. Growing complexity from multi-site design work.",
+      intervention:
+        "Introduction of Autodesk Vault as the central EDM platform for design data. Connection of CAD tools, migration of existing data, a rights and lifecycle model for parts, assemblies and drawings. Interface to PLM structures and master data in SAP. Training for the design teams.",
+      metrics: [
+        { value: "Vault", label: "EDM foundation" },
+        { value: "CAD-linked", label: "Multi-site ready" },
+        { value: "Lifecycle", label: "Versions + releases" },
+      ],
+    },
   },
   {
     id: "it-due-diligence",
@@ -811,15 +950,28 @@ export const cases: CaseStudy[] = [
     context:
       "Kein dediziertes Applications-Team in der bestehenden IT-Organisation. Anwendungen wurden ad-hoc zwischen Infrastructure-Team und Fachbereichen verwaltet, unklare Verantwortung, keine Lieferfähigkeit für M365-, AI- oder Eigenentwicklungs-Initiativen.",
     intervention:
-      "Komplett-Aufbau eines neuen IT-Sub-Teams für Applications bei ODW-ELEKTRIK: Hiring, Onboarding, Skill-Profile, Verantwortungsmatrix, Kommunikation in die bestehende IT-Organisation. Heute eigene Lieferfähigkeit mit Direct Reports und Mandate-Coverage über die globale Organisation.",
+      "Komplett-Aufbau eines neuen IT-Sub-Teams für Applications bei ODW-ELEKTRIK: Hiring, Onboarding, Skill-Profile, Verantwortungsmatrix, Kommunikation in die bestehende IT-Organisation. Heute eigene Lieferfähigkeit mit sechs disziplinarischen Direct Reports und Mandate-Coverage über die globale Organisation.",
     metrics: [
-      // Anzahl der Direct Reports offen (5 oder 6), bis zur Freigabe ohne Zahl.
-      { value: "Direct Reports", label: "Disziplinarische Führung" },
+      { value: "6 DR", label: "Direct Reports disziplinarisch" },
       { value: "Global", label: "Mandate-Coverage" },
       { value: "Greenfield", label: "Team-Build" },
     ],
     tags: ["Team-Aufbau", "Hiring", "Operating Model", "Leadership"],
     hidePill: true,
+    en: {
+      kind: "Team Build",
+      title: "Building the IT Applications Team",
+      anchor: "Tier-2 automotive · New sub-team · Global coverage",
+      context:
+        "No dedicated applications team in the existing IT organization. Applications were managed ad hoc between the infrastructure team and the business units, with unclear responsibilities and no capacity to deliver M365, AI or in-house development initiatives.",
+      intervention:
+        "Building a new IT sub-team for applications at ODW-ELEKTRIK from scratch: hiring, onboarding, skill profiles, responsibility matrix, communication into the existing IT organization. Today the team delivers on its own, with six direct reports under my line management and coverage across the global organization.",
+      metrics: [
+        { value: "6 DR", label: "Direct reports, line management" },
+        { value: "Global", label: "Coverage across the organization" },
+        { value: "Greenfield", label: "Team build" },
+      ],
+    },
   },
   {
     id: "m365-zero-trust-identity",
@@ -839,6 +991,20 @@ export const cases: CaseStudy[] = [
       { value: "MFA", label: "Flächendeckend" },
     ],
     tags: ["Zero Trust", "Entra ID", "MFA", "Conditional Access"],
+    en: {
+      kind: "Program",
+      title: "M365 Zero Trust & Single Identity Architecture",
+      anchor: "Tier-2 automotive · 2,800 employees · 6 sites internationally",
+      context:
+        "Heterogeneous identity landscape with local ADs per site, fragmented MFA, no consistent conditional access. Zero trust on paper, but no end-to-end model in practice. Manual lifecycle processes.",
+      intervention:
+        "Design and rollout of a single identity architecture on Microsoft Entra ID. Conditional access as the central policy layer, MFA across the board, SSO for core applications. Identity lifecycle model with clear ownership. Migration and cutover plan across all sites. Authentication methods have been developed further continuously since.",
+      metrics: [
+        { value: "Single identity", label: "Group-wide" },
+        { value: "Zero trust", label: "Conditional access live" },
+        { value: "MFA", label: "Across the board" },
+      ],
+    },
   },
 
   // ─── 2020 ───────────────────────────────────────────────
@@ -860,25 +1026,53 @@ export const cases: CaseStudy[] = [
       { value: "Audits", label: "Intern geplant + extern begleitet" },
     ],
     tags: ["ISMS", "ISO 27001", "TISAX", "Compliance"],
+    en: {
+      kind: "Program",
+      title: "ISMS Program to ISO 27001 Matrix Certification & TISAX Level 3",
+      anchor: "Tier-2 automotive · 2,800 employees · 6 sites internationally",
+      context:
+        "No unified ISMS, fragmented security policies per site, pressure from customer requirements (TISAX) and an ISO certification roadmap. Audit readiness started from zero.",
+      intervention:
+        "Building an ISMS from the ground up: policies, standards, risk management, SoA, document control, role model. Central security processes (incident handling, vulnerability reviews, action tracking). ISMS workflows automated with Power Automate (permission reviews, audit trail, supplier management). Internal audits planned and conducted, external audits supported.",
+      metrics: [
+        { value: "ISO 27001", label: "Matrix certification achieved" },
+        { value: "TISAX AL3", label: "Label achieved" },
+        { value: "Audits", label: "Internal planned + external supported" },
+      ],
+    },
   },
   {
-    id: "tenfold-iam-rollout",
+    id: "enterprise-iam-self-service",
     origin: "employer",
     category: "enterprise",
     period: "2020 - 2022",
     kind: "Program",
-    title: "Tenfold IAM Einführung mit Self-Service",
+    title: "Enterprise IAM – Identity Lifecycle & Self-Service",
     anchor: "Tier-2 Automotive · IAM-Toolchain · Identity Lifecycle",
     context:
       "Berechtigungsverwaltung über manuelle Tickets. Keine Self-Service-Möglichkeit für Fachbereiche, Lifecycle-Schritte zogen sich, Audit-Spuren lückenhaft. Wachsender Druck durch ISMS-Anforderungen.",
     intervention:
-      "Einführung von Tenfold als zentrale IAM-Plattform. Anbindung Active Directory, M365, SAP und Fachanwendungen. Self-Service-Anträge mit Approval-Workflows, automatisierter Joiner-Mover-Leaver-Prozess, Re-Zertifizierungs-Kampagnen. Rollenmodell harmonisiert, Audit-Trail über Lifecycle-Ereignisse.",
+      "Einführung einer zentralen IAM-Plattform. Anbindung Active Directory, M365, SAP und Fachanwendungen. Self-Service-Anträge mit Approval-Workflows, automatisierter Joiner-Mover-Leaver-Prozess, Re-Zertifizierungs-Kampagnen. Rollenmodell harmonisiert, Audit-Trail über Lifecycle-Ereignisse.",
     metrics: [
       { value: "Self-Service", label: "Berechtigungen in Fachbereichen" },
       { value: "Re-Cert", label: "Kampagnen automatisiert" },
       { value: "Audit-Trail", label: "End-to-End nachvollziehbar" },
     ],
-    tags: ["IAM", "Tenfold", "Identity Lifecycle", "Self-Service"],
+    tags: ["IAM", "Identity Lifecycle", "Self-Service", "Joiner-Mover-Leaver"],
+    en: {
+      kind: "Program",
+      title: "Enterprise IAM – Identity Lifecycle & Self-Service",
+      anchor: "Tier-2 automotive · IAM toolchain · Identity lifecycle",
+      context:
+        "Permission management through manual tickets. No self-service for business units, lifecycle steps dragged on, gaps in audit trails. Growing pressure from ISMS requirements.",
+      intervention:
+        "Introduction of a central IAM platform. Connection of Active Directory, M365, SAP and business applications. Self-service requests with approval workflows, an automated joiner-mover-leaver process, recertification campaigns. Harmonized role model and an audit trail across lifecycle events.",
+      metrics: [
+        { value: "Self-service", label: "Permissions in business units" },
+        { value: "Recertification", label: "Campaigns automated" },
+        { value: "Audit trail", label: "Traceable end to end" },
+      ],
+    },
   },
   {
     id: "sap-r3-s4hana-brownfield",
@@ -968,6 +1162,21 @@ export const cases: CaseStudy[] = [
       { value: "SharePoint", label: "Fileserver-Migration" },
     ],
     tags: ["M365", "Exchange Online", "Teams", "SharePoint"],
+    en: {
+      kind: "Migration",
+      title: "Modern Workplace Core M365 Migration",
+      anchor:
+        "Tier-2 automotive · 2,800 employees · Exchange Online + Teams + SharePoint + OneDrive",
+      context:
+        "On-prem Exchange, Skype for Business, file server islands. Mobile work only possible through improvisation, collaborative document work only through workarounds. COVID pressure accelerated the need for a cloud workplace.",
+      intervention:
+        "Complete migration to Microsoft 365 as the modern workplace foundation. Exchange Online, Teams (including telephony), SharePoint Online and OneDrive as the platform set. Migration waves with coexistence, a rollback plan and adoption support. File server consolidation into SharePoint with an information architecture.",
+      metrics: [
+        { value: "2,800 employees", label: "Migrated" },
+        { value: "Exchange Online", label: "+ Teams Phone" },
+        { value: "SharePoint", label: "File server migration" },
+      ],
+    },
   },
 
   // ─── 2018 ───────────────────────────────────────────────
@@ -990,5 +1199,19 @@ export const cases: CaseStudy[] = [
     ],
     tags: ["Strategie", "Roadmap", "Cloud-First", "AI-Enablement", "TOGAF"],
     hidePill: true,
+    en: {
+      kind: "Strategy",
+      title: "IT Strategy & Roadmap 2030",
+      anchor: "Tier-2 automotive · Hidden champion · Multi-year line role",
+      context:
+        "A mid-sized company driven by on-premises IT, without a clear cloud or AI roadmap. Lots of data sediment in legacy systems, IT as a reactive service. Pressure to change from customer requirements, compliance and competition.",
+      intervention:
+        "Helping shape the path from an on-premises-driven mid-sized company to the AI-enabled, cloud-first IT setup of a hidden champion. Over the full period: foundation (landing zone, IAM), modernization (SAP, M365), AI integration (Copilot, agents), security maturity (ISMS, SOC). Roadmap 2030 with quarterly reviews, investment planning for IT Applications and enterprise architecture based on TOGAF. An IT organization that has an answer to every business question.",
+      metrics: [
+        { value: "7+ years", label: "Line responsibility" },
+        { value: "On-prem → cloud", label: "Strategic shift" },
+        { value: "Reactive → responsive", label: "Operating model" },
+      ],
+    },
   },
 ];

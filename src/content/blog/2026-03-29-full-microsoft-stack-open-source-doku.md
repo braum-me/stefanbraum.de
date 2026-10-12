@@ -1,7 +1,8 @@
 ---
 title: "Full Microsoft-Stack, Open-Source-Doku"
 date: 2026-03-29
-excerpt: "Wie man im Mittelstand zur Wissensbasis kommt, die besser in Copilot findbar ist als Microsofts eigene Tools."
+updated: 2026-10-12
+excerpt: "Warum ich im Microsoft-Stack-Mittelstand auf ein selbst gehostetes Open-Source-Wiki setze und wie es sich in Copilot integrieren lässt."
 tags: ["m365", "copilot", "mcp", "knowledge-base", "self-hosted", "outline"]
 readingTime: "11 min"
 coverImage: "/blog/full-microsoft-stack/hero.webp"
@@ -9,13 +10,15 @@ coverImage: "/blog/full-microsoft-stack/hero.webp"
 
 Microsoft 365. SAP. Azure. Copilot als AI-Backbone im Alltag. Ein Mittelständler, der seit Jahren konsequent im Microsoft-Ökosystem investiert. Wenn in einem solchen Setup die Frage aufkommt, wo künftig strukturiert dokumentiert werden soll, lautet die erwartbare Antwort: irgendwas aus dem Microsoft-Universum.
 
-Ich habe mich anders entschieden. Die Wissensbasis läuft seit kurzem auf Outline, self-hosted, im eigenen Rechenzentrum. Source-available, kein Cloud-Abo, keine Lizenzgebühr.
+Ich habe mich anders entschieden. Die IT-Dokumentation läuft seit kurzem auf Outline, self-hosted, im eigenen Rechenzentrum. Source-available, kein Cloud-Abo, keine Lizenzgebühr.
 
 **Die These, um die es in diesem Post geht:** Im AI-Zeitalter ist die beste Wissensbasis für einen Microsoft-Stack-Mittelständler kein Microsoft-Tool. Sie ist ein quelloffenes Wiki, das man selbst betreibt und in den eigenen AI-Hub integriert.
 
 Wie man dahin kommt und was man dafür aufgibt: hier entlang.
 
-![Outline-Wissensbasis mit Copilot-Integration](/blog/full-microsoft-stack/hero.webp)
+> **Aktualisierung (12.10.2026):** Projektstand präzisiert. Outline ist als selbst gehostete IT-Dokumentation für die IT-Teams an sechs Standorten im Einsatz, mit neun thematischen Collections und Anmeldung über Entra SSO. Ein KI-Dokumentations-Agent auf Basis von Copilot Studio ist im Einsatz. Die MCP-Anbindung ist geplant, ein Graph Connector ist derzeit nicht produktiv umgesetzt. Die drei Integrationsebenen weiter unten beschreiben die Zielarchitektur, nicht den heutigen Ausbaustand.
+
+![Outline-Wissensbasis und Copilot](/blog/full-microsoft-stack/hero.webp)
 
 ## Der Trigger: Copilot hat keine Schnittstelle ins Gehirn
 
@@ -67,7 +70,7 @@ Outline ist ein Wiki unter Business Source License 1.1, für interne Unternehmen
 
 ![Outline Interface](/blog/full-microsoft-stack/outline.webp)
 
-Was den Unterschied macht, sind drei Eigenschaften: die UX-Tiefe, die Compliance-Tauglichkeit und die selbst gebaute Copilot-Integration.
+Was den Unterschied macht, sind drei Eigenschaften: die UX-Tiefe, die Compliance-Tauglichkeit und die Möglichkeit, die Copilot-Integration selbst zu bauen.
 
 ### Smoothness, die mit Notion mithält
 
@@ -89,19 +92,19 @@ Konkret: Wer dokumentierte Betriebsabläufe nach ISO 27001 pflegen muss, bekommt
 
 ![Outline - Document Sharing & Permissions](/blog/full-microsoft-stack/outline-permissions.webp)
 
-### Die selbst gebaute Copilot-Integration
+### Die Copilot-Integration: Zielarchitektur in drei Ebenen
 
-Das ist der Punkt, an dem Outline von "gutes Self-Hosted-Wiki" zu "strategisch beste Wahl für M365-Stack" aufsteigt. Drei Integrationsebenen, die man sich selbst baut.
+Das ist der Punkt, an dem Outline von "gutes Self-Hosted-Wiki" zu "strategisch beste Wahl für M365-Stack" aufsteigt. Die Zielarchitektur besteht aus drei Integrationsebenen, die man selbst baut. Im Einsatz ist heute der Copilot-Agent (Ebene 3). Die MCP-Anbindung (Ebene 2) ist geplant, der Graph Connector (Ebene 1) ist ein Konzept und derzeit nicht produktiv umgesetzt.
 
-**Ebene 1: Microsoft Graph Connector.** Outline-Inhalte werden in den Microsoft-365-Search-Index eingespeist und sind damit für Copilot auffindbar wie interne SharePoint-Dokumente. Aus Sicht des Endnutzers gibt es keinen Unterschied zwischen einer Antwort, die Copilot aus SharePoint zieht, und einer, die aus Outline kommt.
+**Ebene 1: Microsoft Graph Connector (Konzept).** Outline-Inhalte würden in den Microsoft-365-Search-Index eingespeist und wären damit für Copilot auffindbar wie interne SharePoint-Dokumente. Aus Sicht des Endnutzers gäbe es keinen Unterschied zwischen einer Antwort, die Copilot aus SharePoint zieht, und einer, die aus Outline kommt.
 
-**Ebene 2: MCP-Server.** Das Model Context Protocol ist inzwischen in Copilot Studio generell verfügbar. Ein self-hosted MCP-Server vor der Outline-API erlaubt es, einen Copilot-Agenten gezielte Queries absetzen zu lassen: eine bestimmte Seite lesen, eine Collection durchsuchen, bei Bedarf auch eine neue Seite schreiben. Damit wird Outline vom reinen Wissensspeicher zum aktiven Teil der Agent-Workflows.
+**Ebene 2: MCP-Server (geplant).** Das Model Context Protocol ist inzwischen in Copilot Studio generell verfügbar. Ein self-hosted MCP-Server vor der Outline-API soll es einem Copilot-Agenten erlauben, gezielte Queries abzusetzen: eine bestimmte Seite lesen, eine Collection durchsuchen, bei Bedarf auch eine neue Seite schreiben. Damit würde Outline vom reinen Wissensspeicher zum aktiven Teil der Agent-Workflows.
 
-**Ebene 3: Spezialisierter Copilot-Agent.** In Copilot Studio lässt sich ein Agent bauen, dessen Aufgabe der strukturierte Umgang mit der Wissensbasis ist. Neue Mitarbeiter befragen ihn im Onboarding, erfahrene Kollegen nutzen ihn als Schnellsuche, Fachabteilungen lassen sich Übersichten und Protokollstrukturen generieren.
+**Ebene 3: Spezialisierter Copilot-Agent (im Einsatz).** In Copilot Studio lässt sich ein Agent bauen, dessen Aufgabe der strukturierte Umgang mit der Wissensbasis ist. Bei uns ist das ein KI-Dokumentations-Agent: Neue Mitarbeiter befragen ihn im Onboarding, erfahrene Kollegen nutzen ihn als Schnellsuche, und er erstellt Übersichten aus der Dokumentation.
 
-Die Pointe kommt jetzt. Ausgerechnet das Nicht-Microsoft-Tool hat die beste Copilot-Integration. Genau deshalb, weil Outline quelloffen und self-hosted ist. Die Integration liegt in der eigenen Hand. Sie hängt nicht an Microsofts Tool-Roadmap für OneNote, Loop oder einen möglichen Nachfolger. Sie ist selbst gebaut, selbst gewartet, selbst verstanden.
+Die Pointe kommt jetzt. Ausgerechnet das Nicht-Microsoft-Tool bietet die besten Voraussetzungen für eine tiefe Copilot-Integration. Genau deshalb, weil Outline quelloffen und self-hosted ist. Die Integration liegt in der eigenen Hand. Sie hängt nicht an Microsofts Tool-Roadmap für OneNote, Loop oder einen möglichen Nachfolger. Sie wird selbst gebaut, selbst gewartet, selbst verstanden.
 
-Eine saubere API plus MCP plus eigener Graph Connector gibt mehr Kontrolle über die Integration als ein proprietäres Default-Tool je bieten könnte.
+Eine saubere API plus MCP plus eigener Graph Connector gibt mehr Kontrolle über die Integration, als ein proprietäres Default-Tool je bieten könnte. Diese Kontrolle entsteht Schritt für Schritt, mit jeder Ebene, die tatsächlich umgesetzt wird.
 
 ## Was man dafür aufgibt
 
@@ -109,7 +112,7 @@ Der Post wäre unehrlich, wenn er die Kosten der Entscheidung verschwiege.
 
 Betriebsverantwortung ist real. Self-hosted bedeutet: das Wiki läuft auf eigener Infrastruktur, Updates kommen nicht automatisch, Backups sind eigene Aufgabe, der Wartungsaufwand ist laufend. Nicht hoch, aber vorhanden.
 
-Die Integrationen sind Eigenbau. Der Graph Connector, der MCP-Server, der Copilot-Agent: alles Dinge, die man konfigurieren, betreiben und im Zweifel debuggen muss. Das kostet einmalig Zeit und laufend Aufmerksamkeit.
+Die Integrationen sind Eigenbau. Der Copilot-Agent heute, MCP-Server und Graph Connector, sobald sie umgesetzt sind: alles Dinge, die man konfigurieren, betreiben und im Zweifel debuggen muss. Das kostet einmalig Zeit und laufend Aufmerksamkeit.
 
 Es gibt keinen Enterprise-Vendor, den man anrufen kann, wenn es klemmt. Die Community ist aktiv, aber sie ist kein SLA.
 
@@ -123,6 +126,6 @@ Die Frage, die ich früher gestellt habe, war: Microsoft-Tool oder Drittanbieter
 
 Ein Default-Tool aus dem Hersteller-Ökosystem zu wählen ist der einfache Weg. Auf lange Sicht bindet man sich damit an die Integrationsqualität und den Entwicklungsrhythmus eines einzigen Anbieters. Ein quelloffenes Tool mit sauberer API und MCP-Unterstützung zu wählen kostet mehr Aufmerksamkeit. Es gibt dafür aber die Kontrolle über die wichtigste Eigenschaft zurück: wie gut der AI-Hub die eigene Wissensbasis versteht.
 
-Im Mittelstand ist diese Kombination 2026 noch unterschätzt. Source-available, self-hosted, MCP-integriert, auf Copilot eingestellt, ISO-tauglich. Wer die Fähigkeit hat, so etwas selbst zu betreiben, hat in den nächsten Jahren einen Vorteil gegenüber Wettbewerbern, die bei jeder Tool-Entscheidung dem Default folgen.
+Im Mittelstand ist diese Kombination 2026 noch unterschätzt. Source-available, self-hosted, MCP-fähig, auf Copilot eingestellt, ISO-tauglich. Wer die Fähigkeit hat, so etwas selbst zu betreiben, hat in den nächsten Jahren einen Vorteil gegenüber Wettbewerbern, die bei jeder Tool-Entscheidung dem Default folgen.
 
 Vielleicht ist das die eigentliche Erkenntnis: In einer Welt, in der AI die Arbeitsweise verändert, wird die Fähigkeit, Infrastruktur selbst zu betreiben und Integrationen selbst zu bauen, wieder zum Differenzierungsfaktor. Nicht überall. Aber da, wo es zählt.

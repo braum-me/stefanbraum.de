@@ -81,7 +81,7 @@ export const skills: Skill[] = [
       "managed-soc-endpoint-security",
       "cyber-risk-bcm-framework",
       "m365-zero-trust-identity",
-      "tenfold-iam-rollout",
+      "enterprise-iam-self-service",
       "sosafe-security-awareness",
       "it-due-diligence",
     ],
@@ -138,7 +138,7 @@ export const skills: Skill[] = [
     projects: [
       "managed-soc-endpoint-security",
       "isms-iso27001-tisax",
-      "tenfold-iam-rollout",
+      "enterprise-iam-self-service",
       "global-it-governance-service-management",
     ],
     certificates: ["itil-v4-foundation"],

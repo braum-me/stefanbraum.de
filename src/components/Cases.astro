@@ -4,7 +4,7 @@ import {
   caseStatusPill,
   cases,
   formatCasePeriod,
-  LEGACY_CASE_ID_PREFIXES,
+  LEGACY_CASE_ID_PATTERNS,
   LEGACY_CASE_IDS,
   localizeCase,
   portfolioOrder,
@@ -46,7 +46,7 @@ const displayCases = portfolioOrder(cases, now).map((c) => ({
 }));
 
 // Alte Case-IDs für Deep-Links (#case-<alt>), ausgewertet im Client-Script unten.
-const legacyAliases = JSON.stringify({ exact: LEGACY_CASE_IDS, prefixes: LEGACY_CASE_ID_PREFIXES });
+const legacyAliases = JSON.stringify({ exact: LEGACY_CASE_IDS, patterns: LEGACY_CASE_ID_PATTERNS });
 const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases));
 ---
 
@@ -599,7 +599,7 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
     try {
       return JSON.parse(list?.dataset.caseAliases ?? "{}") as {
         exact?: Record<string, string>;
-        prefixes?: { prefix: string; id: string }[];
+        patterns?: { match: "prefix" | "suffix"; value: string; id: string }[];
       };
     } catch {
       return {};
@@ -609,8 +609,10 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
     if (document.getElementById(`case-${id}`)) return id;
     const exact = aliases.exact?.[id];
     if (exact && document.getElementById(`case-${exact}`)) return exact;
-    const byPrefix = aliases.prefixes?.find((a) => id.startsWith(a.prefix));
-    if (byPrefix && document.getElementById(`case-${byPrefix.id}`)) return byPrefix.id;
+    const byPattern = aliases.patterns?.find((p) =>
+      p.match === "prefix" ? id.startsWith(p.value) : id.endsWith(p.value),
+    );
+    if (byPattern && document.getElementById(`case-${byPattern.id}`)) return byPattern.id;
     return null;
   };
   let currentPage = 1;

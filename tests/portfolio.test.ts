@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { findConfidentialTerms } from "../scripts/confidential-terms.mjs";
 import {
   type CaseStudy,
   caseMatchesCategory,
   caseStatusPill,
   cases,
   formatCasePeriod,
-  LEGACY_CASE_ID_PREFIXES,
+  LEGACY_CASE_ID_PATTERNS,
   LEGACY_CASE_IDS,
   portfolioOrder,
   resolveCaseId,
@@ -14,6 +15,7 @@ import {
   sortCasesChronologically,
 } from "../src/data/cases.ts";
 import { skills } from "../src/data/skills.ts";
+import { timeline } from "../src/data/timeline.ts";
 import { de } from "../src/i18n/de.ts";
 import { en } from "../src/i18n/en.ts";
 import { CASE_STATUSES, isActiveStatus, parsePeriod } from "../src/lib/caseStatus.ts";
@@ -73,7 +75,7 @@ describe("portfolio content (Phase 2)", () => {
     assert.doesNotMatch(text, /CVE-\d/i, "CVE");
     assert.doesNotMatch(text, /€|\bMio\b|\bEUR\b/, "budget figures");
     assert.doesNotMatch(text, /tacto/i);
-    assert.doesNotMatch(text, /\b[56] DR\b/, "unconfirmed direct-report count");
+    assert.deepEqual(findConfidentialTerms(text), [], "confidential vendor name");
   });
 });
 
@@ -224,6 +226,7 @@ describe("references and deep links", () => {
     assert.equal(resolveCaseId("team-data-analytics"), "global-bi-platform");
     assert.equal(resolveCaseId("hr-successfactors"), "hr-transformation-evaluation");
     assert.equal(resolveCaseId("managed-soc-legacy-name"), "managed-soc-endpoint-security");
+    assert.equal(resolveCaseId("legacy-vendor-iam-rollout"), "enterprise-iam-self-service");
     assert.equal(resolveCaseId("outline-knowledge-base"), "outline-knowledge-base");
     assert.equal(resolveCaseId("tacto-ai-purchasing"), null);
   });
@@ -231,7 +234,7 @@ describe("references and deep links", () => {
   it("only maps legacy ids to existing cases", () => {
     const ids = new Set(cases.map((c) => c.id));
     for (const target of Object.values(LEGACY_CASE_IDS)) assert.ok(ids.has(target), target);
-    for (const { id } of LEGACY_CASE_ID_PREFIXES) assert.ok(ids.has(id), id);
+    for (const { id } of LEGACY_CASE_ID_PATTERNS) assert.ok(ids.has(id), id);
     // Präfix-Aliase dürfen keine aktuelle ID eines anderen Cases verschlucken
     for (const c of cases) assert.equal(resolveCaseId(c.id), c.id);
   });
@@ -243,5 +246,47 @@ describe("references and deep links", () => {
     );
     assert.equal(byId("aboutexport-saas").blogSlug, "2026-04-20-warum-ich-aboutexport-baue");
     assert.equal(byId("braum-x-hub").blogSlug, "2026-05-10-vier-websites-mit-claude-code");
+  });
+});
+
+describe("finishing pass (content QA)", () => {
+  it("provides complete English texts for all 29 cases", () => {
+    const fields = ["kind", "title", "anchor", "context", "intervention", "metrics"] as const;
+    for (const c of cases) {
+      for (const f of fields) assert.ok(c.en?.[f], `${c.id}: en.${f} missing`);
+      assert.equal(c.en?.metrics?.length, c.metrics.length, `${c.id}: metric count differs`);
+    }
+  });
+
+  it("translates every career entry", () => {
+    for (const e of timeline) {
+      assert.ok(e.role.en, `${e.id}: role.en missing`);
+      assert.ok(e.summary.en, `${e.id}: summary.en missing`);
+    }
+  });
+
+  it("states six direct reports consistently (case DE/EN + timeline DE/EN)", () => {
+    const team = byId("team-aufbau-apps");
+    assert.match(team.intervention, /sechs disziplinarischen Direct Reports/);
+    assert.match(team.en?.intervention ?? "", /six direct reports/);
+    assert.ok(team.metrics.some((m) => m.value === "6 DR"));
+    assert.ok(team.en?.metrics?.some((m) => m.value === "6 DR"));
+    const lead = timeline.find((e) => e.id === "odw-team-lead-apps");
+    assert.match(lead?.summary.de ?? "", /6 disziplinarische Direct Reports/);
+    assert.match(lead?.summary.en ?? "", /6 direct reports/);
+  });
+
+  it("publishes no budget, investment or contract amounts", () => {
+    const text = JSON.stringify({ cases, timeline, skills });
+    assert.doesNotMatch(text, /€|\bMio\b|\bMrd\b|\bEUR\b|\$\s*\d|\bbudget (of|up to)\b/i);
+  });
+
+  it("keeps the anonymized IAM and SOC cases free of vendor names", () => {
+    const iam = byId("enterprise-iam-self-service");
+    assert.equal(iam.title, "Enterprise IAM – Identity Lifecycle & Self-Service");
+    assert.equal(iam.en?.title, "Enterprise IAM – Identity Lifecycle & Self-Service");
+    const text = JSON.stringify({ cases, skills, timeline });
+    assert.deepEqual(findConfidentialTerms(text), []);
+    assert.ok(!skills.some((s) => s.projects.some((p) => p.endsWith("-iam-rollout"))));
   });
 });

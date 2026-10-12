@@ -45,7 +45,7 @@ const blogJsonLd = {
     headline: p.data.title,
     description: p.data.excerpt,
     datePublished: p.data.date.toISOString(),
-    dateModified: p.data.date.toISOString(),
+    dateModified: (p.data.updated ?? p.data.date).toISOString(),
     url: new URL(blogPostPath(p.id), siteUrl).toString(),
     keywords: p.data.tags.join(", "),
     author: {
