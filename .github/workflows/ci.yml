@@ -45,3 +45,9 @@ jobs:
 
       - name: Smoke tests (routes, links, canonical/hreflang, anchors, 404)
         run: pnpm test:smoke
+
+      - name: Install Chromium for browser tests
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Browser tests (layout, deep links, a11y, no-JS)
+        run: pnpm test:e2e

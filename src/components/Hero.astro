@@ -10,13 +10,14 @@ const { locale = "de" } = Astro.props;
 const t = getT(locale);
 
 const { currentPosition, location } = profile;
-const eyebrow = `${profile.name} - ${location.area} - ${location.countryCode}`;
+// Region und Land bleiben auf Mobile zusammen (nowrap-Span im Markup)
+const eyebrowPlace = `${location.area} - ${location.countryCode}`;
 const currentRole = localized(currentPosition.title, locale);
 ---
 
 <section class="relative px-6 md:px-12 pt-24 md:pt-32 pb-20 md:pb-28 overflow-hidden" data-anim-group="hero">
   <div class="max-w-7xl mx-auto w-full relative">
-    <div class="eyebrow" data-anim="eyebrow">{eyebrow}</div>
+    <div class="eyebrow" data-anim="eyebrow"><span>{profile.name} - <span class="whitespace-nowrap">{eyebrowPlace}</span></span></div>
 
     <div class="grid lg:grid-cols-[1.35fr_1fr] gap-12 lg:gap-20 items-center mt-10 md:mt-14">
       <!-- Left: content -->
@@ -170,7 +171,8 @@ const currentRole = localized(currentPosition.title, locale);
     }
     @media (min-width: 640px) {
       .hero-portrait {
-        max-width: 380px;
+        /* Tablet: Portrait begrenzen, damit Headline und Rolle nicht unter den Fold rutschen */
+        max-width: 320px;
       }
     }
     @media (min-width: 1024px) {

@@ -28,7 +28,7 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     <!-- Top: brand block + 2 columns -->
     <div class="footer-top">
       <div class="footer-brand">
-        <a href={markHref} class="footer-mark interactive" aria-label={markLabel}>
+        <a href={markHref} class="footer-mark interactive" aria-label={`SB, ${markLabel}`}>
           <span class="footer-mark-letters">SB</span>
           <span class="footer-mark-dot" aria-hidden="true"></span>
         </a>
@@ -154,7 +154,7 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     font-size: 10.5px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(242, 239, 228, 0.4);
+    color: rgba(242, 239, 228, 0.55);
     margin-bottom: 16px;
   }
 
@@ -212,7 +212,7 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 0.06em;
-    color: rgba(242, 239, 228, 0.45);
+    color: rgba(242, 239, 228, 0.55);
   }
   .footer-meta-link {
     font-family: var(--font-mono);
@@ -232,6 +232,6 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     font-family: var(--font-mono);
     font-size: 10.5px;
     letter-spacing: 0.08em;
-    color: rgba(242, 239, 228, 0.3);
+    color: rgba(242, 239, 228, 0.55);
   }
 </style>

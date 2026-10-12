@@ -29,16 +29,15 @@ const filtered = t.kernschwerpunkte.pillars.filter((p) =>
       </div>
     </div>
 
-    <div class="ks-grid mt-14 md:mt-20" role="tablist" aria-label={t.kernschwerpunkte.aria} data-anim-group="tiles">
+    <div class="ks-grid mt-14 md:mt-20" role="group" aria-label={t.kernschwerpunkte.aria} data-anim-group="tiles">
       {filtered.map((p) => (
         <button
           type="button"
           class="ks-card interactive"
-          role="tab"
           data-pillar={p.id}
           data-anim="tile"
           aria-controls="portfolio"
-          aria-selected="false"
+          aria-pressed="false"
         >
           <div class="ks-num">{p.number}</div>
           <h3 class="ks-title">{p.title}</h3>
@@ -94,7 +93,7 @@ const filtered = t.kernschwerpunkte.pillars.filter((p) =>
     border-color: rgba(0, 200, 150, 0.45);
     background: linear-gradient(160deg, rgba(26, 93, 70, 0.55), rgba(13, 61, 46, 0.85));
   }
-  .ks-card[aria-selected="true"] {
+  .ks-card[aria-pressed="true"] {
     border-color: var(--mint);
     background: linear-gradient(160deg, rgba(26, 93, 70, 0.65), rgba(13, 61, 46, 0.9));
     box-shadow:
@@ -142,7 +141,7 @@ const filtered = t.kernschwerpunkte.pillars.filter((p) =>
     transition: color 0.25s ease;
   }
   .ks-card:hover .ks-foot,
-  .ks-card[aria-selected="true"] .ks-foot {
+  .ks-card[aria-pressed="true"] .ks-foot {
     color: var(--mint);
   }
   .ks-arrow {
@@ -151,7 +150,7 @@ const filtered = t.kernschwerpunkte.pillars.filter((p) =>
   .ks-card:hover .ks-arrow {
     transform: translateX(4px);
   }
-  .ks-card[aria-selected="true"] .ks-arrow {
+  .ks-card[aria-pressed="true"] .ks-arrow {
     transform: translateX(0);
   }
 </style>
@@ -161,7 +160,7 @@ const filtered = t.kernschwerpunkte.pillars.filter((p) =>
 
   const sync = (pillar: string | null) => {
     tiles.forEach((t) => {
-      t.setAttribute("aria-selected", String(t.dataset.pillar === pillar && pillar !== null));
+      t.setAttribute("aria-pressed", String(t.dataset.pillar === pillar && pillar !== null));
     });
   };
 
@@ -169,7 +168,7 @@ const filtered = t.kernschwerpunkte.pillars.filter((p) =>
     t.addEventListener("click", () => {
       const pillar = t.dataset.pillar;
       if (!pillar) return;
-      const isActive = t.getAttribute("aria-selected") === "true";
+      const isActive = t.getAttribute("aria-pressed") === "true";
       const next = isActive ? null : pillar;
       // Update document state (single source of truth)
       document.documentElement.dataset.activePillar = next ?? "";

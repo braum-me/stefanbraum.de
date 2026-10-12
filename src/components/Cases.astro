@@ -65,14 +65,13 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
     </div>
 
     <!-- Filter pills -->
-    <div class="pf-filters reveal-elem" role="tablist" aria-label={t.cases.filterAria}>
+    <div class="pf-filters reveal-elem" role="group" aria-label={t.cases.filterAria}>
       {filterPills.map((p) => (
         <button
           type="button"
           class="pf-pill interactive"
           data-pill={p.id}
-          role="tab"
-          aria-selected={p.id === "all" ? "true" : "false"}
+          aria-pressed={p.id === "all" ? "true" : "false"}
         >
           {p.label}
         </button>
@@ -156,7 +155,7 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
                   ))}
                 </div>
                 <div class="mt-8 pt-6 border-t border-cream/10">
-                  <div class="kicker text-cream/45 mb-2">{t.cases.anchor}</div>
+                  <div class="kicker text-cream/55 mb-2">{t.cases.anchor}</div>
                   <div class="font-mono text-[12.5px] text-cream/75 tracking-[0.04em]" lang={langAttr(c.anchor, locale)}>{c.anchor.value}</div>
                 </div>
               </div>
@@ -168,12 +167,12 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
 
     <!-- Pagination -->
     <nav class="pf-pagination reveal-elem" id="pf-pagination" aria-label={t.cases.pageNavAria} data-page-prefix={t.cases.pageNumberPrefix} hidden>
-      <button type="button" class="pf-page-btn pf-page-prev interactive" data-action="prev" aria-label={t.cases.pagePrevAria}>
+      <button type="button" class="pf-page-btn pf-page-prev interactive" data-action="prev" aria-label={`${t.cases.pagePrev}: ${t.cases.pagePrevAria}`}>
         <span aria-hidden="true">&larr;</span>
         <span class="pf-page-label">{t.cases.pagePrev}</span>
       </button>
       <div class="pf-page-numbers" id="pf-page-numbers" role="group" aria-label={t.cases.pageNavAria}></div>
-      <button type="button" class="pf-page-btn pf-page-next interactive" data-action="next" aria-label={t.cases.pageNextAria}>
+      <button type="button" class="pf-page-btn pf-page-next interactive" data-action="next" aria-label={`${t.cases.pageNext}: ${t.cases.pageNextAria}`}>
         <span class="pf-page-label">{t.cases.pageNext}</span>
         <span aria-hidden="true">&rarr;</span>
       </button>
@@ -210,7 +209,7 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
     border-color: rgba(0, 200, 150, 0.45);
     color: var(--cream);
   }
-  .pf-pill[aria-selected="true"] {
+  .pf-pill[aria-pressed="true"] {
     background: rgba(0, 200, 150, 0.12);
     border-color: var(--mint);
     color: var(--mint);
@@ -260,7 +259,7 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
   .pf-period {
     font-family: var(--font-mono);
     font-size: 11px;
-    color: rgba(242, 239, 228, 0.4);
+    color: rgba(242, 239, 228, 0.55);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     white-space: nowrap;
@@ -387,7 +386,7 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
   .pf-kind {
     font-family: var(--font-mono);
     font-size: 10px;
-    color: rgba(242, 239, 228, 0.4);
+    color: rgba(242, 239, 228, 0.55);
     letter-spacing: 0.16em;
     text-transform: uppercase;
   }
@@ -533,7 +532,7 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
     flex-wrap: wrap;
     justify-content: center;
   }
-  .pf-page-num {
+  .pf-page-numbers :global(.pf-page-num) {
     min-width: 36px;
     height: 36px;
     padding: 0 10px;
@@ -548,16 +547,16 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
     transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
     font-variant-numeric: tabular-nums;
   }
-  .pf-page-num:hover {
+  .pf-page-numbers :global(.pf-page-num:hover) {
     border-color: rgba(0, 200, 150, 0.4);
     color: var(--cream);
   }
-  .pf-page-num[aria-current="page"] {
+  .pf-page-numbers :global(.pf-page-num[aria-current="page"]) {
     background: rgba(0, 200, 150, 0.12);
     border-color: var(--mint);
     color: var(--mint);
   }
-  .pf-page-ellipsis {
+  .pf-page-numbers :global(.pf-page-ellipsis) {
     color: rgba(242, 239, 228, 0.35);
     font-family: var(--font-mono);
     font-size: 12px;
@@ -720,7 +719,7 @@ const sublineText = t.cases.sublineTemplate.replace("{count}", String(totalCases
     // Update pills active state
     pills.forEach((p) => {
       const isActive = (pillar === null && p.dataset.pill === "all") || p.dataset.pill === pillar;
-      p.setAttribute("aria-selected", String(isActive));
+      p.setAttribute("aria-pressed", String(isActive));
     });
 
     // Initial filter pass: hide non-matching rows

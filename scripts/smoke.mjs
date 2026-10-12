@@ -284,6 +284,18 @@ async function main() {
     check(!body.includes('id="case-tacto'), `${home}: entfernter Case gerendert`);
   }
 
+  // OG-Endpoint rendert keinen frei wählbaren Text (Content-Spoofing)
+  {
+    const size = async (q) => {
+      const res = await fetch(`${BASE}/api/og.png${q}`);
+      return { status: res.status, bytes: (await res.arrayBuffer()).byteLength };
+    };
+    const plain = await size("");
+    const spoof = await size("?title=Fake&subtitle=Injected%20text");
+    check(plain.status === 200, `/api/og.png -> ${plain.status}`);
+    check(plain.bytes === spoof.bytes, "/api/og.png übernimmt Text aus Query-Parametern");
+  }
+
   // 7. Sprachumschalter auf Blogartikeln -> existierendes englisches Ziel
   for (const post of blogPosts) {
     const { body } = await get(post);
