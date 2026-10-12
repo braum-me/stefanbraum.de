@@ -28,7 +28,24 @@ pnpm check        # astro check (type errors, accessibility hints)
 pnpm build        # production build
 pnpm lint         # biome
 pnpm format       # biome format --write
+pnpm test         # unit tests (node:test, no extra deps)
+pnpm test:smoke   # smoke tests against the built server (run after `pnpm build`)
+pnpm test:e2e     # browser regression tests (Playwright + axe-core, run after `pnpm build`)
 ```
+
+CI (`.github/workflows/ci.yml`) runs on every PR: frozen install, Biome, `astro check` + `tsc`, unit tests, production build, smoke tests (core routes, internal links, anchors and chapter order, canonical/hreflang consistency, language switcher, JSON-LD, sitemap, 404s, OG endpoint) and browser tests (layout overflow, pagination, deep links incl. legacy IDs, focus order, axe WCAG 2.1 AA, no-JS, reduced motion).
+
+## Content model
+
+| File | Purpose |
+| --- | --- |
+| `src/data/profile.ts` | Single source for current role, employer, location, links. Feeds hero, OG image, Person JSON-LD. |
+| `src/data/sections.ts` | Order of homepage chapters. Drives rendering, chapter numbers, nav and anchors. |
+| `src/data/timeline.ts` | Career stations with `start`/`end` (`null` = present) and `Localized` texts. |
+| `src/data/cases.ts` | Portfolio. Optional `en` texts, `featured` + `priority` for highlighting, `status` / `hidePill` overrides. |
+| `src/lib/caseStatus.ts` | Status rules: `laufend` = ongoing; a closed range only completes after its end year has passed; explicit `status` always wins. |
+| `src/i18n/localized.ts` | `Localized<T>` (`de` required, `en` optional). Missing English falls back to German and is marked with `lang="de"`. |
+| `src/i18n/routes.ts` | Which pages exist in both languages. hreflang, canonical and the language switcher are derived from it. |
 
 ## Project layout
 
@@ -36,7 +53,7 @@ pnpm format       # biome format --write
 src/
 ├─ components/      # Astro components (Hero, Cases, Skills, etc.)
 ├─ content/blog/    # Markdown posts (Astro Content Collection)
-├─ data/            # Typed data (cases, skills, timeline, certifications)
+├─ data/            # Typed data (profile, sections, cases, skills, timeline, certifications)
 ├─ i18n/            # Locale dictionaries (de, en) + helpers
 ├─ layouts/         # BaseLayout
 ├─ pages/           # Route handlers
@@ -44,8 +61,11 @@ src/
 │  ├─ blog/         # Blog listing + detail
 │  ├─ en/           # English mirror routes
 │  └─ rss.xml.ts    # RSS feed
+├─ lib/             # Pure helpers (case status, env)
 ├─ scripts/         # Client-side animation
 └─ styles/global.css
+scripts/smoke.mjs   # Smoke tests against dist/server
+tests/              # Unit tests (node:test)
 ```
 
 ## Environment
@@ -100,7 +120,7 @@ Astro 5 native i18n.
 - `de` (default) → `/`
 - `en` → `/en/`
 
-UI strings live in `src/i18n/de.ts` and `src/i18n/en.ts`. Blog post bodies are language-neutral; the listing on `/en/blog` carries an explicit notice that posts are in German.
+UI strings live in `src/i18n/de.ts` and `src/i18n/en.ts`. Blog posts exist in German only (`/blog/<slug>/`); there are intentionally no `/en/blog/<slug>/` routes. English pages link to the German posts with `hreflang="de"`, the language switcher on a German post leads to `/en/blog/`, and hreflang alternates are only emitted for pages that exist in both languages.
 
 To translate a string, edit both dictionaries. The `Translations` type in `de.ts` enforces structural parity.
 

@@ -1,3 +1,7 @@
+import type { CaseDomainTag } from "../data/cases.ts";
+import type { HomeSectionId } from "../data/sections.ts";
+import type { CaseStatus } from "../lib/caseStatus.ts";
+
 /**
  * German translations. This is the source-of-truth for the locale shape.
  * `en.ts` mirrors this structure 1:1.
@@ -27,31 +31,30 @@ export interface Translations {
     title: string;
     description: string;
     consultingDescription: string;
+    ogSubtitle: string;
     skipLink: string;
   };
   nav: {
-    items: ReadonlyArray<{ id: string; label: string }>;
+    /** Labels je Kapitel; Reihenfolge kommt aus data/sections.ts. */
+    labels: Record<HomeSectionId, string>;
     logoLabelHome: string;
     logoLabelOther: string;
     burgerOpen: string;
     languageLabel: string;
   };
   hero: {
-    eyebrow: string;
     headlinePart1: string;
     headlinePart2: string;
+    currentRoleLabel: string;
     sublineDefault: string;
     sublineConsulting: string;
     ctaPrimary: string;
     ctaSecondary: string;
     portraitAlt: string;
-    portraitLocation: string;
-    portraitName: string;
   };
   microMetrics: {
     pillars: string;
     location: string;
-    locationValue: string;
     practice: string;
     practiceValue: string;
     projects: string;
@@ -78,13 +81,20 @@ export interface Translations {
     filterAria: string;
     filterAll: string;
     empty: string;
-    statusOngoing: string;
-    statusConcept: string;
+    /** Sichtbare Status-Labels (Pill). */
+    status: Record<CaseStatus, string>;
+    /** Bedeutung des Status (Tooltip / Screenreader). */
+    statusHint: Record<CaseStatus, string>;
+    domainTags: Record<CaseDomainTag, string>;
+    featured: string;
+    periodOngoing: string;
+    periodSince: string;
     domain: string;
     intervention: string;
     signals: string;
     anchor: string;
     readBlog: string;
+    germanOnly: string;
     fromPortfolio: string;
     pageNavAria: string;
     pagePrev: string;
@@ -123,7 +133,8 @@ export interface Translations {
     eyebrow: string;
     headline: string;
     subline: string;
-    entries: ReadonlyArray<{ year: string; period: string }>;
+    present: string;
+    parallelRole: string;
   };
   writing: {
     eyebrow: string;
@@ -161,14 +172,7 @@ export interface Translations {
     backToTop: string;
     toHome: string;
   };
-  chapters: {
-    "01": string;
-    "02": string;
-    "03": string;
-    "04": string;
-    "05": string;
-    "06": string;
-  };
+  chapters: Record<HomeSectionId, string>;
   notFound: {
     eyebrow: string;
     title: string;
@@ -208,49 +212,47 @@ export const de: Translations = {
   },
   meta: {
     siteName: "stefanbraum.de",
-    title: "Stefan Braum - Operator, Builder, Schreiber",
+    title: "Stefan Braum – IT Leadership, Enterprise Architecture & AI",
     description:
-      "Personal Hub von Stefan Braum: IT-Leitung im Mittelstand, AI-Adoption, Side-Projects, Schreiben. Blog über Stack, Architektur und Praxistests.",
+      "Stefan Braum, IT-Führungskraft im industriellen Mittelstand: Enterprise-Architektur, Transformation, IT-Security und AI. Strategische Verantwortung, technisch hands-on.",
     consultingDescription:
       "Beratung im Mittelstand zu AI, Enterprise-Architektur und IT-Strategie. Erstgespräch über braum.consulting.",
+    ogSubtitle: "IT-Führung. Architektur. Umsetzung.",
     skipLink: "Zum Hauptinhalt springen",
   },
   nav: {
-    items: [
-      { id: "kernschwerpunkte", label: "Schwerpunkte" },
-      { id: "portfolio", label: "Portfolio" },
-      { id: "skills", label: "Skills" },
-      { id: "stationen", label: "Stationen" },
-      { id: "schreiben", label: "Schreiben" },
-      { id: "kontakt", label: "Kontakt" },
-    ],
+    labels: {
+      kernschwerpunkte: "Schwerpunkte",
+      stationen: "Stationen",
+      portfolio: "Portfolio",
+      skills: "Skills",
+      schreiben: "Schreiben",
+      kontakt: "Kontakt",
+    },
     logoLabelHome: "Stefan Braum, zurück nach oben",
     logoLabelOther: "Zur Startseite",
     burgerOpen: "Menü öffnen",
     languageLabel: "Sprache",
   },
   hero: {
-    eyebrow: "Stefan Braum - Main-Kinzig-Kreis - DE",
-    headlinePart1: "Architekt, Führungskraft,",
-    headlinePart2: "Practitioner.",
+    headlinePart1: "IT-Führung. Architektur.",
+    headlinePart2: "Umsetzung.",
+    currentRoleLabel: "Aktuell",
     sublineDefault:
-      "Ich gestalte IT-Architektur, Teams und Digitalisierung im Industrie-Mittelstand.",
+      "Ich verantworte Anwendungs- und Integrationsarchitektur, ISMS und IT-Security sowie den praktischen Einsatz von AI in einer globalen IT/SAP-Organisation im industriellen Mittelstand. Technisch bleibe ich hands-on: eigene Plattformen, Automatisierung, SaaS.",
     sublineConsulting:
       "Beratung im Mittelstand zu AI, Enterprise-Architektur und IT-Strategie. Erstgespräch über braum.consulting.",
     ctaPrimary: "Kontakt aufnehmen",
     ctaSecondary: "Projekte ansehen",
-    portraitAlt: "Stefan Braum",
-    portraitLocation: "Sinntal, DE",
-    portraitName: "Stefan Braum",
+    portraitAlt: "Porträt von Stefan Braum",
   },
   microMetrics: {
     pillars: "Säulen",
     location: "Standort",
-    locationValue: "Main-Kinzig-Kreis - CET",
     practice: "Praxis",
     practiceValue: "12 Jahre IT",
     projects: "Projekte",
-    projectsValue: "30 dokumentiert",
+    projectsValue: "{count} dokumentiert",
     aria: "Profile signals",
   },
   kernschwerpunkte: {
@@ -265,43 +267,37 @@ export const de: Translations = {
         id: "transformation",
         number: "01",
         title: "Digitale Transformation",
-        body:
-          "Modern Work, M365-Adoption, Prozess-Plattformen, Self-Service für Fachbereiche. Vom Tool-Rollout bis Change.",
+        body: "Modern Work, M365-Adoption, Prozess-Plattformen, Self-Service für Fachbereiche. Vom Tool-Rollout bis Change.",
       },
       {
         id: "ai",
         number: "02",
         title: "AI & Data",
-        body:
-          "Copilot-Rollouts, Custom Agents, Adoption-Programme, BI- und Analytics-Plattformen. KI als Werkzeug, nicht als Buzzword.",
+        body: "Copilot-Rollouts, Custom Agents, Adoption-Programme, BI- und Analytics-Plattformen. KI als Werkzeug, nicht als Buzzword.",
       },
       {
         id: "enterprise",
         number: "03",
         title: "Enterprise & Security",
-        body:
-          "SAP S/4HANA, Azure Landing Zone, Zero Trust, Identity- und SOC-Foundation. Architektur mit Hands-on-Mentalität.",
+        body: "SAP S/4HANA, Azure Landing Zone, Zero Trust, Identity- und SOC-Foundation. Architektur mit Hands-on-Mentalität.",
       },
       {
         id: "compliance",
         number: "04",
         title: "Compliance & Governance",
-        body:
-          "ISMS nach ISO 27001 / TISAX, BCM, Risk Management, IT-Due-Diligence. Auditfähig, nicht nur PowerPoint-Konform.",
+        body: "ISMS nach ISO 27001 / TISAX, BCM, Risk Management, IT-Due-Diligence. Auditfähig, nicht nur PowerPoint-Konform.",
       },
       {
         id: "engineering",
         number: "05",
         title: "Engineering & Build",
-        body:
-          "Eigene Plattformen, Side-Projects, Open-Source. Cloud-native Container, modernes Web, SaaS-Vorhaben.",
+        body: "Eigene Plattformen, Side-Projects, Open-Source. Cloud-native Container, modernes Web, SaaS-Vorhaben.",
       },
       {
         id: "leadership",
         number: "06",
         title: "Führung & Team",
-        body:
-          "Teamaufbau, Direct Reports, stellv. Leitung, KPI-Steuerung. Kurze Wege zu Geschäftsführung und Fachbereichen.",
+        body: "Teamaufbau, Direct Reports, stellv. Leitung, KPI-Steuerung. Kurze Wege zu Geschäftsführung und Fachbereichen.",
       },
     ],
   },
@@ -313,13 +309,39 @@ export const de: Translations = {
     filterAria: "Portfolio-Filter",
     filterAll: "Alle",
     empty: "Projekte in dieser Säule folgen.",
-    statusOngoing: "Ongoing",
-    statusConcept: "Zielbild",
+    status: {
+      ongoing: "Laufend",
+      "in-operation": "Im Betrieb",
+      pilot: "Pilot",
+      preparation: "Vorbereitung",
+      concept: "Zielbild",
+      completed: "Abgeschlossen",
+      "handed-over": "Abgeschlossen & übergeben",
+      "pre-evaluation-completed": "Vorevaluierung abgeschlossen",
+    },
+    statusHint: {
+      ongoing: "Projekt in aktiver Umsetzung",
+      "in-operation": "Eingeführt und im laufenden Betrieb, wird weiterentwickelt",
+      pilot: "Pilotphase mit begrenztem Nutzerkreis, Rollout schrittweise",
+      preparation: "In Vorbereitung, noch keine Umsetzung abgeschlossen",
+      concept: "Zielbild bzw. Konzept, noch nicht umgesetzt",
+      completed: "Projekt abgeschlossen",
+      "handed-over": "Konzipiert, abgeschlossen und an das verantwortliche Team übergeben",
+      "pre-evaluation-completed":
+        "Vorevaluierung abgeschlossen, Entscheidung liegt beim Management",
+    },
+    domainTags: {
+      "modern-workplace": "Modern Workplace",
+    },
+    featured: "Ausgewählt",
+    periodOngoing: "laufend",
+    periodSince: "seit",
     domain: "Domäne",
     intervention: "Intervention",
     signals: "Signale",
     anchor: "Anchor",
-    readBlog: "Im Blog ausfuehrlich",
+    readBlog: "Im Blog ausführlich",
+    germanOnly: "",
     fromPortfolio: "Im Portfolio:",
     pageNavAria: "Portfolio-Seitennavigation",
     pagePrev: "Zurück",
@@ -331,8 +353,7 @@ export const de: Translations = {
   skills: {
     eyebrow: "Stefan Braum - Werkzeuge & Belege",
     headline: "Skills und Zertifikate.",
-    subline:
-      "Was ich tatsaechlich nutze, womit ich es belegt habe und wo es zum Einsatz kam.",
+    subline: "Was ich tatsaechlich nutze, womit ich es belegt habe und wo es zum Einsatz kam.",
     sphereAria: "Skills, klickbar für Detail",
     skillDetailLabel: "Detail anzeigen",
     certificates: "Zertifikate",
@@ -361,28 +382,8 @@ export const de: Translations = {
     headline: "Stationen.",
     subline:
       "Von der Ausbildung zum Fachinformatiker bis zur stellv. Leitung einer globalen IT/SAP-Organisation. Parallel seit 2023 eigene Selbstständigkeit mit Braum Consulting und ein SaaS-Aufbau in Eigenregie.",
-    entries: [
-      {
-        year: "2023",
-        period: "Jun 2023 - Heute",
-      },
-      {
-        year: "2022",
-        period: "Jul 2022 - Heute",
-      },
-      {
-        year: "2021",
-        period: "Apr 2021 - Heute",
-      },
-      {
-        year: "2018",
-        period: "Aug 2018 - Mär 2021",
-      },
-      {
-        year: "2014",
-        period: "Sep 2014 - Jun 2018",
-      },
-    ],
+    present: "Heute",
+    parallelRole: "Parallelrolle",
   },
   writing: {
     eyebrow: "Stefan Braum - Schreiben",
@@ -394,7 +395,7 @@ export const de: Translations = {
     listingHeadline: "Notizen aus der Praxis.",
     listingSubline:
       "Was ich gerade lerne, baue, beobachte. Mittelstands-IT, AI-Adoption, Compliance-Realität, Build-Notes. Kein Marketing, keine Liste mit Punkten. Einfach Notizen.",
-    listingTitle: "Schreiben - Stefan Braum",
+    listingTitle: "Schreiben · Stefan Braum",
     listingDescription:
       "Notizen aus der Praxis: AI-Adoption, Mittelstands-IT, Compliance, Build-Notes.",
     backToList: "Schreiben",
@@ -440,12 +441,12 @@ export const de: Translations = {
     toHome: "Zur Startseite",
   },
   chapters: {
-    "01": "Kernschwerpunkte",
-    "02": "Portfolio",
-    "03": "Skills und Zertifikate",
-    "04": "Stationen",
-    "05": "Notizen aus der Praxis",
-    "06": "Lass uns reden",
+    kernschwerpunkte: "Kernschwerpunkte",
+    stationen: "Stationen",
+    portfolio: "Portfolio",
+    skills: "Skills und Zertifikate",
+    schreiben: "Notizen aus der Praxis",
+    kontakt: "Lass uns reden",
   },
   notFound: {
     eyebrow: "Stefan Braum - Nicht gefunden",
@@ -461,7 +462,7 @@ export const de: Translations = {
     backToOverview: "Zurück zur Übersicht",
     impressum: {
       title: "Impressum - Stefan Braum",
-      description: "Anbieterkennzeichnung nach Paragraph 5 TMG für stefanbraum.de.",
+      description: "Anbieterkennzeichnung nach § 5 DDG für stefanbraum.de.",
       h1: "Impressum",
     },
     datenschutz: {

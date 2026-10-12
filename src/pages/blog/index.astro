@@ -3,11 +3,15 @@
 // automatisch ab ihrem Datum - ohne Rebuild.
 export const prerender = false;
 
-import BaseLayout from "~/layouts/BaseLayout.astro";
-import Nav from "~/components/Nav.astro";
+import { type CollectionEntry, getCollection } from "astro:content";
 import Footer from "~/components/Footer.astro";
-import { getCollection, type CollectionEntry } from "astro:content";
+import Nav from "~/components/Nav.astro";
+import { getT } from "~/i18n";
+import { blogPostPath } from "~/i18n/routes.ts";
+import BaseLayout from "~/layouts/BaseLayout.astro";
 import { env } from "~/lib/env.ts";
+
+const t = getT("de");
 
 type Post = CollectionEntry<"blog">;
 const allPosts = (await getCollection("blog")) as Post[];
@@ -21,19 +25,17 @@ const dateFmt = new Intl.DateTimeFormat("de-DE", {
   year: "numeric",
 });
 
-const allTags = Array.from(
-  new Set(posts.flatMap((p) => p.data.tags)),
-).sort((a, b) => a.localeCompare(b));
+const allTags = Array.from(new Set(posts.flatMap((p) => p.data.tags))).sort((a, b) =>
+  a.localeCompare(b),
+);
 
-const siteUrl =
-  env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
+const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
 
 const blogJsonLd = {
   "@context": "https://schema.org",
   "@type": "Blog",
   name: "Stefan Braum - Schreiben",
-  description:
-    "Notizen aus der Praxis: AI-Adoption, Mittelstands-IT, Compliance, Build-Notes.",
+  description: "Notizen aus der Praxis: AI-Adoption, Mittelstands-IT, Compliance, Build-Notes.",
   url: new URL("/blog/", siteUrl).toString(),
   inLanguage: "de-DE",
   author: {
@@ -46,8 +48,8 @@ const blogJsonLd = {
     headline: p.data.title,
     description: p.data.excerpt,
     datePublished: p.data.date.toISOString(),
-    dateModified: p.data.date.toISOString(),
-    url: new URL(`/blog/${p.id}/`, siteUrl).toString(),
+    dateModified: (p.data.updated ?? p.data.date).toISOString(),
+    url: new URL(blogPostPath(p.id), siteUrl).toString(),
     keywords: p.data.tags.join(", "),
     author: {
       "@type": "Person",
@@ -59,8 +61,8 @@ const blogJsonLd = {
 ---
 
 <BaseLayout
-  title="Schreiben · Stefan Braum"
-  description="Notizen aus der Praxis: AI-Adoption, Mittelstands-IT, Compliance, Build-Notes."
+  title={t.writing.listingTitle}
+  description={t.writing.listingDescription}
   locale="de"
 >
   <Nav locale="de" />
@@ -106,7 +108,7 @@ const blogJsonLd = {
               class="blog-item"
               data-tags={post.data.tags.join(",")}
             >
-              <a href={`/blog/${post.id}/`} class="blog-link interactive">
+              <a href={blogPostPath(post.id)} class="blog-link interactive">
                 <div class="blog-meta">
                   <time datetime={post.data.date.toISOString()}>
                     {dateFmt.format(post.data.date)}
@@ -263,7 +265,7 @@ const blogJsonLd = {
     gap: 10px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: rgba(242, 239, 228, 0.4);
+    color: rgba(242, 239, 228, 0.55);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     margin-bottom: 10px;

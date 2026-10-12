@@ -1,6 +1,6 @@
 ---
+import { getLocalePrefix, getT } from "~/i18n";
 import BaseLayout from "~/layouts/BaseLayout.astro";
-import { getT, getLocalePrefix } from "~/i18n";
 
 const locale = "en" as const;
 const t = getT(locale);

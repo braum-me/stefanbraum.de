@@ -1,14 +1,15 @@
 ---
 export const prerender = true;
 
-import BaseLayout from "~/layouts/BaseLayout.astro";
-import Nav from "~/components/Nav.astro";
-import Footer from "~/components/Footer.astro";
-import { getCollection, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
-import { env } from "~/lib/env.ts";
+import { getCollection, render } from "astro:content";
+import Footer from "~/components/Footer.astro";
+import Nav from "~/components/Nav.astro";
 import { cases } from "~/data/cases.ts";
 import { getT } from "~/i18n";
+import { blogIndexPath, blogPostPath } from "~/i18n/routes.ts";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { env } from "~/lib/env.ts";
 
 const t = getT("de");
 
@@ -62,14 +63,10 @@ const scored = otherPosts
   });
 
 const withOverlap = scored.filter((s) => s.overlap > 0).slice(0, 3);
-const related =
-  withOverlap.length > 0
-    ? withOverlap.map((s) => s.post)
-    : otherPosts.slice(0, 3);
+const related = withOverlap.length > 0 ? withOverlap.map((s) => s.post) : otherPosts.slice(0, 3);
 
-const siteUrl =
-  env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
-const postUrl = new URL(`/blog/${post.id}/`, siteUrl).toString();
+const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
+const postUrl = new URL(blogPostPath(post.id), siteUrl).toString();
 
 const blogPostingJsonLd = {
   "@context": "https://schema.org",
@@ -77,11 +74,12 @@ const blogPostingJsonLd = {
   headline: post.data.title,
   description: post.data.excerpt,
   datePublished: post.data.date.toISOString(),
-  dateModified: post.data.date.toISOString(),
+  dateModified: (post.data.updated ?? post.data.date).toISOString(),
   inLanguage: "de-DE",
   keywords: post.data.tags.join(", "),
   author: {
     "@type": "Person",
+    "@id": `${siteUrl.replace(/\/$/, "")}/#stefan-braum`,
     name: "Stefan Braum",
     url: siteUrl,
   },
@@ -97,6 +95,7 @@ const blogPostingJsonLd = {
   title={`${post.data.title} · Stefan Braum`}
   description={post.data.excerpt}
   ogImage={post.data.coverImage}
+  ogType="article"
   locale="de"
 >
   <Nav locale="de" />
@@ -104,7 +103,7 @@ const blogPostingJsonLd = {
   <main id="top">
     <article class="relative px-6 md:px-12 pt-32 md:pt-40 pb-24 md:pb-32">
       <div class="max-w-3xl mx-auto">
-        <a href="/blog/" class="blog-back interactive">← Schreiben</a>
+        <a href={blogIndexPath("de")} class="blog-back interactive">← Schreiben</a>
 
         <header class="blog-header">
           <div class="blog-meta">
@@ -149,7 +148,7 @@ const blogPostingJsonLd = {
             <ul class="related-list">
               {related.map((p) => (
                 <li class="related-item">
-                  <a href={`/blog/${p.id}/`} class="related-link interactive">
+                  <a href={blogPostPath(p.id)} class="related-link interactive">
                     <div class="blog-meta">
                       <time datetime={p.data.date.toISOString()}>
                         {dateShortFmt.format(p.data.date)}
@@ -308,7 +307,7 @@ const blogPostingJsonLd = {
     gap: 10px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: rgba(242, 239, 228, 0.4);
+    color: rgba(242, 239, 228, 0.55);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     margin-bottom: 14px;
@@ -495,7 +494,7 @@ const blogPostingJsonLd = {
     font-family: var(--font-mono);
     font-size: 11.5px;
     letter-spacing: 0.06em;
-    color: rgba(242, 239, 228, 0.45);
+    color: rgba(242, 239, 228, 0.55);
   }
 
   /* Side-by-side compare-grid (z.B. für Modell-Vergleiche) */

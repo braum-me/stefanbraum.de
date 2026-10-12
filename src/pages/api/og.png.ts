@@ -1,8 +1,11 @@
-import type { APIRoute } from "astro";
-import { Resvg } from "@resvg/resvg-js";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { Resvg } from "@resvg/resvg-js";
+import type { APIRoute } from "astro";
 import satori from "satori";
+import { profile } from "~/data/profile.ts";
+import { getT } from "~/i18n";
+import { localized } from "~/i18n/localized.ts";
 
 export const prerender = false;
 
@@ -36,13 +39,18 @@ function span(style: Record<string, string | number>, children: string): Node {
 }
 
 export const GET: APIRoute = async ({ url }) => {
-  const title = url.searchParams.get("title") ?? "Stefan Braum";
-  const focus = url.searchParams.get("focus");
-
-  let subtitle = url.searchParams.get("subtitle") ?? "Digitale Transformation aus der Linie, nicht aus dem Slide.";
-  let metaRight = "Teamleiter IT Apps & stellv. Global Head IT/SAP";
+  // Nur feste Varianten (Sprache, Fokus): kein frei wählbarer Text aus der URL,
+  // damit unter stefanbraum.de keine beliebigen "Stefan Braum"-Grafiken erzeugt werden können.
+  const lang = url.searchParams.get("lang") === "en" ? "en" : "de";
+  const focus = url.searchParams.get("focus") === "consulting" ? "consulting" : undefined;
+  const title = profile.name;
+  let subtitle = getT(lang).meta.ogSubtitle;
+  let metaRight = localized(profile.currentPosition.titleShort, lang);
   if (focus === "consulting") {
-    subtitle = "Beratung im Mittelstand: AI, Enterprise-Architektur, IT-Strategie.";
+    subtitle =
+      lang === "en"
+        ? "Mid-market consulting: AI, enterprise architecture, IT strategy."
+        : "Beratung im Mittelstand: AI, Enterprise-Architektur, IT-Strategie.";
     metaRight = "braum.consulting";
   }
 
@@ -105,7 +113,7 @@ export const GET: APIRoute = async ({ url }) => {
                 background: "#00C896",
                 boxShadow: "0 0 12px #00C896",
               }),
-              span({}, "Sinntal · DE"),
+              span({}, `${profile.location.locality} · ${profile.location.countryCode}`),
             ],
           ),
         ],
@@ -162,10 +170,7 @@ export const GET: APIRoute = async ({ url }) => {
           paddingTop: "28px",
           borderTop: "1px solid rgba(47,130,100,0.35)",
         },
-        [
-          span({}, "stefanbraum.de"),
-          span({ color: "rgba(0,200,150,0.8)" }, metaRight),
-        ],
+        [span({}, "stefanbraum.de"), span({ color: "rgba(0,200,150,0.8)" }, metaRight)],
       ),
     ],
   );

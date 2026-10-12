@@ -1,5 +1,6 @@
 ---
-import { getT, getLocalePrefix, type Locale } from "~/i18n";
+import { profile } from "~/data/profile.ts";
+import { getLocalePrefix, getT, type Locale } from "~/i18n";
 
 interface Props {
   locale?: Locale;
@@ -11,9 +12,9 @@ const prefix = getLocalePrefix(locale);
 const year = new Date().getFullYear();
 
 const properties = [
-  { name: "braum.me", href: "https://braum.me" },
-  { name: "braum.consulting", href: "https://braum.consulting" },
-  { name: "aboutexport.com", href: "https://aboutexport.com" },
+  { name: "braum.me", href: profile.links.me },
+  { name: "braum.consulting", href: profile.links.consulting },
+  { name: "aboutexport.com", href: profile.links.aboutexport },
 ];
 
 const homePath = prefix === "" ? "/" : `${prefix}/`;
@@ -27,7 +28,7 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     <!-- Top: brand block + 2 columns -->
     <div class="footer-top">
       <div class="footer-brand">
-        <a href={markHref} class="footer-mark interactive" aria-label={markLabel}>
+        <a href={markHref} class="footer-mark interactive" aria-label={`SB, ${markLabel}`}>
           <span class="footer-mark-letters">SB</span>
           <span class="footer-mark-dot" aria-hidden="true"></span>
         </a>
@@ -36,8 +37,8 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
       <div class="footer-col">
         <div class="footer-col-head">{t.footer.contact}</div>
         <ul class="footer-col-list">
-          <li><a href="https://braum.me/mail" class="footer-link interactive">{t.footer.contactMail}</a></li>
-          <li><a href="https://linkedin.com/in/stefanbraum" class="footer-link interactive">{t.footer.contactLinkedIn}</a></li>
+          <li><a href={profile.mailUrl} class="footer-link interactive">{t.footer.contactMail}</a></li>
+          <li><a href={profile.links.linkedin} class="footer-link interactive">{t.footer.contactLinkedIn}</a></li>
         </ul>
       </div>
 
@@ -54,12 +55,12 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     <!-- Bottom bar -->
     <div class="footer-bottom">
       <div class="footer-bottom-left">
-        <span class="footer-meta">&copy; {year} Stefan Braum</span>
+        <span class="footer-meta">&copy; {year} {profile.name}</span>
       </div>
       <div class="footer-bottom-mid">
-        <a href={`${prefix}/impressum`} class="footer-meta-link interactive">{t.footer.impressum}</a>
+        <a href={`${prefix}/impressum/`} class="footer-meta-link interactive">{t.footer.impressum}</a>
         <span class="footer-meta-sep" aria-hidden="true">&middot;</span>
-        <a href={`${prefix}/datenschutz`} class="footer-meta-link interactive">{t.footer.datenschutz}</a>
+        <a href={`${prefix}/datenschutz/`} class="footer-meta-link interactive">{t.footer.datenschutz}</a>
       </div>
       <div class="footer-bottom-right">
         <span class="footer-stack">{t.footer.stack}</span>
@@ -153,7 +154,7 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     font-size: 10.5px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(242, 239, 228, 0.4);
+    color: rgba(242, 239, 228, 0.55);
     margin-bottom: 16px;
   }
 
@@ -211,7 +212,7 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 0.06em;
-    color: rgba(242, 239, 228, 0.45);
+    color: rgba(242, 239, 228, 0.55);
   }
   .footer-meta-link {
     font-family: var(--font-mono);
@@ -231,6 +232,6 @@ const markLabel = isHome ? t.footer.backToTop : t.footer.toHome;
     font-family: var(--font-mono);
     font-size: 10.5px;
     letter-spacing: 0.08em;
-    color: rgba(242, 239, 228, 0.3);
+    color: rgba(242, 239, 228, 0.55);
   }
 </style>

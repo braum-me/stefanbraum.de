@@ -22,56 +22,53 @@ export const en: Translations = {
   },
   meta: {
     siteName: "stefanbraum.de",
-    title: "Stefan Braum - Operator, Builder, Writer",
+    title: "Stefan Braum – IT Leadership, Enterprise Architecture & AI",
     description:
-      "Personal hub of Stefan Braum: IT leadership in the German Mittelstand, applied AI, side projects, writing. Blog on stack, architecture, and field tests.",
+      "Stefan Braum, IT leader in the German industrial mid-market: enterprise architecture, transformation, IT security and AI. Strategic responsibility, still hands-on.",
     consultingDescription:
       "Mid-market consulting on AI, enterprise architecture, and IT strategy. Initial conversation via braum.consulting.",
+    ogSubtitle: "IT Leadership. Architecture. Execution.",
     skipLink: "Skip to main content",
   },
   nav: {
-    items: [
-      { id: "kernschwerpunkte", label: "Focus Areas" },
-      { id: "portfolio", label: "Portfolio" },
-      { id: "skills", label: "Skills" },
-      { id: "stationen", label: "Career" },
-      { id: "schreiben", label: "Writing" },
-      { id: "kontakt", label: "Contact" },
-    ],
+    labels: {
+      kernschwerpunkte: "Focus Areas",
+      stationen: "Career",
+      portfolio: "Portfolio",
+      skills: "Skills",
+      schreiben: "Writing",
+      kontakt: "Contact",
+    },
     logoLabelHome: "Stefan Braum, back to top",
     logoLabelOther: "Back to home",
     burgerOpen: "Open menu",
     languageLabel: "Language",
   },
   hero: {
-    eyebrow: "Stefan Braum - Main-Kinzig-Kreis - DE",
-    headlinePart1: "Architect, leader,",
-    headlinePart2: "practitioner.",
+    headlinePart1: "IT Leadership. Architecture.",
+    headlinePart2: "Execution.",
+    currentRoleLabel: "Currently",
     sublineDefault:
-      "I shape IT architecture, teams, and digitalization in the German industrial Mittelstand.",
+      "I am responsible for application and integration architecture, ISMS and IT security, and the practical use of AI in a global IT/SAP organization in the German industrial mid-market. Technically, I stay hands-on: own platforms, automation, SaaS.",
     sublineConsulting:
       "Mid-market consulting on AI, enterprise architecture, and IT strategy. Initial conversation via braum.consulting.",
     ctaPrimary: "Get in touch",
     ctaSecondary: "View projects",
-    portraitAlt: "Stefan Braum",
-    portraitLocation: "Sinntal, DE",
-    portraitName: "Stefan Braum",
+    portraitAlt: "Portrait of Stefan Braum",
   },
   microMetrics: {
     pillars: "Pillars",
     location: "Location",
-    locationValue: "Main-Kinzig-Kreis - CET",
-    practice: "Years in IT",
-    practiceValue: "12 Years",
+    practice: "Experience",
+    practiceValue: "12 years in IT",
     projects: "Projects",
-    projectsValue: "30 documented",
+    projectsValue: "{count} documented",
     aria: "Profile signals",
   },
   kernschwerpunkte: {
     eyebrow: "Stefan Braum - Focus Areas",
     headline: "Focus Areas.",
-    subline:
-      "Six fields where I deliver consistently. Click opens the matching projects below.",
+    subline: "Six fields where I deliver consistently. Click opens the matching projects below.",
     cta: "View projects",
     aria: "Focus Areas",
     pillars: [
@@ -79,61 +76,79 @@ export const en: Translations = {
         id: "transformation",
         number: "01",
         title: "Digital Transformation",
-        body:
-          "Modern Work, M365 adoption, process platforms, self-service for business units. From tool rollout to change management.",
+        body: "Modern Work, M365 adoption, process platforms, self-service for business units. From tool rollout to change management.",
       },
       {
         id: "ai",
         number: "02",
         title: "AI & Data",
-        body:
-          "Copilot rollouts, custom agents, adoption programs, BI and analytics platforms. AI as a tool, not a buzzword.",
+        body: "Copilot rollouts, custom agents, adoption programs, BI and analytics platforms. AI as a tool, not a buzzword.",
       },
       {
         id: "enterprise",
         number: "03",
         title: "Enterprise & Security",
-        body:
-          "SAP S/4HANA, Azure Landing Zone, Zero Trust, identity and SOC foundation. Architecture with a hands-on mentality.",
+        body: "SAP S/4HANA, Azure Landing Zone, Zero Trust, identity and SOC foundation. Architecture with a hands-on mentality.",
       },
       {
         id: "compliance",
         number: "04",
         title: "Compliance & Governance",
-        body:
-          "ISMS per ISO 27001 / TISAX, BCM, risk management, IT due-diligence. Audit-ready, not just PowerPoint-ready.",
+        body: "ISMS per ISO 27001 / TISAX, BCM, risk management, IT due-diligence. Audit-ready, not just PowerPoint-ready.",
       },
       {
         id: "engineering",
         number: "05",
         title: "Engineering & Build",
-        body:
-          "Custom platforms, side-projects, open source. Cloud-native containers, modern web, SaaS ventures.",
+        body: "Custom platforms, side-projects, open source. Cloud-native containers, modern web, SaaS ventures.",
       },
       {
         id: "leadership",
         number: "06",
         title: "Leadership & Team",
-        body:
-          "Team building, direct reports, deputy lead, KPI steering. Short paths to executive management and business units.",
+        body: "Team building, direct reports, deputy lead, KPI steering. Short paths to executive management and business units.",
       },
     ],
   },
   cases: {
     eyebrow: "Stefan Braum - Portfolio",
     headline: "Portfolio.",
-    sublineTemplate:
-      "{count} projects from main job and own practice. Clients anonymized.",
+    sublineTemplate: "{count} projects from main job and own practice. Clients anonymized.",
     filterAria: "Portfolio filter",
     filterAll: "All",
     empty: "Projects in this pillar coming.",
-    statusOngoing: "Ongoing",
-    statusConcept: "Concept",
+    status: {
+      ongoing: "Ongoing",
+      "in-operation": "In operation",
+      pilot: "Pilot",
+      preparation: "Preparation",
+      concept: "Concept",
+      completed: "Completed",
+      "handed-over": "Completed & handed over",
+      "pre-evaluation-completed": "Pre-evaluation completed",
+    },
+    statusHint: {
+      ongoing: "Project in active delivery",
+      "in-operation": "Introduced and running in production, still being developed",
+      pilot: "Pilot phase with a limited user group, rolled out step by step",
+      preparation: "In preparation, no delivery completed yet",
+      concept: "Target state or concept, not yet implemented",
+      completed: "Project completed",
+      "handed-over": "Designed, completed and handed over to the responsible team",
+      "pre-evaluation-completed": "Pre-evaluation completed, decision rests with management",
+    },
+    domainTags: {
+      "modern-workplace": "Modern Workplace",
+    },
+    featured: "Featured",
+    periodOngoing: "ongoing",
+    periodSince: "since",
     domain: "Domain",
     intervention: "Intervention",
     signals: "Signals",
     anchor: "Anchor",
     readBlog: "Read on the blog",
+    germanOnly: "in German",
     fromPortfolio: "From the portfolio:",
     pageNavAria: "Portfolio pagination",
     pagePrev: "Back",
@@ -145,8 +160,7 @@ export const en: Translations = {
   skills: {
     eyebrow: "Stefan Braum - Tools & Evidence",
     headline: "Skills & Certifications.",
-    subline:
-      "What I actually use, how I have proven it, and where it has been deployed.",
+    subline: "What I actually use, how I have proven it, and where it has been deployed.",
     sphereAria: "Skills, click for detail",
     skillDetailLabel: "Show detail",
     certificates: "Certifications",
@@ -175,40 +189,19 @@ export const en: Translations = {
     headline: "Career.",
     subline:
       "From IT systems-integration apprenticeship to deputy lead of a global IT/SAP organization. In parallel, since 2023, own consulting practice with Braum Consulting and a SaaS build in self-direction.",
-    entries: [
-      {
-        year: "2023",
-        period: "Jun 2023 - Today",
-      },
-      {
-        year: "2022",
-        period: "Jul 2022 - Today",
-      },
-      {
-        year: "2021",
-        period: "Apr 2021 - Today",
-      },
-      {
-        year: "2018",
-        period: "Aug 2018 - Mar 2021",
-      },
-      {
-        year: "2014",
-        period: "Sep 2014 - Jun 2018",
-      },
-    ],
+    present: "Today",
+    parallelRole: "parallel role",
   },
   writing: {
     eyebrow: "Stefan Braum - Writing",
     headline: "Field Notes.",
-    subline:
-      "What I am learning, building, observing. No marketing, no bullet lists. Just notes.",
+    subline: "What I am learning, building, observing. No marketing, no bullet lists. Just notes.",
     empty: "No posts yet. Soon.",
     seeAll: "See all notes",
     listingHeadline: "Field Notes.",
     listingSubline:
       "What I am learning, building, observing. Mid-market IT, AI adoption, compliance reality, build notes. No marketing, no bullet lists. Just notes.",
-    listingTitle: "Writing - Stefan Braum",
+    listingTitle: "Writing · Stefan Braum",
     listingDescription:
       "Field notes from practice: AI adoption, mid-market IT, compliance, build notes.",
     backToList: "Writing",
@@ -216,8 +209,7 @@ export const en: Translations = {
     blogIndexAria: "Filter by tag",
     filterAll: "All",
     filterEmpty: "No posts with this tag.",
-    notice:
-      "Posts available in German. English translations coming as posts publish in English.",
+    notice: "Posts available in German. English translations coming as posts publish in English.",
   },
   contact: {
     eyebrow: "Stefan Braum - Contact",
@@ -255,12 +247,12 @@ export const en: Translations = {
     toHome: "Back to home",
   },
   chapters: {
-    "01": "Focus Areas",
-    "02": "Portfolio",
-    "03": "Skills & Certifications",
-    "04": "Career",
-    "05": "Field Notes",
-    "06": "Let's Talk",
+    kernschwerpunkte: "Focus Areas",
+    stationen: "Career",
+    portfolio: "Portfolio",
+    skills: "Skills & Certifications",
+    schreiben: "Field Notes",
+    kontakt: "Let's Talk",
   },
   notFound: {
     eyebrow: "Stefan Braum - Not found",
@@ -276,7 +268,8 @@ export const en: Translations = {
     backToOverview: "Back to overview",
     impressum: {
       title: "Imprint - Stefan Braum",
-      description: "Provider information per Section 5 TMG for stefanbraum.de.",
+      description:
+        "Provider information per Section 5 DDG (German Digital Services Act) for stefanbraum.de.",
       h1: "Imprint",
     },
     datenschutz: {

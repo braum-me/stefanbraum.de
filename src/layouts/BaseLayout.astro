@@ -1,8 +1,14 @@
 ---
-import { env } from "~/lib/env.ts";
+// Preload der beiden tragenden Schriften (Body: Geist, Headlines: Inter), nur Latin.
+// Verkürzt den Font-Swap und damit LCP; URLs kommen gehasht aus dem Build.
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import AmbientShader from "~/components/AmbientShader.astro";
-import EntryBoot from "~/components/EntryBoot.astro";
-import { getT, localizePath, type Locale } from "~/i18n";
+import { profile } from "~/data/profile.ts";
+import { getT, type Locale } from "~/i18n";
+import { localized } from "~/i18n/localized.ts";
+import { canonicalPath, getHreflangLinks, homePath } from "~/i18n/routes.ts";
+import { env } from "~/lib/env.ts";
 import "../styles/global.css";
 
 interface Props {
@@ -11,14 +17,11 @@ interface Props {
   noindex?: boolean;
   ogFocus?: "consulting";
   ogImage?: string;
+  ogType?: "website" | "article";
   locale?: Locale;
 }
 
-const {
-  locale = "de",
-  ogFocus,
-  ogImage,
-} = Astro.props;
+const { locale = "de", ogFocus, ogImage, ogType = "website" } = Astro.props;
 const t = getT(locale);
 
 const title = Astro.props.title ?? t.meta.title;
@@ -26,86 +29,60 @@ const description = Astro.props.description ?? t.meta.description;
 const noindex = Astro.props.noindex ?? false;
 
 const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
-const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const abs = (path: string) => new URL(path, siteUrl).toString();
+const canonicalUrl = abs(canonicalPath(Astro.url.pathname));
 
-const ogSubtitle = locale === "en"
-  ? "Digital Transformation from the Line, Not from the Slide."
-  : "Digitale Transformation aus der Linie, nicht aus dem Slide.";
-const ogParams = new URLSearchParams({
-  title: "Stefan Braum",
-  subtitle: ogSubtitle,
-});
+// Text kommt serverseitig aus Profil/i18n; die URL trägt nur die Variante.
+const ogParams = new URLSearchParams();
 if (ogFocus) ogParams.set("focus", ogFocus);
-const ogImageUrl = ogImage
-  ? new URL(ogImage, siteUrl).toString()
-  : new URL(`/api/og.png?${ogParams.toString()}`, siteUrl).toString();
+if (locale === "en") ogParams.set("lang", "en");
+const ogImageUrl = ogImage ? abs(ogImage) : abs(`/api/og.png?${ogParams.toString()}`);
 const ogImageIsCustom = Boolean(ogImage);
 
-// hreflang alternates pointing to the equivalent path in each locale
-const hreflangAlternates = (
-  [
-    { hreflang: "de", locale: "de" as Locale },
-    { hreflang: "en", locale: "en" as Locale },
-    { hreflang: "x-default", locale: "de" as Locale },
-  ]
-).map((entry) => ({
-  hreflang: entry.hreflang,
-  href: new URL(localizePath(Astro.url.pathname, entry.locale), siteUrl).toString(),
-}));
+// hreflang nur für tatsächlich existierende Sprach-Entsprechungen (siehe i18n/routes.ts)
+const hreflangAlternates = noindex
+  ? []
+  : getHreflangLinks(Astro.url.pathname).map((alt) => ({
+      hreflang: alt.hreflang,
+      href: abs(alt.path),
+    }));
 
 const umamiScriptRaw = env("UMAMI_SCRIPT_URL");
 const umamiWebsiteId = env("UMAMI_WEBSITE_ID");
 const umamiScript = umamiScriptRaw
-  ? (umamiScriptRaw.endsWith(".js") ? umamiScriptRaw : `${umamiScriptRaw.replace(/\/$/, "")}/script.js`)
+  ? umamiScriptRaw.endsWith(".js")
+    ? umamiScriptRaw
+    : `${umamiScriptRaw.replace(/\/$/, "")}/script.js`
   : undefined;
 const umamiEnabled = Boolean(umamiScript && umamiWebsiteId);
 
-const portraitUrl = new URL("/portrait.webp", siteUrl).toString();
+const { currentPosition, location } = profile;
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
   "@id": `${siteUrl.replace(/\/$/, "")}/#stefan-braum`,
-  name: "Stefan Braum",
-  givenName: "Stefan",
-  familyName: "Braum",
+  name: profile.name,
+  givenName: profile.givenName,
+  familyName: profile.familyName,
   url: siteUrl,
-  mainEntityOfPage: canonicalUrl,
-  image: portraitUrl,
-  description,
+  mainEntityOfPage: abs(homePath(locale)),
+  image: abs("/portrait.webp"),
+  // Personenbeschreibung, nicht die Seitenbeschreibung (Blogartikel haben eigene Excerpts)
+  description: t.meta.description,
   inLanguage: locale === "en" ? "en-US" : "de-DE",
-  jobTitle: locale === "en"
-    ? "Team Lead IT Applications & Deputy Global Head of IT/SAP"
-    : "Teamleiter IT Applications & stellv. Global Head of IT/SAP",
+  jobTitle: localized(currentPosition.title, locale),
   worksFor: {
     "@type": "Organization",
-    name: "ODW-Elektrik",
+    name: currentPosition.employer.name,
   },
-  sameAs: [
-    "https://braum.me",
-    "https://braum.consulting",
-    "https://braum.org",
-    "https://braum.dev",
-    "https://aboutexport.com",
-    "https://linkedin.com/in/stefanbraum",
-    "https://github.com/braum-me",
-    "https://stefanbraum.substack.com",
-  ],
+  sameAs: profile.sameAs,
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Sinntal",
-    addressRegion: "Hessen",
-    addressCountry: "DE",
+    addressLocality: location.locality,
+    addressRegion: location.region,
+    addressCountry: location.countryCode,
   },
-  knowsAbout: [
-    "Digital Transformation",
-    "IT Leadership",
-    "Enterprise Architecture",
-    "SAP",
-    "Azure Hybrid Cloud",
-    "Microsoft 365",
-    "IT-Security",
-    "Applied AI in Enterprise",
-  ],
+  knowsAbout: profile.knowsAbout,
 };
 ---
 
@@ -121,20 +98,24 @@ const personJsonLd = {
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#030F0B" />
 
-    <link rel="canonical" href={canonicalUrl} />
+    {!noindex && <link rel="canonical" href={canonicalUrl} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" href={geistLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
 
     {hreflangAlternates.map((alt) => (
       <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
     ))}
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:site_name" content="stefanbraum.de" />
     <meta property="og:locale" content={t.ogLocale} />
-    <meta property="og:locale:alternate" content={locale === "en" ? "de_DE" : "en_US"} />
+    {hreflangAlternates.length > 0 && (
+      <meta property="og:locale:alternate" content={locale === "en" ? "de_DE" : "en_US"} />
+    )}
     <meta property="og:image" content={ogImageUrl} />
     {!ogImageIsCustom && <meta property="og:image:width" content="1200" />}
     {!ogImageIsCustom && <meta property="og:image:height" content="630" />}
@@ -170,18 +151,12 @@ const personJsonLd = {
     }
 
     <script is:inline>
-      // EntryBoot skip-check vor dem ersten Paint, verhindert FOUC-Flash
-      try {
-        if (sessionStorage.getItem("stb-boot") === "1") {
-          document.documentElement.classList.add("boot-skipped");
-        }
-      } catch (e) {
-        /* private mode etc */
-      }
+      // Vor dem ersten Paint: Entry-Animationen nur aktivieren, wenn JS läuft.
+      // Ohne JS bleiben alle [data-anim]-Elemente sichtbar.
+      document.documentElement.classList.add("js");
     </script>
   </head>
   <body>
-    <EntryBoot />
     <a href="#top" class="skip-link">{t.meta.skipLink}</a>
 
     <!-- Background layers -->
