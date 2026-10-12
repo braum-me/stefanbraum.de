@@ -3,6 +3,8 @@ import path from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import type { APIRoute } from "astro";
 import satori from "satori";
+import { profile } from "~/data/profile.ts";
+import { localized } from "~/i18n/localized.ts";
 
 export const prerender = false;
 
@@ -42,7 +44,8 @@ export const GET: APIRoute = async ({ url }) => {
   let subtitle =
     url.searchParams.get("subtitle") ??
     "Digitale Transformation aus der Linie, nicht aus dem Slide.";
-  let metaRight = "Teamleiter IT Apps & stellv. Global Head IT/SAP";
+  const lang = url.searchParams.get("lang") === "en" ? "en" : "de";
+  let metaRight = localized(profile.currentPosition.titleShort, lang);
   if (focus === "consulting") {
     subtitle = "Beratung im Mittelstand: AI, Enterprise-Architektur, IT-Strategie.";
     metaRight = "braum.consulting";
@@ -107,7 +110,7 @@ export const GET: APIRoute = async ({ url }) => {
                 background: "#00C896",
                 boxShadow: "0 0 12px #00C896",
               }),
-              span({}, "Sinntal · DE"),
+              span({}, `${profile.location.locality} · ${profile.location.countryCode}`),
             ],
           ),
         ],

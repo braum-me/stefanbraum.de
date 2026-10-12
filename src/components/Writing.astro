@@ -1,13 +1,15 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
-import { getLocalePrefix, getT, type Locale } from "~/i18n";
+import { getT, type Locale } from "~/i18n";
+import { blogIndexPath, blogPostPath } from "~/i18n/routes.ts";
 
 interface Props {
   locale?: Locale;
 }
 const { locale = "de" } = Astro.props;
 const t = getT(locale);
-const prefix = getLocalePrefix(locale);
+// Artikel existieren nur auf Deutsch; auf EN entsprechend kennzeichnen.
+const postLang = locale === "de" ? undefined : "de";
 
 type Post = CollectionEntry<"blog">;
 const allPosts = (await getCollection("blog")) as Post[];
@@ -41,18 +43,29 @@ const dateFmt = new Intl.DateTimeFormat(t.intlLocale, {
 
     <div class="writing-list reveal-elem mt-14" data-anim-group="tiles">
       {posts.map((post) => (
-        <a href={`${prefix}/blog/${post.id}/`} class="writing-item interactive" data-anim="tile">
+        <a
+          href={blogPostPath(post.id)}
+          class="writing-item interactive"
+          data-anim="tile"
+          hreflang="de"
+        >
           <div class="writing-meta">
             <time datetime={post.data.date.toISOString()}>{dateFmt.format(post.data.date)}</time>
             {post.data.readingTime && (
               <>
                 <span class="writing-sep" aria-hidden="true">&middot;</span>
-                <span>{post.data.readingTime}</span>
+                <span lang={postLang}>{post.data.readingTime}</span>
+              </>
+            )}
+            {postLang && (
+              <>
+                <span class="writing-sep" aria-hidden="true">&middot;</span>
+                <span>DE</span>
               </>
             )}
           </div>
-          <h3 class="writing-title">{post.data.title}</h3>
-          <p class="writing-excerpt">{post.data.excerpt}</p>
+          <h3 class="writing-title" lang={postLang}>{post.data.title}</h3>
+          <p class="writing-excerpt" lang={postLang}>{post.data.excerpt}</p>
         </a>
       ))}
     </div>
@@ -63,7 +76,7 @@ const dateFmt = new Intl.DateTimeFormat(t.intlLocale, {
 
     {posts.length > 0 && (
       <div class="reveal-elem mt-14 flex">
-        <a href={`${prefix}/blog/`} class="writing-all interactive">
+        <a href={blogIndexPath(locale)} class="writing-all interactive">
           {t.writing.seeAll}
           <span class="text-mint" aria-hidden="true">&rarr;</span>
         </a>

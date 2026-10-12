@@ -1,24 +1,35 @@
+import type { ContentLocale, Resolved } from "../i18n/localized.ts";
+import { resolveLocalized } from "../i18n/localized.ts";
+import type { CaseStatus } from "../lib/caseStatus.ts";
 import type { CaseCategoryId } from "./caseCategories.ts";
 
-export type CaseStatus = "ongoing" | "concept";
+export type { CaseStatus } from "../lib/caseStatus.ts";
+export { caseStatusPill, resolveCaseStatus } from "../lib/caseStatus.ts";
 
 export interface CaseMetric {
   value: string;
   label: string;
 }
 
-export interface CaseStudy {
-  id: string;
-  category: CaseCategoryId;
-  period: string;
+/** Übersetzbare Textfelder eines Cases. */
+export interface CaseTextFields {
   kind: string;
   title: string;
   anchor: string;
   context: string;
   intervention: string;
   metrics: CaseMetric[];
+}
+
+export interface CaseStudy extends CaseTextFields {
+  id: string;
+  category: CaseCategoryId;
+  period: string;
   tags: string[];
-  /** Optional override. Auto-detected from period ('laufend' / future-year) wenn nicht gesetzt. */
+  /** Optional: englische Fassung. Einzelne Felder dürfen fehlen; sie fallen
+      dann auf Deutsch zurück und werden mit lang="de" gekennzeichnet. */
+  en?: Partial<CaseTextFields>;
+  /** Optionaler Override. Sonst aus `period` abgeleitet, siehe lib/caseStatus.ts. */
   status?: CaseStatus;
   /** Hard-Override: keinen Status-Pill anzeigen, auch wenn auto-detect 'ongoing' sagt.
       Nutzbar für laufende Mandate, die nicht als 'Projekt mit Ongoing-Status' wirken sollen
@@ -27,25 +38,55 @@ export interface CaseStudy {
   /** Optional: Slug eines Blog-Posts der diesen Case ausführlich behandelt.
       Erzeugt im Case-Detail einen 'Im Blog'-Link, im Blog-Post einen Rückverweis. */
   blogSlug?: string;
+  /** Hervorgehobenes Projekt. Featured-Cases stehen vor allen anderen. */
+  featured?: boolean;
+  /** Sortierung innerhalb der Featured-Gruppe: kleiner = weiter vorne.
+      Ohne Wert gilt die Reihenfolge im Array. */
+  priority?: number;
 }
 
-/** Aktueller Bezugszeitraum für Auto-Status. */
-const CURRENT_YEAR = 2026;
+/**
+ * Anzeige-Reihenfolge: Featured zuerst (nach `priority`, dann Array-Reihenfolge),
+ * danach alle übrigen in Array-Reihenfolge. Stabil und ohne Seiteneffekte.
+ * Ohne gesetzte Flags ist das Ergebnis identisch mit dem Eingabe-Array.
+ */
+export function orderCasesForDisplay<T extends Pick<CaseStudy, "featured" | "priority">>(
+  list: readonly T[],
+): T[] {
+  return list
+    .map((c, index) => ({ c, index }))
+    .sort((a, b) => {
+      const fa = a.c.featured ? 0 : 1;
+      const fb = b.c.featured ? 0 : 1;
+      if (fa !== fb) return fa - fb;
+      if (fa === 0) {
+        const pa = a.c.priority ?? Number.POSITIVE_INFINITY;
+        const pb = b.c.priority ?? Number.POSITIVE_INFINITY;
+        if (pa !== pb) return pa - pb;
+      }
+      return a.index - b.index;
+    })
+    .map(({ c }) => c);
+}
 
-/** Status ableiten:
-    1. hidePill → null (Override)
-    2. status explicit gesetzt → status
-    3. 'laufend' im period → ongoing
-    4. End-Jahr STRENG GROESSER als currentYear → ongoing (zukünftig)
-    5. sonst null (abgeschlossen) */
-export function caseStatus(c: CaseStudy): CaseStatus | null {
-  if (c.hidePill) return null;
-  if (c.status) return c.status;
-  const period = c.period.toLowerCase();
-  if (period.includes("laufend")) return "ongoing";
-  const m = c.period.match(/(\d{4})\s*-\s*(\d{4})/);
-  if (m && Number.parseInt(m[2] ?? "0", 10) > CURRENT_YEAR) return "ongoing";
-  return null;
+export type LocalizedCase = Omit<CaseStudy, keyof CaseTextFields | "en"> & {
+  [K in keyof CaseTextFields]: Resolved<CaseTextFields[K]>;
+};
+
+/** Textfelder in der gewünschten Sprache, mit Sprachkennzeichnung je Feld. */
+export function localizeCase(c: CaseStudy, locale: ContentLocale): LocalizedCase {
+  const { en, ...rest } = c;
+  const field = <K extends keyof CaseTextFields>(key: K) =>
+    resolveLocalized<CaseTextFields[K]>({ de: c[key], en: en?.[key] }, locale);
+  return {
+    ...rest,
+    kind: field("kind"),
+    title: field("title"),
+    anchor: field("anchor"),
+    context: field("context"),
+    intervention: field("intervention"),
+    metrics: field("metrics"),
+  };
 }
 
 // Reihenfolge: chronologisch absteigend nach Startjahr, dann Endjahr.

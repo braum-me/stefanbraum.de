@@ -839,7 +839,7 @@ button,
 /* GSAP entry-animations (animations.client.ts):
    data-anim-Elemente starten unsichtbar, JS animiert sie ein.
    Reduced-motion + Fallback (kein JS): Elemente sofort sichtbar. */
-[data-anim] {
+.js [data-anim] {
   opacity: 0;
   will-change: opacity, transform;
 }
@@ -849,6 +849,7 @@ button,
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
+  .js [data-anim],
   [data-anim] {
     opacity: 1 !important;
     transform: none !important;

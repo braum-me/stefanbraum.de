@@ -1,12 +1,14 @@
 ---
-import { getLocalePrefix, getT, type Locale, localizePath } from "~/i18n";
+import { HOME_SECTIONS } from "~/data/sections.ts";
+import { getLocalePrefix, getT, type Locale } from "~/i18n";
+import { languageSwitchTarget } from "~/i18n/routes.ts";
 
 interface Props {
   locale?: Locale;
 }
 const { locale = "de" } = Astro.props;
 const t = getT(locale);
-const navItems = t.nav.items;
+const navItems = HOME_SECTIONS.map((id) => ({ id, label: t.nav.labels[id] }));
 
 const prefix = getLocalePrefix(locale);
 const homePath = prefix === "" ? "/" : `${prefix}/`;
@@ -15,9 +17,10 @@ const linkPrefix = isHome ? "" : homePath;
 const logoHref = isHome ? "#top" : homePath;
 const logoLabel = isHome ? t.nav.logoLabelHome : t.nav.logoLabelOther;
 
-// Language toggle target paths (mirror current path in the other locale)
-const dePath = localizePath(Astro.url.pathname, "de");
-const enPath = localizePath(Astro.url.pathname, "en");
+// Sprachumschalter: existierende Entsprechung, sonst nächstliegende Seite
+// (z.B. deutscher Blogartikel -> /en/blog/). Siehe i18n/routes.ts.
+const dePath = languageSwitchTarget(Astro.url.pathname, "de");
+const enPath = languageSwitchTarget(Astro.url.pathname, "en");
 ---
 
 <header id="site-nav" class="site-nav" data-at-top="true">
@@ -225,12 +228,11 @@ const enPath = localizePath(Astro.url.pathname, "en");
     font-size: 11px;
   }
   .nav-mobile-lang {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
-    padding: 18px 4px 6px;
-    border-top: 1px solid rgba(242, 239, 228, 0.06);
-    margin-top: 8px;
+    padding: 14px 4px 20px;
+    margin: 0 24px;
   }
   .nav-link {
     font-family: var(--font-mono);

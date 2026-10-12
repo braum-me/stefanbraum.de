@@ -1,0 +1,62 @@
+---
+import Cases from "~/components/Cases.astro";
+import ChapterSeparator from "~/components/ChapterSeparator.astro";
+import Contact from "~/components/Contact.astro";
+import Footer from "~/components/Footer.astro";
+import Hero from "~/components/Hero.astro";
+import Kernschwerpunkte from "~/components/Kernschwerpunkte.astro";
+import MicroMetrics from "~/components/MicroMetrics.astro";
+import Nav from "~/components/Nav.astro";
+import Skills from "~/components/Skills.astro";
+import Timeline from "~/components/Timeline.astro";
+import Writing from "~/components/Writing.astro";
+import { chapterNumber, HOME_SECTIONS, type HomeSectionId } from "~/data/sections.ts";
+import { getT, type Locale } from "~/i18n";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+
+// Startseite für beide Locales. Kapitel-Reihenfolge, Nummern und Anker
+// kommen aus data/sections.ts (gleiche Quelle wie die Navigation).
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getT(locale);
+
+const focus = Astro.url.searchParams.get("focus");
+const validFocus = focus === "consulting" ? focus : undefined;
+const pageDescription =
+  validFocus === "consulting" ? t.meta.consultingDescription : t.meta.description;
+
+const sectionComponents = {
+  kernschwerpunkte: Kernschwerpunkte,
+  stationen: Timeline,
+  portfolio: Cases,
+  skills: Skills,
+  schreiben: Writing,
+  kontakt: Contact,
+} satisfies Record<HomeSectionId, unknown>;
+---
+
+<BaseLayout
+  title={t.meta.title}
+  description={pageDescription}
+  ogFocus={validFocus}
+  ogImage="/og-home.jpg"
+  locale={locale}
+>
+  <Nav locale={locale} />
+  <main id="top">
+    <Hero locale={locale} />
+    <MicroMetrics locale={locale} />
+    {HOME_SECTIONS.map((id) => {
+      const Section = sectionComponents[id];
+      return (
+        <>
+          <ChapterSeparator number={chapterNumber(id)} title={t.chapters[id]} />
+          <Section locale={locale} />
+        </>
+      );
+    })}
+  </main>
+  <Footer locale={locale} />
+</BaseLayout>

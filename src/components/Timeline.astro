@@ -1,6 +1,7 @@
 ---
-import { timeline } from "~/data/timeline.ts";
+import { formatPeriod, startYear, timeline } from "~/data/timeline.ts";
 import { getT, type Locale } from "~/i18n";
+import { langAttr, resolveLocalized } from "~/i18n/localized.ts";
 
 interface Props {
   locale?: Locale;
@@ -8,12 +9,14 @@ interface Props {
 const { locale = "de" } = Astro.props;
 const t = getT(locale);
 
-// Merge translated period labels (by year) onto timeline entries while keeping
-// company/role/summary/tags from the canonical DE data.
-const periodOverrides = new Map(t.timeline.entries.map((e) => [e.year, e.period]));
 const entries = timeline.map((e) => ({
-  ...e,
-  period: periodOverrides.get(e.year) ?? e.period,
+  id: e.id,
+  year: startYear(e),
+  period: formatPeriod(e, locale, t.timeline.present),
+  company: e.parallel ? `${e.company} (${t.timeline.parallelRole})` : e.company,
+  role: resolveLocalized(e.role, locale),
+  summary: resolveLocalized(e.summary, locale),
+  tags: e.tags,
 }));
 ---
 
@@ -37,9 +40,9 @@ const entries = timeline.map((e) => ({
         <div class="timeline-line-fill"></div>
       </div>
 
-      <div class="space-y-10 md:space-y-12 reveal-stagger pl-6 md:pl-10">
+      <ol class="space-y-10 md:space-y-12 reveal-stagger pl-6 md:pl-10 list-none" role="list">
         {entries.map((entry) => (
-          <div class="timeline-item grid md:grid-cols-[auto_1fr] gap-6 md:gap-12 items-start interactive relative">
+          <li id={`station-${entry.id}`} class="timeline-item grid md:grid-cols-[auto_1fr] gap-6 md:gap-12 items-start interactive relative">
             <div class="timeline-node" aria-hidden="true"></div>
             <div class="min-w-[140px] md:min-w-[180px]">
               <div class="timeline-year">{entry.year}</div>
@@ -47,11 +50,17 @@ const entries = timeline.map((e) => ({
             </div>
             <div>
               <div class="kicker text-mint mb-2">{entry.company}</div>
-              <h3 class="font-display text-xl md:text-2xl font-medium text-cream tracking-tight leading-tight mb-4">
-                {entry.role}
+              <h3
+                class="font-display text-xl md:text-2xl font-medium text-cream tracking-tight leading-tight mb-4"
+                lang={langAttr(entry.role, locale)}
+              >
+                {entry.role.value}
               </h3>
-              <p class="font-body text-[15.5px] md:text-[16.5px] text-cream/70 leading-[1.65] max-w-[62ch] mb-5">
-                {entry.summary}
+              <p
+                class="font-body text-[15.5px] md:text-[16.5px] text-cream/70 leading-[1.65] max-w-[62ch] mb-5"
+                lang={langAttr(entry.summary, locale)}
+              >
+                {entry.summary.value}
               </p>
               <div class="flex flex-wrap gap-2">
                 {entry.tags.map((tag) => (
@@ -59,9 +68,9 @@ const entries = timeline.map((e) => ({
                 ))}
               </div>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ol>
     </div>
 
     <style>

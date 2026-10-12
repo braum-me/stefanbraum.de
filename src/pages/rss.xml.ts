@@ -1,6 +1,7 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
+import { blogPostPath } from "~/i18n/routes.ts";
 import { env } from "~/lib/env.ts";
 
 // SSR: Datum-Filter pro Request, vordatierte Posts erscheinen automatisch ab Datum.
@@ -24,7 +25,7 @@ export async function GET(context: APIContext) {
       title: p.data.title,
       pubDate: p.data.date,
       description: p.data.excerpt,
-      link: `/blog/${p.id}/`,
+      link: blogPostPath(p.id),
       categories: p.data.tags,
     })),
     customData: "<language>de-de</language>",

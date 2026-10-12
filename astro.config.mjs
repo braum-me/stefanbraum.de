@@ -14,7 +14,12 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      // Fehlerseiten gehören nicht in die Sitemap
+      filter: (page) => !/\/404\/?$/.test(new URL(page).pathname),
+    }),
+  ],
   server: {
     host: true,
     port: 5556,

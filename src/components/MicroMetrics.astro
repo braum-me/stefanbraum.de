@@ -1,6 +1,8 @@
 ---
 // News-Banner-Strip mit Live-Status + harten Zahlen.
 // Marquee-Animation per CSS, Items doppelt gerendert für seamless loop.
+import { cases } from "~/data/cases.ts";
+import { profile } from "~/data/profile.ts";
 import { getT, type Locale } from "~/i18n";
 
 interface Props {
@@ -14,12 +16,12 @@ const berlinHour = Number(
   new Intl.DateTimeFormat("de-DE", {
     hour: "numeric",
     hour12: false,
-    timeZone: "Europe/Berlin",
+    timeZone: profile.location.timezone,
   }).format(now),
 );
 const weekdayName = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
-  timeZone: "Europe/Berlin",
+  timeZone: profile.location.timezone,
 }).format(now);
 const isWeekend = weekdayName === "Sat" || weekdayName === "Sun";
 const inWorkingHours = !isWeekend && berlinHour >= 8 && berlinHour < 18;
@@ -33,9 +35,16 @@ interface Item {
 
 const items: Item[] = [
   { label: t.microMetrics.pillars, value: "6" },
-  { label: t.microMetrics.location, value: t.microMetrics.locationValue, dot: availabilityState },
+  {
+    label: t.microMetrics.location,
+    value: `${profile.location.area} - CET`,
+    dot: availabilityState,
+  },
   { label: t.microMetrics.practice, value: t.microMetrics.practiceValue },
-  { label: t.microMetrics.projects, value: t.microMetrics.projectsValue },
+  {
+    label: t.microMetrics.projects,
+    value: t.microMetrics.projectsValue.replace("{count}", String(cases.length)),
+  },
 ];
 ---
 

@@ -6,6 +6,7 @@ export const prerender = false;
 import { type CollectionEntry, getCollection } from "astro:content";
 import Footer from "~/components/Footer.astro";
 import Nav from "~/components/Nav.astro";
+import { blogPostPath } from "~/i18n/routes.ts";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { env } from "~/lib/env.ts";
 
@@ -45,7 +46,7 @@ const blogJsonLd = {
     description: p.data.excerpt,
     datePublished: p.data.date.toISOString(),
     dateModified: p.data.date.toISOString(),
-    url: new URL(`/blog/${p.id}/`, siteUrl).toString(),
+    url: new URL(blogPostPath(p.id), siteUrl).toString(),
     keywords: p.data.tags.join(", "),
     author: {
       "@type": "Person",
@@ -104,7 +105,7 @@ const blogJsonLd = {
               class="blog-item"
               data-tags={post.data.tags.join(",")}
             >
-              <a href={`/blog/${post.id}/`} class="blog-link interactive">
+              <a href={blogPostPath(post.id)} class="blog-link interactive">
                 <div class="blog-meta">
                   <time datetime={post.data.date.toISOString()}>
                     {dateFmt.format(post.data.date)}
