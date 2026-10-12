@@ -1,8 +1,8 @@
 ---
-import { env } from "~/lib/env.ts";
 import AmbientShader from "~/components/AmbientShader.astro";
 import EntryBoot from "~/components/EntryBoot.astro";
-import { getT, localizePath, type Locale } from "~/i18n";
+import { getT, type Locale, localizePath } from "~/i18n";
+import { env } from "~/lib/env.ts";
 import "../styles/global.css";
 
 interface Props {
@@ -14,11 +14,7 @@ interface Props {
   locale?: Locale;
 }
 
-const {
-  locale = "de",
-  ogFocus,
-  ogImage,
-} = Astro.props;
+const { locale = "de", ogFocus, ogImage } = Astro.props;
 const t = getT(locale);
 
 const title = Astro.props.title ?? t.meta.title;
@@ -28,9 +24,10 @@ const noindex = Astro.props.noindex ?? false;
 const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
 
-const ogSubtitle = locale === "en"
-  ? "Digital Transformation from the Line, Not from the Slide."
-  : "Digitale Transformation aus der Linie, nicht aus dem Slide.";
+const ogSubtitle =
+  locale === "en"
+    ? "Digital Transformation from the Line, Not from the Slide."
+    : "Digitale Transformation aus der Linie, nicht aus dem Slide.";
 const ogParams = new URLSearchParams({
   title: "Stefan Braum",
   subtitle: ogSubtitle,
@@ -42,13 +39,11 @@ const ogImageUrl = ogImage
 const ogImageIsCustom = Boolean(ogImage);
 
 // hreflang alternates pointing to the equivalent path in each locale
-const hreflangAlternates = (
-  [
-    { hreflang: "de", locale: "de" as Locale },
-    { hreflang: "en", locale: "en" as Locale },
-    { hreflang: "x-default", locale: "de" as Locale },
-  ]
-).map((entry) => ({
+const hreflangAlternates = [
+  { hreflang: "de", locale: "de" as Locale },
+  { hreflang: "en", locale: "en" as Locale },
+  { hreflang: "x-default", locale: "de" as Locale },
+].map((entry) => ({
   hreflang: entry.hreflang,
   href: new URL(localizePath(Astro.url.pathname, entry.locale), siteUrl).toString(),
 }));
@@ -56,7 +51,9 @@ const hreflangAlternates = (
 const umamiScriptRaw = env("UMAMI_SCRIPT_URL");
 const umamiWebsiteId = env("UMAMI_WEBSITE_ID");
 const umamiScript = umamiScriptRaw
-  ? (umamiScriptRaw.endsWith(".js") ? umamiScriptRaw : `${umamiScriptRaw.replace(/\/$/, "")}/script.js`)
+  ? umamiScriptRaw.endsWith(".js")
+    ? umamiScriptRaw
+    : `${umamiScriptRaw.replace(/\/$/, "")}/script.js`
   : undefined;
 const umamiEnabled = Boolean(umamiScript && umamiWebsiteId);
 
@@ -73,9 +70,10 @@ const personJsonLd = {
   image: portraitUrl,
   description,
   inLanguage: locale === "en" ? "en-US" : "de-DE",
-  jobTitle: locale === "en"
-    ? "Team Lead IT Applications & Deputy Global Head of IT/SAP"
-    : "Teamleiter IT Applications & stellv. Global Head of IT/SAP",
+  jobTitle:
+    locale === "en"
+      ? "Team Lead IT Applications & Deputy Global Head of IT/SAP"
+      : "Teamleiter IT Applications & stellv. Global Head of IT/SAP",
   worksFor: {
     "@type": "Organization",
     name: "ODW-Elektrik",

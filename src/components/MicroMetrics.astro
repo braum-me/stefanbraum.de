@@ -10,8 +10,17 @@ const { locale = "de" } = Astro.props;
 const t = getT(locale);
 
 const now = new Date();
-const berlinHour = Number(new Intl.DateTimeFormat("de-DE", { hour: "numeric", hour12: false, timeZone: "Europe/Berlin" }).format(now));
-const weekdayName = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: "Europe/Berlin" }).format(now);
+const berlinHour = Number(
+  new Intl.DateTimeFormat("de-DE", {
+    hour: "numeric",
+    hour12: false,
+    timeZone: "Europe/Berlin",
+  }).format(now),
+);
+const weekdayName = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  timeZone: "Europe/Berlin",
+}).format(now);
 const isWeekend = weekdayName === "Sat" || weekdayName === "Sun";
 const inWorkingHours = !isWeekend && berlinHour >= 8 && berlinHour < 18;
 const availabilityState: "on" | "off" = inWorkingHours ? "on" : "off";

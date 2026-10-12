@@ -265,43 +265,37 @@ export const de: Translations = {
         id: "transformation",
         number: "01",
         title: "Digitale Transformation",
-        body:
-          "Modern Work, M365-Adoption, Prozess-Plattformen, Self-Service für Fachbereiche. Vom Tool-Rollout bis Change.",
+        body: "Modern Work, M365-Adoption, Prozess-Plattformen, Self-Service für Fachbereiche. Vom Tool-Rollout bis Change.",
       },
       {
         id: "ai",
         number: "02",
         title: "AI & Data",
-        body:
-          "Copilot-Rollouts, Custom Agents, Adoption-Programme, BI- und Analytics-Plattformen. KI als Werkzeug, nicht als Buzzword.",
+        body: "Copilot-Rollouts, Custom Agents, Adoption-Programme, BI- und Analytics-Plattformen. KI als Werkzeug, nicht als Buzzword.",
       },
       {
         id: "enterprise",
         number: "03",
         title: "Enterprise & Security",
-        body:
-          "SAP S/4HANA, Azure Landing Zone, Zero Trust, Identity- und SOC-Foundation. Architektur mit Hands-on-Mentalität.",
+        body: "SAP S/4HANA, Azure Landing Zone, Zero Trust, Identity- und SOC-Foundation. Architektur mit Hands-on-Mentalität.",
       },
       {
         id: "compliance",
         number: "04",
         title: "Compliance & Governance",
-        body:
-          "ISMS nach ISO 27001 / TISAX, BCM, Risk Management, IT-Due-Diligence. Auditfähig, nicht nur PowerPoint-Konform.",
+        body: "ISMS nach ISO 27001 / TISAX, BCM, Risk Management, IT-Due-Diligence. Auditfähig, nicht nur PowerPoint-Konform.",
       },
       {
         id: "engineering",
         number: "05",
         title: "Engineering & Build",
-        body:
-          "Eigene Plattformen, Side-Projects, Open-Source. Cloud-native Container, modernes Web, SaaS-Vorhaben.",
+        body: "Eigene Plattformen, Side-Projects, Open-Source. Cloud-native Container, modernes Web, SaaS-Vorhaben.",
       },
       {
         id: "leadership",
         number: "06",
         title: "Führung & Team",
-        body:
-          "Teamaufbau, Direct Reports, stellv. Leitung, KPI-Steuerung. Kurze Wege zu Geschäftsführung und Fachbereichen.",
+        body: "Teamaufbau, Direct Reports, stellv. Leitung, KPI-Steuerung. Kurze Wege zu Geschäftsführung und Fachbereichen.",
       },
     ],
   },
@@ -331,8 +325,7 @@ export const de: Translations = {
   skills: {
     eyebrow: "Stefan Braum - Werkzeuge & Belege",
     headline: "Skills und Zertifikate.",
-    subline:
-      "Was ich tatsaechlich nutze, womit ich es belegt habe und wo es zum Einsatz kam.",
+    subline: "Was ich tatsaechlich nutze, womit ich es belegt habe und wo es zum Einsatz kam.",
     sphereAria: "Skills, klickbar für Detail",
     skillDetailLabel: "Detail anzeigen",
     certificates: "Zertifikate",

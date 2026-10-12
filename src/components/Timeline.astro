@@ -10,9 +10,7 @@ const t = getT(locale);
 
 // Merge translated period labels (by year) onto timeline entries while keeping
 // company/role/summary/tags from the canonical DE data.
-const periodOverrides = new Map(
-  t.timeline.entries.map((e) => [e.year, e.period]),
-);
+const periodOverrides = new Map(t.timeline.entries.map((e) => [e.year, e.period]));
 const entries = timeline.map((e) => ({
   ...e,
   period: periodOverrides.get(e.year) ?? e.period,

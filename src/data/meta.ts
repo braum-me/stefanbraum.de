@@ -9,8 +9,7 @@ export const siteMeta = {
   role: "Teamleiter IT Apps & stellv. Global Head of IT/SAP",
   company: "ODW-Elektrik",
   consulting: "Braum Consulting",
-  usp:
-    "Teamleiter IT Applications und stellv. Global Head of IT/SAP bei einem Automotive-Tier-2 mit 2.800 Mitarbeitern. Schwerpunkte: AI-Praxis, Enterprise-Architektur und IT-Strategie.",
+  usp: "Teamleiter IT Applications und stellv. Global Head of IT/SAP bei einem Automotive-Tier-2 mit 2.800 Mitarbeitern. Schwerpunkte: AI-Praxis, Enterprise-Architektur und IT-Strategie.",
   mailUrl: "https://braum.me/mail",
   // Sub-headlines je nach URL-Param focus
   subHeadlines: {

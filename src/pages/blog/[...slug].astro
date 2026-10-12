@@ -1,14 +1,14 @@
 ---
 export const prerender = true;
 
-import BaseLayout from "~/layouts/BaseLayout.astro";
-import Nav from "~/components/Nav.astro";
-import Footer from "~/components/Footer.astro";
-import { getCollection, render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
-import { env } from "~/lib/env.ts";
+import { getCollection, render } from "astro:content";
+import Footer from "~/components/Footer.astro";
+import Nav from "~/components/Nav.astro";
 import { cases } from "~/data/cases.ts";
 import { getT } from "~/i18n";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { env } from "~/lib/env.ts";
 
 const t = getT("de");
 
@@ -62,13 +62,9 @@ const scored = otherPosts
   });
 
 const withOverlap = scored.filter((s) => s.overlap > 0).slice(0, 3);
-const related =
-  withOverlap.length > 0
-    ? withOverlap.map((s) => s.post)
-    : otherPosts.slice(0, 3);
+const related = withOverlap.length > 0 ? withOverlap.map((s) => s.post) : otherPosts.slice(0, 3);
 
-const siteUrl =
-  env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
+const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
 const postUrl = new URL(`/blog/${post.id}/`, siteUrl).toString();
 
 const blogPostingJsonLd = {

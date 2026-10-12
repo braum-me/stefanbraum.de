@@ -10,7 +10,9 @@ const t = getT(locale);
 
 // Defensive: ensure pillar IDs match caseCategories
 const validIds = new Set(caseCategories.map((c) => c.id));
-const filtered = t.kernschwerpunkte.pillars.filter((p) => validIds.has(p.id as (typeof caseCategories)[number]["id"]));
+const filtered = t.kernschwerpunkte.pillars.filter((p) =>
+  validIds.has(p.id as (typeof caseCategories)[number]["id"]),
+);
 ---
 
 <section id="kernschwerpunkte" class="relative px-6 md:px-12 py-24 md:py-32">

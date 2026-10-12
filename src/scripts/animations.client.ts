@@ -3,8 +3,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const reduced = (): boolean =>
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduced = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ── DIY SplitText ───────────────────────────────────────────────
    Wickelt jedes Wort in <span class="split-word" style="display:
@@ -58,19 +57,19 @@ function splitChars(el: HTMLElement): HTMLElement[] {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const inner = node as HTMLElement;
       const children = Array.from(inner.childNodes);
-      children.forEach((c) => splitNode(c, inner));
+      for (const c of children) splitNode(c, inner);
     }
   };
 
   const children = Array.from(el.childNodes);
-  children.forEach((c) => splitNode(c, el));
+  for (const c of children) splitNode(c, el);
   el.dataset.split = "1";
   return collect;
 }
 
 /* ── Init ──────────────────────────────────────────────────────── */
 function initAnimations(): void {
-  ScrollTrigger.getAll().forEach((t) => t.kill());
+  for (const t of ScrollTrigger.getAll()) t.kill();
 
   if (reduced()) {
     document.querySelectorAll<HTMLElement>(".split-char").forEach((el) => {

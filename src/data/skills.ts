@@ -67,11 +67,7 @@ export const skills: Skill[] = [
     domain: "cloud",
     yearsExperience: 5,
     subSkills: ["Landing Zone", "Infrastructure as Code", "Hybrid", "GitOps", "Identity"],
-    projects: [
-      "azure-landing-zone",
-      "sap-modernization-azure",
-      "outline-knowledge-base",
-    ],
+    projects: ["azure-landing-zone", "sap-modernization-azure", "outline-knowledge-base"],
     certificates: [],
   },
   {
@@ -127,12 +123,7 @@ export const skills: Skill[] = [
     name: "Enterprise Architecture",
     domain: "method",
     yearsExperience: 5,
-    subSkills: [
-      "Vendor-Steuerung",
-      "Architektur-Reviews",
-      "Stack-Entscheidungen",
-      "Build-vs-Buy",
-    ],
+    subSkills: ["Vendor-Steuerung", "Architektur-Reviews", "Stack-Entscheidungen", "Build-vs-Buy"],
     projects: [
       "azure-landing-zone",
       "sap-modernization-azure",
@@ -150,11 +141,7 @@ export const skills: Skill[] = [
     domain: "method",
     yearsExperience: 7,
     subSkills: ["Service-Management", "Incident", "Change", "Problem-Management"],
-    projects: [
-      "managed-soc-arctic-wolf",
-      "isms-iso27001-tisax",
-      "tenfold-iam-rollout",
-    ],
+    projects: ["managed-soc-arctic-wolf", "isms-iso27001-tisax", "tenfold-iam-rollout"],
     certificates: ["itil-v4-foundation"],
   },
   {
@@ -196,11 +183,7 @@ export const skills: Skill[] = [
     domain: "leadership",
     yearsExperience: 4,
     subSkills: ["Hiring", "Coaching", "Stakeholder-Management", "Direct Reports"],
-    projects: [
-      "team-aufbau-apps",
-      "team-data-analytics",
-      "it-strategie-odw-gesamtlaufzeit",
-    ],
+    projects: ["team-aufbau-apps", "team-data-analytics", "it-strategie-odw-gesamtlaufzeit"],
     certificates: ["management-training"],
   },
 ];

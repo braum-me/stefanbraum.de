@@ -1,7 +1,7 @@
-import type { APIRoute } from "astro";
-import { Resvg } from "@resvg/resvg-js";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { Resvg } from "@resvg/resvg-js";
+import type { APIRoute } from "astro";
 import satori from "satori";
 
 export const prerender = false;
@@ -39,7 +39,9 @@ export const GET: APIRoute = async ({ url }) => {
   const title = url.searchParams.get("title") ?? "Stefan Braum";
   const focus = url.searchParams.get("focus");
 
-  let subtitle = url.searchParams.get("subtitle") ?? "Digitale Transformation aus der Linie, nicht aus dem Slide.";
+  let subtitle =
+    url.searchParams.get("subtitle") ??
+    "Digitale Transformation aus der Linie, nicht aus dem Slide.";
   let metaRight = "Teamleiter IT Apps & stellv. Global Head IT/SAP";
   if (focus === "consulting") {
     subtitle = "Beratung im Mittelstand: AI, Enterprise-Architektur, IT-Strategie.";
@@ -162,10 +164,7 @@ export const GET: APIRoute = async ({ url }) => {
           paddingTop: "28px",
           borderTop: "1px solid rgba(47,130,100,0.35)",
         },
-        [
-          span({}, "stefanbraum.de"),
-          span({ color: "rgba(0,200,150,0.8)" }, metaRight),
-        ],
+        [span({}, "stefanbraum.de"), span({ color: "rgba(0,200,150,0.8)" }, metaRight)],
       ),
     ],
   );

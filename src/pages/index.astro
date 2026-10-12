@@ -1,17 +1,17 @@
 ---
-import BaseLayout from "~/layouts/BaseLayout.astro";
-import Nav from "~/components/Nav.astro";
-import Hero from "~/components/Hero.astro";
-import MicroMetrics from "~/components/MicroMetrics.astro";
-import Kernschwerpunkte from "~/components/Kernschwerpunkte.astro";
-import ChapterSeparator from "~/components/ChapterSeparator.astro";
-import Timeline from "~/components/Timeline.astro";
 import Cases from "~/components/Cases.astro";
-import Skills from "~/components/Skills.astro";
-import Writing from "~/components/Writing.astro";
+import ChapterSeparator from "~/components/ChapterSeparator.astro";
 import Contact from "~/components/Contact.astro";
 import Footer from "~/components/Footer.astro";
-import { getT, getLocale } from "~/i18n";
+import Hero from "~/components/Hero.astro";
+import Kernschwerpunkte from "~/components/Kernschwerpunkte.astro";
+import MicroMetrics from "~/components/MicroMetrics.astro";
+import Nav from "~/components/Nav.astro";
+import Skills from "~/components/Skills.astro";
+import Timeline from "~/components/Timeline.astro";
+import Writing from "~/components/Writing.astro";
+import { getLocale, getT } from "~/i18n";
+import BaseLayout from "~/layouts/BaseLayout.astro";
 
 const locale = getLocale(Astro.url);
 const t = getT(locale);
@@ -19,7 +19,8 @@ const t = getT(locale);
 const focus = Astro.url.searchParams.get("focus");
 const validFocus = focus === "consulting" ? focus : undefined;
 
-const pageDescription = validFocus === "consulting" ? t.meta.consultingDescription : t.meta.description;
+const pageDescription =
+  validFocus === "consulting" ? t.meta.consultingDescription : t.meta.description;
 ---
 
 <BaseLayout title={t.meta.title} description={pageDescription} ogFocus={validFocus} ogImage="/og-home.jpg" locale={locale}>

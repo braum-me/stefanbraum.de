@@ -70,8 +70,7 @@ export const en: Translations = {
   kernschwerpunkte: {
     eyebrow: "Stefan Braum - Focus Areas",
     headline: "Focus Areas.",
-    subline:
-      "Six fields where I deliver consistently. Click opens the matching projects below.",
+    subline: "Six fields where I deliver consistently. Click opens the matching projects below.",
     cta: "View projects",
     aria: "Focus Areas",
     pillars: [
@@ -79,51 +78,44 @@ export const en: Translations = {
         id: "transformation",
         number: "01",
         title: "Digital Transformation",
-        body:
-          "Modern Work, M365 adoption, process platforms, self-service for business units. From tool rollout to change management.",
+        body: "Modern Work, M365 adoption, process platforms, self-service for business units. From tool rollout to change management.",
       },
       {
         id: "ai",
         number: "02",
         title: "AI & Data",
-        body:
-          "Copilot rollouts, custom agents, adoption programs, BI and analytics platforms. AI as a tool, not a buzzword.",
+        body: "Copilot rollouts, custom agents, adoption programs, BI and analytics platforms. AI as a tool, not a buzzword.",
       },
       {
         id: "enterprise",
         number: "03",
         title: "Enterprise & Security",
-        body:
-          "SAP S/4HANA, Azure Landing Zone, Zero Trust, identity and SOC foundation. Architecture with a hands-on mentality.",
+        body: "SAP S/4HANA, Azure Landing Zone, Zero Trust, identity and SOC foundation. Architecture with a hands-on mentality.",
       },
       {
         id: "compliance",
         number: "04",
         title: "Compliance & Governance",
-        body:
-          "ISMS per ISO 27001 / TISAX, BCM, risk management, IT due-diligence. Audit-ready, not just PowerPoint-ready.",
+        body: "ISMS per ISO 27001 / TISAX, BCM, risk management, IT due-diligence. Audit-ready, not just PowerPoint-ready.",
       },
       {
         id: "engineering",
         number: "05",
         title: "Engineering & Build",
-        body:
-          "Custom platforms, side-projects, open source. Cloud-native containers, modern web, SaaS ventures.",
+        body: "Custom platforms, side-projects, open source. Cloud-native containers, modern web, SaaS ventures.",
       },
       {
         id: "leadership",
         number: "06",
         title: "Leadership & Team",
-        body:
-          "Team building, direct reports, deputy lead, KPI steering. Short paths to executive management and business units.",
+        body: "Team building, direct reports, deputy lead, KPI steering. Short paths to executive management and business units.",
       },
     ],
   },
   cases: {
     eyebrow: "Stefan Braum - Portfolio",
     headline: "Portfolio.",
-    sublineTemplate:
-      "{count} projects from main job and own practice. Clients anonymized.",
+    sublineTemplate: "{count} projects from main job and own practice. Clients anonymized.",
     filterAria: "Portfolio filter",
     filterAll: "All",
     empty: "Projects in this pillar coming.",
@@ -145,8 +137,7 @@ export const en: Translations = {
   skills: {
     eyebrow: "Stefan Braum - Tools & Evidence",
     headline: "Skills & Certifications.",
-    subline:
-      "What I actually use, how I have proven it, and where it has been deployed.",
+    subline: "What I actually use, how I have proven it, and where it has been deployed.",
     sphereAria: "Skills, click for detail",
     skillDetailLabel: "Show detail",
     certificates: "Certifications",
@@ -201,8 +192,7 @@ export const en: Translations = {
   writing: {
     eyebrow: "Stefan Braum - Writing",
     headline: "Field Notes.",
-    subline:
-      "What I am learning, building, observing. No marketing, no bullet lists. Just notes.",
+    subline: "What I am learning, building, observing. No marketing, no bullet lists. Just notes.",
     empty: "No posts yet. Soon.",
     seeAll: "See all notes",
     listingHeadline: "Field Notes.",
@@ -216,8 +206,7 @@ export const en: Translations = {
     blogIndexAria: "Filter by tag",
     filterAll: "All",
     filterEmpty: "No posts with this tag.",
-    notice:
-      "Posts available in German. English translations coming as posts publish in English.",
+    notice: "Posts available in German. English translations coming as posts publish in English.",
   },
   contact: {
     eyebrow: "Stefan Braum - Contact",

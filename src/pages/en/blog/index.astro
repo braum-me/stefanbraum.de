@@ -3,12 +3,12 @@
 // automatisch ab ihrem Datum - ohne Rebuild.
 export const prerender = false;
 
-import BaseLayout from "~/layouts/BaseLayout.astro";
-import Nav from "~/components/Nav.astro";
+import { type CollectionEntry, getCollection } from "astro:content";
 import Footer from "~/components/Footer.astro";
-import { getCollection, type CollectionEntry } from "astro:content";
-import { env } from "~/lib/env.ts";
+import Nav from "~/components/Nav.astro";
 import { getT } from "~/i18n";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { env } from "~/lib/env.ts";
 
 const locale = "en" as const;
 const t = getT(locale);
@@ -25,12 +25,11 @@ const dateFmt = new Intl.DateTimeFormat(t.intlLocale, {
   year: "numeric",
 });
 
-const allTags = Array.from(
-  new Set(posts.flatMap((p) => p.data.tags)),
-).sort((a, b) => a.localeCompare(b));
+const allTags = Array.from(new Set(posts.flatMap((p) => p.data.tags))).sort((a, b) =>
+  a.localeCompare(b),
+);
 
-const siteUrl =
-  env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
+const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://stefanbraum.de";
 
 const blogJsonLd = {
   "@context": "https://schema.org",
