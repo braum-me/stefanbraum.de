@@ -1,14 +1,21 @@
 ---
-import { cases } from "~/data/cases.ts";
+import { cases, formatCasePeriod, localizeCase, portfolioOrder } from "~/data/cases.ts";
 import { certifications } from "~/data/certifications.ts";
-import { type SkillDomain, skillDomains, skills } from "~/data/skills.ts";
+import {
+  skills as allSkills,
+  localizeSkill,
+  type SkillDomain,
+  skillDomains,
+} from "~/data/skills.ts";
 import { getT, type Locale } from "~/i18n";
+import { langAttr } from "~/i18n/localized.ts";
 
 interface Props {
   locale?: Locale;
 }
 const { locale = "de" } = Astro.props;
 const t = getT(locale);
+const skills = allSkills.map((s) => localizeSkill(s, locale));
 
 // Group skills by domain for mobile / fallback grid - localized labels
 const groupedSkills = (Object.keys(skillDomains) as SkillDomain[]).map((d) => ({
@@ -23,11 +30,22 @@ const groupedSkills = (Object.keys(skillDomains) as SkillDomain[]).map((d) => ({
 const MAX_PROJECTS = 6;
 const MAX_CERTS = 1;
 
+// Gleiche Reihenfolge wie im Portfolio; Titel/Zeitraum lokalisiert.
+const ordered = portfolioOrder(cases);
+const periodLabels = { ongoing: t.cases.periodOngoing, since: t.cases.periodSince };
+
 const skillDetails = skills.map((s) => {
-  const allProjects = s.projects
-    .map((pid) => cases.find((c) => c.id === pid))
-    .filter((c): c is NonNullable<typeof c> => c !== undefined)
-    .sort((a, b) => cases.indexOf(a) - cases.indexOf(b));
+  const allProjects = ordered
+    .filter((c) => s.projects.includes(c.id))
+    .map((c) => {
+      const title = localizeCase(c, locale).title;
+      return {
+        id: c.id,
+        title: title.value,
+        titleLang: langAttr(title, locale),
+        period: formatCasePeriod(c.period, periodLabels),
+      };
+    });
   const allCerts = s.certificates
     .map((cid) => certifications.find((c) => c.id === cid))
     .filter((c): c is NonNullable<typeof c> => c !== undefined);
@@ -154,7 +172,7 @@ const skillDetails = skills.map((s) => {
                       >
                         <span class="proof-badge proof-badge-proj">{t.skills.proofProj}</span>
                         <span class="proof-text">
-                          <span class="proof-title">{p.title}</span>
+                          <span class="proof-title" lang={p.titleLang}>{p.title}</span>
                           <span class="proof-sub">{p.period}</span>
                         </span>
                       </button>
@@ -354,7 +372,7 @@ const skillDetails = skills.map((s) => {
     font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 0.06em;
-    color: rgba(242, 239, 228, 0.45);
+    color: rgba(242, 239, 228, 0.55);
   }
 
   .panel-state {
@@ -364,7 +382,12 @@ const skillDetails = skills.map((s) => {
     right: 0;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.28s ease;
+    /* visibility: inaktive Panels sind weder fokussierbar noch für Screenreader sichtbar.
+       Verzögert, damit das Ausblenden weiter animiert. */
+    visibility: hidden;
+    transition:
+      opacity 0.28s ease,
+      visibility 0s linear 0.28s;
     display: flex;
     flex-direction: column;
     gap: 0;
@@ -382,6 +405,8 @@ const skillDetails = skills.map((s) => {
     right: auto;
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
+    transition-delay: 0s;
   }
   @media (max-width: 1023px) {
     .panel-state.is-active {
@@ -603,7 +628,7 @@ const skillDetails = skills.map((s) => {
     border-top: 1px solid rgba(242, 239, 228, 0.05);
     font-family: var(--font-body);
     font-size: 12.5px;
-    color: rgba(242, 239, 228, 0.4);
+    color: rgba(242, 239, 228, 0.55);
     line-height: 1.5;
     max-width: 38ch;
   }

@@ -6,9 +6,12 @@ export const prerender = false;
 import { type CollectionEntry, getCollection } from "astro:content";
 import Footer from "~/components/Footer.astro";
 import Nav from "~/components/Nav.astro";
+import { getT } from "~/i18n";
 import { blogPostPath } from "~/i18n/routes.ts";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { env } from "~/lib/env.ts";
+
+const t = getT("de");
 
 type Post = CollectionEntry<"blog">;
 const allPosts = (await getCollection("blog")) as Post[];
@@ -45,7 +48,7 @@ const blogJsonLd = {
     headline: p.data.title,
     description: p.data.excerpt,
     datePublished: p.data.date.toISOString(),
-    dateModified: p.data.date.toISOString(),
+    dateModified: (p.data.updated ?? p.data.date).toISOString(),
     url: new URL(blogPostPath(p.id), siteUrl).toString(),
     keywords: p.data.tags.join(", "),
     author: {
@@ -58,8 +61,8 @@ const blogJsonLd = {
 ---
 
 <BaseLayout
-  title="Schreiben · Stefan Braum"
-  description="Notizen aus der Praxis: AI-Adoption, Mittelstands-IT, Compliance, Build-Notes."
+  title={t.writing.listingTitle}
+  description={t.writing.listingDescription}
   locale="de"
 >
   <Nav locale="de" />
@@ -262,7 +265,7 @@ const blogJsonLd = {
     gap: 10px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: rgba(242, 239, 228, 0.4);
+    color: rgba(242, 239, 228, 0.55);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     margin-bottom: 10px;

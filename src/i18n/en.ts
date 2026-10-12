@@ -59,8 +59,8 @@ export const en: Translations = {
   microMetrics: {
     pillars: "Pillars",
     location: "Location",
-    practice: "Years in IT",
-    practiceValue: "12 Years",
+    practice: "Experience",
+    practiceValue: "12 years in IT",
     projects: "Projects",
     projectsValue: "{count} documented",
     aria: "Profile signals",
@@ -117,10 +117,32 @@ export const en: Translations = {
     filterAria: "Portfolio filter",
     filterAll: "All",
     empty: "Projects in this pillar coming.",
-    statusOngoing: "Ongoing",
-    statusConcept: "Concept",
+    status: {
+      ongoing: "Ongoing",
+      "in-operation": "In operation",
+      pilot: "Pilot",
+      preparation: "Preparation",
+      concept: "Concept",
+      completed: "Completed",
+      "handed-over": "Completed & handed over",
+      "pre-evaluation-completed": "Pre-evaluation completed",
+    },
+    statusHint: {
+      ongoing: "Project in active delivery",
+      "in-operation": "Introduced and running in production, still being developed",
+      pilot: "Pilot phase with a limited user group, rolled out step by step",
+      preparation: "In preparation, no delivery completed yet",
+      concept: "Target state or concept, not yet implemented",
+      completed: "Project completed",
+      "handed-over": "Designed, completed and handed over to the responsible team",
+      "pre-evaluation-completed": "Pre-evaluation completed, decision rests with management",
+    },
+    domainTags: {
+      "modern-workplace": "Modern Workplace",
+    },
     featured: "Featured",
     periodOngoing: "ongoing",
+    periodSince: "since",
     domain: "Domain",
     intervention: "Intervention",
     signals: "Signals",
@@ -179,7 +201,7 @@ export const en: Translations = {
     listingHeadline: "Field Notes.",
     listingSubline:
       "What I am learning, building, observing. Mid-market IT, AI adoption, compliance reality, build notes. No marketing, no bullet lists. Just notes.",
-    listingTitle: "Writing - Stefan Braum",
+    listingTitle: "Writing · Stefan Braum",
     listingDescription:
       "Field notes from practice: AI adoption, mid-market IT, compliance, build notes.",
     backToList: "Writing",
@@ -246,7 +268,8 @@ export const en: Translations = {
     backToOverview: "Back to overview",
     impressum: {
       title: "Imprint - Stefan Braum",
-      description: "Provider information per Section 5 TMG for stefanbraum.de.",
+      description:
+        "Provider information per Section 5 DDG (German Digital Services Act) for stefanbraum.de.",
       h1: "Imprint",
     },
     datenschutz: {

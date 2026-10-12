@@ -1,7 +1,27 @@
 import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "astro/config";
+import { defineConfig, passthroughImageService } from "astro/config";
+
+/**
+ * Rehype-Plugin ohne Dependency: Bilder in Markdown-Posts laden nach dem ersten
+ * (Hero/LCP-Kandidat) lazy, alle dekodieren asynchron. Spart Bandbreite beim Erstaufruf.
+ */
+function rehypeLazyImages() {
+  return (tree) => {
+    let index = 0;
+    const visit = (node) => {
+      if (node.type === "element" && node.tagName === "img") {
+        node.properties = node.properties ?? {};
+        node.properties.decoding ??= "async";
+        if (index > 0) node.properties.loading ??= "lazy";
+        index++;
+      }
+      for (const child of node.children ?? []) visit(child);
+    };
+    visit(tree);
+  };
+}
 
 export default defineConfig({
   output: "server",
@@ -13,6 +33,9 @@ export default defineConfig({
     routing: {
       prefixDefaultLocale: false,
     },
+  },
+  markdown: {
+    rehypePlugins: [rehypeLazyImages],
   },
   integrations: [
     sitemap({
@@ -32,10 +55,16 @@ export default defineConfig({
   },
   compressHTML: true,
   build: {
-    inlineStylesheets: "auto",
+    // Kleine Site: CSS inline spart render-blockierende Requests (Mobile-LCP).
+    inlineStylesheets: "always",
     assets: "_astro",
   },
   image: {
+    // Die Site nutzt keine Astro-Bildoptimierung (astro:assets). Passthrough statt
+    // Sharp: der SSR-Endpoint /_image verarbeitet keine Bilder, damit sind
+    // Sharp/libvips-Advisories (u. a. AVIF-RCE GHSA-26w7-cxv4-gfx2) zur Laufzeit
+    // nicht erreichbar.
+    service: passthroughImageService(),
     responsiveStyles: true,
   },
   experimental: {

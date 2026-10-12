@@ -43,9 +43,13 @@
     "connection" in navigator &&
     (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
 
-  // Skip shader entirely on reduced-motion, low-end devices, or save-data:
+  // Gleiche Grenze wie der statische CSS-Fallback in global.css: auf kleinen
+  // Viewports kein WebGL (spart ~700 KB Three.js und eine Dauer-Renderschleife).
+  const isSmallViewport = window.matchMedia("(max-width: 640px)").matches;
+
+  // Skip shader entirely on reduced-motion, small viewports, low-end devices, or save-data:
   // CSS fallback already covers visual baseline.
-  if (canvas && !prefersReduced && !isLowEnd && !dataSaver) {
+  if (canvas && !prefersReduced && !isSmallViewport && !isLowEnd && !dataSaver) {
     // Defer Three.js import until idle so it doesn't block initial paint
     const start = async () => {
       const THREE = await import("three");
@@ -182,10 +186,16 @@
     const win = window as unknown as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void;
     };
-    if (typeof win.requestIdleCallback === "function") {
-      win.requestIdleCallback(safeStart, { timeout: 2000 });
-    } else {
-      window.setTimeout(safeStart, 600);
-    }
+    // Erst nach `load` und im Idle starten: Three.js (Parse + Shader-Compile) soll
+    // nicht mit dem initialen Rendering und ersten Interaktionen konkurrieren.
+    const scheduleIdle = () => {
+      if (typeof win.requestIdleCallback === "function") {
+        win.requestIdleCallback(safeStart, { timeout: 4000 });
+      } else {
+        window.setTimeout(safeStart, 1500);
+      }
+    };
+    if (document.readyState === "complete") scheduleIdle();
+    else window.addEventListener("load", scheduleIdle, { once: true });
   }
 </script>

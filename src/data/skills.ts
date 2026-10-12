@@ -17,6 +17,14 @@ export interface Skill {
   projects: string[];
   /** matches Certification.id */
   certificates: string[];
+  /** Englische Bezeichnungen; ohne Angabe gelten `name`/`subSkills` (Produktnamen). */
+  en?: { name?: string; subSkills?: string[] };
+}
+
+/** Name und Sub-Skills in der gewünschten Sprache. */
+export function localizeSkill(s: Skill, locale: "de" | "en"): Skill {
+  if (locale !== "en" || !s.en) return s;
+  return { ...s, name: s.en.name ?? s.name, subSkills: s.en.subSkills ?? s.subSkills };
 }
 
 export const skillDomains: Record<SkillDomain, string> = {
@@ -39,10 +47,11 @@ export const skills: Skill[] = [
     projects: [
       "sap-modernization-azure",
       "sap-r3-s4hana-brownfield",
-      "hr-successfactors",
+      "hr-transformation-evaluation",
       "global-bi-platform",
     ],
     certificates: [],
+    en: { subSkills: ["S/4HANA", "Brownfield migration", "Clean Core", "SAP SAC", "SAP DWC"] },
   },
   {
     id: "m365",
@@ -54,10 +63,10 @@ export const skills: Skill[] = [
       "modern-workplace-m365",
       "modern-intranet-ai-knowledge-agent",
       "copilot-adoption-program",
-      "copilot-agents-rollout",
       "adobe-sign-digital-signature",
       "m365-zero-trust-identity",
-      "odw-central-eigenentwicklung",
+      "power-platform-coe",
+      "microsoft-places-hybrid-workplace",
     ],
     certificates: ["ms-600"],
   },
@@ -78,14 +87,15 @@ export const skills: Skill[] = [
     subSkills: ["ISO 27001", "TISAX", "BCM", "SOC", "IAM", "Zero Trust", "Awareness"],
     projects: [
       "isms-iso27001-tisax",
-      "managed-soc-arctic-wolf",
+      "managed-soc-endpoint-security",
       "cyber-risk-bcm-framework",
       "m365-zero-trust-identity",
-      "tenfold-iam-rollout",
+      "enterprise-iam-self-service",
       "sosafe-security-awareness",
       "it-due-diligence",
     ],
     certificates: ["itil-v4-foundation"],
+    en: { name: "IT Security & ISMS" },
   },
   {
     id: "ai-copilot",
@@ -94,15 +104,17 @@ export const skills: Skill[] = [
     yearsExperience: 2,
     subSkills: ["Copilot", "Custom Agents", "MCP", "RAG", "Prompt-Engineering", "AI-Adoption"],
     projects: [
-      "copilot-agents-rollout",
-      "modern-intranet-ai-knowledge-agent",
       "copilot-adoption-program",
+      "modern-intranet-ai-knowledge-agent",
       "ai-elearning-platform",
       "lexisnexis-patent-analytics",
-      "tacto-ai-purchasing",
       "outline-knowledge-base",
     ],
     certificates: ["ai-strategic-leverage"],
+    en: {
+      name: "AI / Copilot / Agents",
+      subSkills: ["Copilot", "Custom Agents", "MCP", "RAG", "Prompt engineering", "AI adoption"],
+    },
   },
   {
     id: "power-platform",
@@ -110,12 +122,7 @@ export const skills: Skill[] = [
     domain: "modernwork",
     yearsExperience: 5,
     subSkills: ["Power Automate", "Power Apps", "Power BI", "CoE", "Citizen Developer"],
-    projects: [
-      "power-platform-coe",
-      "odw-central-eigenentwicklung",
-      "kpi-restructuring-data-automation",
-      "isms-iso27001-tisax",
-    ],
+    projects: ["power-platform-coe", "global-bi-platform", "isms-iso27001-tisax"],
     certificates: [],
   },
   {
@@ -132,8 +139,12 @@ export const skills: Skill[] = [
       "autodesk-vault-edm",
       "m365-zero-trust-identity",
       "it-strategie-odw-gesamtlaufzeit",
+      "plm-web-client-evolution",
     ],
     certificates: ["digital-transformation-mgmt"],
+    en: {
+      subSkills: ["Vendor management", "Architecture reviews", "Stack decisions", "Build vs. buy"],
+    },
   },
   {
     id: "itil-ops",
@@ -141,8 +152,17 @@ export const skills: Skill[] = [
     domain: "method",
     yearsExperience: 7,
     subSkills: ["Service-Management", "Incident", "Change", "Problem-Management"],
-    projects: ["managed-soc-arctic-wolf", "isms-iso27001-tisax", "tenfold-iam-rollout"],
+    projects: [
+      "managed-soc-endpoint-security",
+      "isms-iso27001-tisax",
+      "enterprise-iam-self-service",
+      "global-it-governance-service-management",
+    ],
     certificates: ["itil-v4-foundation"],
+    en: {
+      name: "ITIL & IT Operations",
+      subSkills: ["Service management", "Incident", "Change", "Problem management"],
+    },
   },
   {
     id: "digital-transformation",
@@ -155,12 +175,15 @@ export const skills: Skill[] = [
       "modern-workplace-m365",
       "modern-intranet-ai-knowledge-agent",
       "copilot-adoption-program",
-      "kpi-restructuring-data-automation",
+      "global-bi-platform",
       "ai-elearning-platform",
       "adobe-sign-digital-signature",
-      "global-bi-platform",
+      "catena-x-preparation",
     ],
     certificates: ["digital-transformation-mgmt", "management-training"],
+    en: {
+      subSkills: ["Change management", "Adoption", "Processes", "Self-service enablement"],
+    },
   },
   {
     id: "data-bi",
@@ -168,14 +191,9 @@ export const skills: Skill[] = [
     domain: "enterprise",
     yearsExperience: 5,
     subSkills: ["SAP SAC", "SAP DWC", "Power BI", "Microsoft Fabric", "KPI-Reporting"],
-    projects: [
-      "team-data-analytics",
-      "global-bi-platform",
-      "kpi-restructuring-data-automation",
-      "lexisnexis-patent-analytics",
-      "tacto-ai-purchasing",
-    ],
+    projects: ["global-bi-platform", "lexisnexis-patent-analytics"],
     certificates: [],
+    en: { subSkills: ["SAP SAC", "SAP DWC", "Power BI", "Microsoft Fabric", "KPI reporting"] },
   },
   {
     id: "leadership-team",
@@ -183,7 +201,16 @@ export const skills: Skill[] = [
     domain: "leadership",
     yearsExperience: 4,
     subSkills: ["Hiring", "Coaching", "Stakeholder-Management", "Direct Reports"],
-    projects: ["team-aufbau-apps", "team-data-analytics", "it-strategie-odw-gesamtlaufzeit"],
+    projects: [
+      "team-aufbau-apps",
+      "global-bi-platform",
+      "it-strategie-odw-gesamtlaufzeit",
+      "global-it-governance-service-management",
+    ],
     certificates: ["management-training"],
+    en: {
+      name: "Leadership & Team",
+      subSkills: ["Hiring", "Coaching", "Stakeholder management", "Direct reports"],
+    },
   },
 ];

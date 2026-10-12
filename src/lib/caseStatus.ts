@@ -1,23 +1,53 @@
 /**
  * Projektstatus-Logik für Portfolio-Cases.
  *
- * Regeln (in dieser Reihenfolge):
- *   1. `hidePill`                    -> kein Pill (Status wird nicht angezeigt)
- *   2. expliziter `status`           -> gewinnt immer ("ongoing" | "concept" | "completed")
- *   3. Zeitraum "<Jahr> - laufend"   -> "ongoing"
- *   4. Endjahr >= aktuelles Jahr     -> "ongoing" (geplantes Ende noch nicht erreicht)
- *   5. Endjahr <  aktuelles Jahr     -> "completed"
- *   6. Zeitraum nicht auswertbar     -> "completed" (konservativ: kein Laufend-Pill)
+ * Fachliche Status (redaktionell gesetzt über `status`):
+ *   ongoing                   laufend (aktive Umsetzung)
+ *   in-operation              im Betrieb (eingeführt, wird betrieben/weiterentwickelt)
+ *   pilot                     Pilot (begrenzter Rollout, kein Abschluss)
+ *   preparation               Vorbereitung (kein Ergebnis, keine Umsetzung behauptet)
+ *   concept                   Zielbild/Konzept
+ *   completed                 abgeschlossen
+ *   handed-over               abgeschlossen und übergeben
+ *   pre-evaluation-completed  Vorevaluierung abgeschlossen (keine Entscheidung behauptet)
  *
- * Ein Projekt wird damit frühestens nach Ablauf seines angegebenen Endjahres
- * automatisch abgeschlossen, nie allein durch den Wechsel in das Endjahr.
- * Abweichungen (früher fertig, verlängert, nur Zielbild) werden explizit
- * über `status` gepflegt.
+ * Ohne `status` wird heuristisch aus `period` abgeleitet (nur ongoing | completed):
+ *   1. "<Jahr> - laufend" / "seit <Jahr>" -> "ongoing"
+ *   2. Endjahr >= aktuelles Jahr          -> "ongoing" (geplantes Ende noch nicht erreicht)
+ *   3. Endjahr <  aktuelles Jahr          -> "completed"
+ *   4. nicht auswertbar                   -> "completed" (konservativ: kein Laufend-Pill)
+ *
+ * Ein redaktionell gesetzter `status` hat immer Vorrang vor der Heuristik.
+ * `hidePill` blendet nur die Anzeige aus, der fachliche Status bleibt erhalten.
  */
 
-export type CaseStatus = "ongoing" | "concept" | "completed";
+export const CASE_STATUSES = [
+  "ongoing",
+  "in-operation",
+  "pilot",
+  "preparation",
+  "concept",
+  "completed",
+  "handed-over",
+  "pre-evaluation-completed",
+] as const;
 
-/** Status, die als Pill angezeigt werden. "completed" bleibt ohne Pill. */
+export type CaseStatus = (typeof CASE_STATUSES)[number];
+
+/** Status, die als aktiv gelten (Sortierung: aktiv vor abgeschlossen). */
+const ACTIVE_STATUSES: ReadonlySet<CaseStatus> = new Set([
+  "ongoing",
+  "in-operation",
+  "pilot",
+  "preparation",
+  "concept",
+]);
+
+/**
+ * Status, die als Pill angezeigt werden. Schlichtes "completed" bleibt wie
+ * bisher ohne Pill; qualifizierte Abschlüsse (übergeben, Vorevaluierung)
+ * werden ausgewiesen, damit sie nicht als laufend oder als Vollumsetzung wirken.
+ */
 export type CaseStatusPill = Exclude<CaseStatus, "completed">;
 
 export interface StatusInput {
@@ -34,7 +64,7 @@ export interface ParsedPeriod {
 
 const ONGOING_WORDS = ["laufend", "ongoing", "heute", "today"];
 
-/** "2025 - 2027" | "2026 - laufend" | "2025" -> ParsedPeriod, sonst null. */
+/** "2025 - 2027" | "2026 - laufend" | "seit 2024" | "2025" -> ParsedPeriod, sonst null. */
 export function parsePeriod(period: string): ParsedPeriod | null {
   const normalized = period.trim().toLowerCase();
   const range = normalized.match(/^(\d{4})\s*[-–]\s*(\d{4}|[a-zäöü]+)$/);
@@ -45,6 +75,8 @@ export function parsePeriod(period: string): ParsedPeriod | null {
     if (ONGOING_WORDS.includes(end)) return { startYear, endYear: null };
     return null;
   }
+  const since = normalized.match(/^(?:seit|since)\s+(\d{4})$/);
+  if (since) return { startYear: Number(since[1]), endYear: null };
   const single = normalized.match(/^(\d{4})$/);
   if (single) {
     const year = Number(single[1]);
@@ -60,7 +92,7 @@ export function currentYear(now: Date = new Date()): number {
   );
 }
 
-/** Vollständiger Status, unabhängig von der Anzeige. */
+/** Vollständiger fachlicher Status, unabhängig von der Anzeige. */
 export function resolveCaseStatus(c: StatusInput, now: Date = new Date()): CaseStatus {
   if (c.status) return c.status;
   const parsed = parsePeriod(c.period);
@@ -69,7 +101,11 @@ export function resolveCaseStatus(c: StatusInput, now: Date = new Date()): CaseS
   return parsed.endYear >= currentYear(now) ? "ongoing" : "completed";
 }
 
-/** Status-Pill für die Anzeige oder `null` (abgeschlossen bzw. `hidePill`). */
+export function isActiveStatus(status: CaseStatus): boolean {
+  return ACTIVE_STATUSES.has(status);
+}
+
+/** Status-Pill für die Anzeige oder `null` (schlicht abgeschlossen bzw. `hidePill`). */
 export function caseStatusPill(c: StatusInput, now: Date = new Date()): CaseStatusPill | null {
   if (c.hidePill) return null;
   const status = resolveCaseStatus(c, now);

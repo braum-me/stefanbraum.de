@@ -1,4 +1,8 @@
 ---
+// Preload der beiden tragenden Schriften (Body: Geist, Headlines: Inter), nur Latin.
+// Verkürzt den Font-Swap und damit LCP; URLs kommen gehasht aus dem Build.
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
+import interLatin from "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
 import AmbientShader from "~/components/AmbientShader.astro";
 import { profile } from "~/data/profile.ts";
 import { getT, type Locale } from "~/i18n";
@@ -28,10 +32,8 @@ const siteUrl = env("PUBLIC_SITE_URL") ?? Astro.site?.toString() ?? "https://ste
 const abs = (path: string) => new URL(path, siteUrl).toString();
 const canonicalUrl = abs(canonicalPath(Astro.url.pathname));
 
-const ogParams = new URLSearchParams({
-  title: profile.name,
-  subtitle: t.meta.ogSubtitle,
-});
+// Text kommt serverseitig aus Profil/i18n; die URL trägt nur die Variante.
+const ogParams = new URLSearchParams();
 if (ogFocus) ogParams.set("focus", ogFocus);
 if (locale === "en") ogParams.set("lang", "en");
 const ogImageUrl = ogImage ? abs(ogImage) : abs(`/api/og.png?${ogParams.toString()}`);
@@ -98,6 +100,8 @@ const personJsonLd = {
 
     {!noindex && <link rel="canonical" href={canonicalUrl} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" href={geistLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={interLatin} as="font" type="font/woff2" crossorigin />
 
     {hreflangAlternates.map((alt) => (
       <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />

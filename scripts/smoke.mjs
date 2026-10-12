@@ -10,7 +10,8 @@
  * Sprachumschalter, JSON-LD, Sitemap und 404-Verhalten.
  */
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
+import { findConfidentialTerms } from "./confidential-terms.mjs";
 
 const PORT = Number(process.env.SMOKE_PORT ?? 4399);
 const HOST = "127.0.0.1";
@@ -29,7 +30,8 @@ const EXPECTED_SECTIONS = [
 ];
 const TRANSLATED = ["/", "/blog/", "/impressum/", "/datenschutz/"];
 /** Begriffe, die in Phase 1 nirgends im ausgelieferten HTML stehen dürfen. */
-const FORBIDDEN_TERMS = [/eissmann/i];
+const FORBIDDEN_TERMS = [/eissmann/i, /tacto/i];
+const EXPECTED_CASES = 29;
 
 const failures = [];
 const fail = (msg) => failures.push(msg);
@@ -166,6 +168,9 @@ async function main() {
     const { body } = await get(p);
 
     for (const re of FORBIDDEN_TERMS) check(!re.test(body), `${p}: enthält ${re}`);
+    const confidential = findConfidentialTerms(body);
+    check(confidential.length === 0, `${p}: vertraulicher Anbietername (Hash ${confidential})`);
+    check(!/\d\s*(Mio|Mrd)\.?\s*€|€\s*\d|\d\s*€/.test(body), `${p}: Geldbetrag im Inhalt`);
     check(!body.includes("entry-boot"), `${p}: Boot-Splash ist noch vorhanden`);
 
     for (const href of links(body)) {
@@ -246,6 +251,75 @@ async function main() {
     const chapterNums = [...body.matchAll(/class="chapter-num"[^>]*>(\d+)</g)].map((m) => m[1]);
     check(chapterNums.join() === "01,02,03,04,05,06", `${home}: Kapitelnummern ${chapterNums}`);
     check(body.includes(headlines[home]), `${home}: Hero-Headline fehlt`);
+
+    // Portfolio: Anzahl, Status-Labels, Mehrfachkategorien, Legacy-Aliase
+    const rows = [...body.matchAll(/<details[^>]*class="pf-row"[^>]*>/g)].map((m) => m[0]);
+    check(
+      rows.length === EXPECTED_CASES,
+      `${home}: ${rows.length} Cases (erwartet ${EXPECTED_CASES})`,
+    );
+    check(
+      rows.some((r) => /data-cats="engineering transformation"/.test(r)),
+      `${home}: Mehrfachkategorie (engineering transformation) fehlt`,
+    );
+    const statusLabels =
+      home === "/"
+        ? [
+            "Im Betrieb",
+            "Pilot",
+            "Vorbereitung",
+            "Abgeschlossen &amp; übergeben",
+            "Vorevaluierung abgeschlossen",
+          ]
+        : [
+            "In operation",
+            "Pilot",
+            "Preparation",
+            "Completed &amp; handed over",
+            "Pre-evaluation completed",
+          ];
+    for (const label of statusLabels)
+      check(body.includes(label), `${home}: Status-Label "${label}" fehlt`);
+    check(body.includes("data-case-aliases="), `${home}: Legacy-Alias-Daten fehlen`);
+    check(!body.includes('id="case-tacto'), `${home}: entfernter Case gerendert`);
+  }
+
+  // Impressum: keine Verweise auf die eingestellte EU-OS-Plattform (seit 20.07.2025)
+  for (const p of ["/impressum/", "/en/impressum/"]) {
+    const { body } = await get(p);
+    check(
+      !/ec\.europa\.eu\/consumers\/odr/i.test(body),
+      `${p}: Link zur eingestellten OS-Plattform`,
+    );
+    check(
+      /Verbraucherschlichtungsstelle|consumer arbitration board/.test(body),
+      `${p}: VSBG-Hinweis fehlt`,
+    );
+  }
+
+  // /_image verarbeitet keine Bilder (Passthrough statt Sharp, siehe astro.config.mjs)
+  {
+    const res = await fetch(`${BASE}/_image?href=/portrait.webp&w=64&f=png`);
+    const bytes = (await res.arrayBuffer()).byteLength;
+    const original = statSync("public/portrait.webp").size;
+    check(
+      res.status === 200 && bytes === original,
+      `/_image verarbeitet Bilder (${res.status}, ${bytes} B)`,
+    );
+    const remote = await fetch(`${BASE}/_image?href=https://example.com/x.png&w=64`);
+    check(remote.status === 403, `/_image erlaubt Remote-Bilder (${remote.status})`);
+  }
+
+  // OG-Endpoint rendert keinen frei wählbaren Text (Content-Spoofing)
+  {
+    const size = async (q) => {
+      const res = await fetch(`${BASE}/api/og.png${q}`);
+      return { status: res.status, bytes: (await res.arrayBuffer()).byteLength };
+    };
+    const plain = await size("");
+    const spoof = await size("?title=Fake&subtitle=Injected%20text");
+    check(plain.status === 200, `/api/og.png -> ${plain.status}`);
+    check(plain.bytes === spoof.bytes, "/api/og.png übernimmt Text aus Query-Parametern");
   }
 
   // 7. Sprachumschalter auf Blogartikeln -> existierendes englisches Ziel

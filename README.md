@@ -30,9 +30,10 @@ pnpm lint         # biome
 pnpm format       # biome format --write
 pnpm test         # unit tests (node:test, no extra deps)
 pnpm test:smoke   # smoke tests against the built server (run after `pnpm build`)
+pnpm test:e2e     # browser regression tests (Playwright + axe-core, run after `pnpm build`)
 ```
 
-CI (`.github/workflows/ci.yml`) runs on every PR: frozen install, Biome, `astro check` + `tsc`, unit tests, production build and smoke tests (core routes, internal links, anchors and chapter order, canonical/hreflang consistency, language switcher, JSON-LD, sitemap, 404s).
+CI (`.github/workflows/ci.yml`) runs on every PR: frozen install, Biome, `astro check` + `tsc`, unit tests, production build, smoke tests (core routes, internal links, anchors and chapter order, canonical/hreflang consistency, language switcher, JSON-LD, sitemap, 404s, OG endpoint) and browser tests (layout overflow, pagination, deep links incl. legacy IDs, focus order, axe WCAG 2.1 AA, no-JS, reduced motion).
 
 ## Content model
 
