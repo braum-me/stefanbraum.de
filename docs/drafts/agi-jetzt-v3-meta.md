@@ -1,6 +1,6 @@
 # agi.jetzt v3: Begleitmaterial zum Blog-Entwurf
 
-Artikel: `src/content/blog/2026-10-12-agi-jetzt-v3-observatorium.md` (`draft: true`)
+Artikel: `src/content/blog/2026-10-16-agi-jetzt-v3-observatorium.md` (Go-live 16.10.2026)
 
 ## Titel-Alternativen
 
@@ -10,7 +10,7 @@ Artikel: `src/content/blog/2026-10-12-agi-jetzt-v3-observatorium.md` (`draft: tr
 
 ## Teaser / Excerpt
 
-In den vergangenen Wochen habe ich agi.jetzt praktisch neu gebaut. Aus dem AGI-Tracker mit Score und Weekly wird ein Observatorium, das Fähigkeiten, Verfügbarkeit und Unsicherheit getrennt ausweist.
+agi.jetzt v3 ist live. Aus dem AGI-Tracker mit Score und Weekly wird ein Observatorium, das Fähigkeiten, Verfügbarkeit und Unsicherheit getrennt ausweist.
 
 ## SEO-Titel
 
@@ -24,7 +24,7 @@ Warum agi.jetzt keinen AGI-Score mehr zeigt, Intelligence und Deployment Frontie
 
 `agi-jetzt-v3-observatorium`
 
-Hinweis: Im Repo ist der Dateiname die ID, also `YYYY-MM-DD-agi-jetzt-v3-observatorium.md`. Datum beim Go-live anpassen.
+URL: `https://stefanbraum.de/blog/2026-10-16-agi-jetzt-v3-observatorium/` (im Repo ist der Dateiname die ID)
 
 ## LinkedIn-Teaser (für den Launch)
 
@@ -34,19 +34,15 @@ Eine Zahl wie "73 % zu AGI" klingt präzise, versteckt aber genau die Lücken, u
 
 Dazu: eine Modell-Landschaft jenseits der Chat-Modelle, ein eigener Prüfstand mit reproduzierbaren Aufgaben und ein Datenmodell, das Ankündigung und Verfügbarkeit sauber auseinanderhält.
 
-Was ich umgebaut habe und warum, steht im Blog: [LINK]
+Was ich umgebaut habe und warum, steht im Blog: https://stefanbraum.de/blog/2026-10-16-agi-jetzt-v3-observatorium/
 
 ## Pre-Publication-Checkliste
 
-- [ ] Go-live von agi.jetzt v3 tatsächlich erfolgt
-- [ ] Go-live-Datum in Frontmatter `date` und Dateinamen einsetzen
-- [ ] Modell-/Provider-/Produktzahlen gegen Live-Stand prüfen (Entwurf: ca. 24 / 169 / 18, Klassenverteilung 101 / 29 / 11 / 7 / 6 / 15)
-- [ ] Frontier-Stand prüfen (Entwurf: 4 Anbieter, 10 Modelle)
-- [ ] Weekly-Archivstand prüfen (Entwurf: KW01–KW41, 15 Ausgaben mit Spezialmodell-Abschnitt)
-- [ ] Formulierungen "steht kurz vor dem Wechsel" / "befindet sich in den letzten Schritten" → "ist live" (Intro + "Wie es weitergeht")
-- [ ] Links/CTA prüfen (agi.jetzt-Startseite, ggf. direkte Links auf Prüfstand / Updates / Weekly)
-- [ ] Thumbnail als `public/blog/agi-jetzt-v3-observatorium/thumbnail.webp` ablegen
-- [ ] Thumbnail-Wording abgleichen ("Observatory" im Bild vs. "Observatorium" im Titel)
-- [ ] Redaktionsnotiz am Artikelende entfernen
-- [ ] Manuell deployen (draft steht bereits auf false)
-- [ ] LinkedIn-Teaser: `[LINK]` ersetzen
+- [x] Go-live-Datum (16.10.2026) in Frontmatter und Dateiname
+- [x] Live-Wording in Intro, Excerpt, Weekly-Abschnitt und "Wie es weitergeht"
+- [x] Weekly-Zahlen datumsneutral formuliert (kein fixes "KW41" / "15 von 41")
+- [x] Redaktionsnotiz entfernt
+- [x] LinkedIn-Teaser mit finaler URL
+- [ ] Thumbnail als `public/blog/agi-jetzt-v3-observatorium/thumbnail.webp` ablegen, dann im Frontmatter `coverImage: "/blog/agi-jetzt-v3-observatorium/thumbnail.webp"` ergänzen und optional die Bildzeile unter das Frontmatter setzen
+- [ ] Optional: Modell-/Provider-/Frontier-Zahlen am Launch-Tag gegenprüfen (Text nutzt "rund" bzw. "zum Start von v3": ca. 24 Anbieter, ~170 Modelle, 18 Produkte, 4 Anbieter / 10 Frontier-Modelle)
+- [ ] Am oder nach dem 16.10. manuell deployen (Post wird erst gebaut, wenn das Build-Datum ≥ Post-Datum ist)
