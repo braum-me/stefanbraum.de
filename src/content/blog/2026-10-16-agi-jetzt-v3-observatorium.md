@@ -1,16 +1,13 @@
 ---
 title: "agi.jetzt v3: Vom AGI-Tracker zum Observatorium"
-date: 2026-10-12
-excerpt: "In den vergangenen Wochen habe ich agi.jetzt praktisch neu gebaut. Aus dem AGI-Tracker mit Score und Weekly wird ein Observatorium, das Fähigkeiten, Verfügbarkeit und Unsicherheit getrennt ausweist. Warum ich den Score abgeschafft habe und was sonst unter der Haube passiert ist."
+date: 2026-10-16
+excerpt: "agi.jetzt v3 ist live. Aus dem AGI-Tracker mit Score und Weekly wird ein Observatorium, das Fähigkeiten, Verfügbarkeit und Unsicherheit getrennt ausweist. Warum ich den Score abgeschafft habe und was sonst unter der Haube passiert ist."
 tags: ["agi", "ki", "agi-jetzt", "methodik", "build"]
 readingTime: "11 min"
 draft: false
-coverImage: "/blog/agi-jetzt-v3-observatorium/thumbnail.webp"
 ---
 
-![agi.jetzt v3: Vom AGI-Tracker zum Observatorium](/blog/agi-jetzt-v3-observatorium/thumbnail.webp)
-
-In den vergangenen Wochen habe ich agi.jetzt praktisch neu gebaut. Die neue Version, intern v3, befindet sich gerade in den letzten Schritten vor dem öffentlichen Wechsel. Wer heute auf agi.jetzt geht, sieht noch die bisherige Version. Dieser Beitrag beschreibt, was sich ändert und vor allem warum.
+In den vergangenen Wochen habe ich agi.jetzt praktisch neu gebaut. Seit dem 16. Oktober 2026 ist die neue Version, intern v3, live. Dieser Beitrag beschreibt, was sich geändert hat und vor allem warum.
 
 Auf den ersten Blick sieht das nach einem Redesign aus. Neue Startseite, neue Typografie, neue Navigation. Das ist aber der kleinere Teil der Arbeit. Die eigentliche Änderung betrifft die Frage, wie ich KI-Fortschritt überhaupt beobachten will. Im Juni habe ich hier über den [ersten Stand von agi.jetzt](/blog/2026-06-14-den-weg-zur-agi-dokumentieren/) geschrieben: ein Tracker mit Dashboard, wöchentlichem Briefing und einem Composite Score aus acht Benchmarks. Ein paar der Entscheidungen von damals habe ich in v3 bewusst zurückgenommen.
 
@@ -50,7 +47,7 @@ Dazu gehört eine zweite Unterscheidung, die in v3 an mehreren Stellen auftaucht
 
 In der alten Version standen Modelle ziemlich gleichberechtigt nebeneinander. v3 hat eine explizit kuratierte Frontier, also die Systeme, die aktuell den Stand der Technik definieren.
 
-Zum Zeitpunkt dieses Entwurfs sind das zehn Modelle von vier Anbietern: von OpenAI GPT-6 Astra, GPT-6.1 Sol und GPT-6 Luna, von Anthropic Claude Fable 5.1, Claude Opus 5.5 und Claude Sonnet 5.5, von Google Gemini 4 Argon, Gemini 3.8 Flash und Gemini 3.5 Flash-Lite, und von SpaceXAI Grok 4.7.
+Zum Start von v3 sind das zehn Modelle von vier Anbietern: von OpenAI GPT-6 Astra, GPT-6.1 Sol und GPT-6 Luna, von Anthropic Claude Fable 5.1, Claude Opus 5.5 und Claude Sonnet 5.5, von Google Gemini 4 Argon, Gemini 3.8 Flash und Gemini 3.5 Flash-Lite, und von SpaceXAI Grok 4.7.
 
 Die Namen werden schnell altern, deshalb sind sie hier nur Beispiel. Interessanter ist die Regel dahinter. Ein Modell kommt in die Frontier, wenn es ein aktuelles First-Party-System mit realem externem Zugang ist. Gemini 4 Argon ist dafür ein guter Grenzfall. Der Zugang läuft derzeit nur auf Einladung, aber es gibt ihn tatsächlich, und das System ist eindeutig Teil des aktuellen Spitzenfelds. Also zählt es. Ein Modell, das nur in einem Paper oder einer Keynote existiert, zählt nicht.
 
@@ -86,9 +83,9 @@ Auf dem Datenmodell sitzen drei Bereiche, die man als Leser direkt nutzt.
 
 Der neue Bereich Updates soll die Frage beantworten: Was hat sich tatsächlich verändert? Ohne dass man dafür zwei Dutzend Vendor-Blogs verfolgen muss. Es ist ein einziger Feed, in dem die Modellklassen sichtbar bleiben. Er enthält neue Modelle, Previews, Übergänge in die allgemeine Verfügbarkeit, Änderungen an der Verfügbarkeit, Produktänderungen und relevante Spezialmodelle. Er spiegelt aber nicht mechanisch jede Herstellerankündigung. Was dort landet, braucht eine Quelle und eine redaktionelle Relevanz.
 
-Das Weekly bleibt. Das Archiv umfasst aktuell KW01 bis KW41 2026 und wurde im Zuge des Umbaus aufgeräumt und erweitert. Neu ist ein Abschnitt "Spezialmodelle & neue Ansätze". Er erscheint nur, wenn es in der jeweiligen Woche quellenbelegte relevante Entwicklungen gab. Einen leeren Platzhalter-Abschnitt gibt es nicht. Aktuell enthalten 15 der 41 Ausgaben diesen Abschnitt, was ganz gut zeigt, wie ungleichmäßig sich dieser Teil des Feldes bewegt.
+Das Weekly bleibt. Das Archiv reicht zurück bis KW01 2026 und wurde im Zuge des Umbaus aufgeräumt und erweitert. Neu ist ein Abschnitt "Spezialmodelle & neue Ansätze". Er erscheint nur, wenn es in der jeweiligen Woche quellenbelegte relevante Entwicklungen gab. Einen leeren Platzhalter-Abschnitt gibt es nicht. Zum Start enthält gut ein Drittel der Ausgaben diesen Abschnitt, was ganz gut zeigt, wie ungleichmäßig sich dieser Teil des Feldes bewegt.
 
-Beim Wechsel wird das Weekly fortgesetzt und nicht neu gestartet. Die alte Seite publiziert bis zum tatsächlichen Umschalten weiter. Die letzte dort erfolgreich veröffentlichte Ausgabe ist die letzte Legacy-Ausgabe, die nächste gehört zu v3. Einen fest verdrahteten Stichtag wie "bis KW40" gibt es absichtlich nicht, weil sich so ein Datum bei einem Release-Prozess gern verschiebt.
+Mit dem Wechsel wird das Weekly fortgesetzt und nicht neu gestartet. Die alte Seite hat bis zum Umschalten weiter publiziert. Die letzte dort veröffentlichte Ausgabe ist die letzte Legacy-Ausgabe, die nächste gehört zu v3. Einen fest verdrahteten Stichtag wie "bis KW40" gibt es absichtlich nicht, weil sich so ein Datum bei einem Release-Prozess gern verschiebt.
 
 Der Bereich Work AI ist die praktische Seite der Deployment Frontier. Er zeigt, was Organisationen tatsächlich einsetzen können: von OpenAI ChatGPT, ChatGPT Work, Codex und die API, von Anthropic Claude, Claude Code, Team, Enterprise und die API, von Google Gemini, die Gemini API und Google Workspace mit Gemini, dazu GitHub Copilot, Microsoft 365 Copilot, Grok und Langdock.
 
@@ -124,19 +121,8 @@ Dazu kommen die unspektakulären Teile, die bei einem Datenprojekt am Ende den U
 
 ## Wie es weitergeht
 
-Staging ist ausführlich getestet, die Datenbasis ist frisch auditiert, der Wechsel ist vorbereitet. Die neue Version steht kurz vor dem öffentlichen Umschalten. Danach geht das Weekly nahtlos weiter, die Updates laufen, und der Prüfstand bekommt nach und nach seine ersten veröffentlichten Läufe der zweiten Generation.
+Vor dem Wechsel lief v3 ausführlich auf Staging, die Datenbasis wurde frisch auditiert. Jetzt ist die neue Version öffentlich. Das Weekly geht nahtlos weiter, die Updates laufen, und der Prüfstand bekommt nach und nach seine ersten veröffentlichten Läufe der zweiten Generation.
 
 Inhaltlich will ich in den nächsten Monaten vor allem zwei Dinge schärfen. Erstens die Verbindung zwischen den beiden Fronten: Wie lange dauert es typischerweise, bis eine Fähigkeit von der Intelligence Frontier in Produkten für Unternehmen ankommt? Zweitens die Evidenzlage bei den schwachen Feldern wie Learning & Memory und Adaptability, wo es heute schlicht zu wenig belastbare Messungen gibt.
 
 Wer reinschauen will: [agi.jetzt](https://agi.jetzt). Wer einen Fehler findet oder eine Quelle anders bewertet, kann sich gern melden. Bei einem Projekt, das Unsicherheit ernst nehmen will, ist das ausdrücklich erwünscht.
-
-> **[Redaktionsnotiz, vor Veröffentlichung entfernen]**
->
-> - Go-live-Datum einsetzen (Frontmatter `date` und Dateiname)
-> - Aktuelle Modell-, Provider- und Produktzahlen prüfen (Stand Entwurf: ca. 24 Anbieter, 169 öffentliche Modelle, 18 Produkte)
-> - Finalen Frontier-Stand prüfen (Stand Entwurf: 4 Anbieter, 10 Modelle)
-> - Aus "steht kurz vor dem Wechsel" → "ist live" machen (Intro + Abschnitt "Wie es weitergeht")
-> - Weekly-Archivstand prüfen (Stand Entwurf: KW01–KW41, 15 Ausgaben mit Spezialmodell-Abschnitt)
-> - Finalen Link/CTA prüfen
-> - Thumbnail als `public/blog/agi-jetzt-v3-observatorium/thumbnail.webp` ablegen
-> - Redaktionsnotiz entfernen, dann manuell deployen
