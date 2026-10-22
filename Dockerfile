@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # ─── Stage 1: dependencies ──────────────────────────────────────
-FROM node:22-alpine AS deps
+FROM node:22.23.4-alpine AS deps
 WORKDIR /app
 
 # Override host's NODE_ENV=production so devDependencies install
@@ -15,7 +15,7 @@ RUN --mount=type=cache,id=pnpm,target=/root/.pnpm-store \
     pnpm install --frozen-lockfile --prod=false
 
 # ─── Stage 2: build ─────────────────────────────────────────────
-FROM node:22-alpine AS build
+FROM node:22.23.4-alpine AS build
 WORKDIR /app
 
 ENV NODE_ENV=development
@@ -30,7 +30,7 @@ RUN pnpm build && \
     pnpm prune --prod
 
 # ─── Stage 3: runtime ───────────────────────────────────────────
-FROM node:22-alpine AS runtime
+FROM node:22.23.4-alpine AS runtime
 WORKDIR /app
 
 RUN apk add --no-cache tini && \
