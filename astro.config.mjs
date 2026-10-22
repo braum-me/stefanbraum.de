@@ -1,3 +1,4 @@
+import { unified } from "@astrojs/markdown-remark";
 import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
@@ -35,7 +36,7 @@ export default defineConfig({
     },
   },
   markdown: {
-    rehypePlugins: [rehypeLazyImages],
+    processor: unified({ rehypePlugins: [rehypeLazyImages] }),
   },
   integrations: [
     sitemap({
